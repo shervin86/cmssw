@@ -238,7 +238,7 @@ void FastCalibratorEE::BuildEoPeta_ele(int iLoop, int nentries , int useW, int u
 
    float pIn, FdiEta;
    ///=== electron tight W or Z only Endcap
-   if ( isEBEle[0] == 0 && (( useW == 1 && isW == 1 ) ||  ( useZ== 1 && isZ == 1 ))) {
+   if ( isEBEle[0] == 0 && (( useW == 1 && chargeEle[1] == -100 ) || ( useZ== 1 && chargeEle[1]!=-100 ))) {
 
     FdiEta = energySCEle[0]/(rawEnergySCEle[0]+esEnergySCEle[0]); /// Cluster containment approximation using ps infos
    
