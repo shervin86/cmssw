@@ -164,6 +164,8 @@ class SimpleCutBasedPhotonIDSelectionFunctor : public Selector<reco::PhotonRef> 
       set("pfChIso_EB", 2.6);    set("pfChIso_EE", 2.3);  
       set("pfNhIso_EB",  3.5);	   set("pfNhIso_EE",  2.9);
       set("pfPhIso_EB",  1.3);	   set("pfPhIso_EE",  100., false);
+      set("coef_pfPhIso_EB", 0.005);    set("coef_pfPhIso_EE", 0.005);  
+      set("coef_pfNhIso_EB",  0.04);	   set("coef_pfNhIso_EE",  0.04);
     }
     else if (version_ == medium) {      //OLD VALUES - see https://twiki.cern.ch/twiki/bin/viewauth/CMS/CutBasedPhotonID2012
       //set("fiducial");
@@ -173,6 +175,8 @@ class SimpleCutBasedPhotonIDSelectionFunctor : public Selector<reco::PhotonRef> 
       set("pfChIso_EB", 1.5);    set("pfChIso_EE", 1.2);  
       set("pfNhIso_EB",  1.0);	   set("pfNhIso_EE",  1.5);
       set("pfPhIso_EB",  0.7);	   set("pfPhIso_EE",  1.0);
+      set("coef_pfPhIso_EB", 0.005);    set("coef_pfPhIso_EE", 0.005);  
+      set("coef_pfNhIso_EB",  0.04);	   set("coef_pfNhIso_EE",  0.04);
     }
     else if (version_ == tight) {      //OLD VALUES - see https://twiki.cern.ch/twiki/bin/viewauth/CMS/CutBasedPhotonID2012
       //set("fiducial");
@@ -182,6 +186,8 @@ class SimpleCutBasedPhotonIDSelectionFunctor : public Selector<reco::PhotonRef> 
       set("pfChIso_EB", 0.7);    set("pfChIso_EE", 0.5);  
       set("pfNhIso_EB",  0.4);	   set("pfNhIso_EE",  1.5);
       set("pfPhIso_EB",  0.5);	   set("pfPhIso_EE",  1.0);
+      set("coef_pfPhIso_EB", 0.005);    set("coef_pfPhIso_EE", 0.005);  
+      set("coef_pfNhIso_EB",  0.04);	   set("coef_pfNhIso_EE",  0.04);
     }
     else if (version_ == loose25nsRun2) {      //PHYS14 - see https://twiki.cern.ch/twiki/bin/viewauth/CMS/CutBasedPhotonIdentificationRun2
       //set("fiducial");
@@ -191,6 +197,8 @@ class SimpleCutBasedPhotonIDSelectionFunctor : public Selector<reco::PhotonRef> 
       set("pfChIso_EB", 2.94);    set("pfChIso_EE", 3.07);  
       set("pfNhIso_EB",  3.16);	   set("pfNhIso_EE",  17.16);
       set("pfPhIso_EB",  4.43);	   set("pfPhIso_EE",  2.11);
+      set("coef_pfPhIso_EB", 0.0004);    set("coef_pfPhIso_EE", 0.0037);  
+      set("coef_pfNhIso_EB",  0.0023);	   set("coef_pfNhIso_EE",  0.0116);
     }
     else if (version_ == medium25nsRun2) {      //PHYS14 - see https://twiki.cern.ch/twiki/bin/viewauth/CMS/CutBasedPhotonIdentificationRun2
       //set("fiducial");
@@ -200,6 +208,8 @@ class SimpleCutBasedPhotonIDSelectionFunctor : public Selector<reco::PhotonRef> 
       set("pfChIso_EB", 2.62);    set("pfChIso_EE", 1.40);  
       set("pfNhIso_EB",  2.69);	   set("pfNhIso_EE",  4.92);
       set("pfPhIso_EB",  1.35);	   set("pfPhIso_EE",  2.11);
+      set("coef_pfPhIso_EB", 0.0004);    set("coef_pfPhIso_EE", 0.0037);  
+      set("coef_pfNhIso_EB",  0.0023);	   set("coef_pfNhIso_EE",  0.0116);
     }
     else if (version_ == tight25nsRun2) {      //PHYS14 - see https://twiki.cern.ch/twiki/bin/viewauth/CMS/CutBasedPhotonIdentificationRun2
       //set("fiducial");
@@ -209,6 +219,8 @@ class SimpleCutBasedPhotonIDSelectionFunctor : public Selector<reco::PhotonRef> 
       set("pfChIso_EB", 1.91);    set("pfChIso_EE", 1.26);  
       set("pfNhIso_EB",  2.55);	   set("pfNhIso_EE",  2.71);
       set("pfPhIso_EB",  1.29);	   set("pfPhIso_EE",  1.91);
+      set("coef_pfPhIso_EB", 0.0004);    set("coef_pfPhIso_EE", 0.0037);  
+      set("coef_pfNhIso_EB",  0.0023);	   set("coef_pfNhIso_EE",  0.0116);
     }
 
 
@@ -239,12 +251,12 @@ class SimpleCutBasedPhotonIDSelectionFunctor : public Selector<reco::PhotonRef> 
     double iso_nh = photon.neutralHadronIso();
 
     if (photon.eta()<1.479) {
-      iso_nh = iso_nh - 0.0023*photon.pt();  //https://twiki.cern.ch/twiki/bin/viewauth/CMS/CutBasedPhotonIdentificationRun2
-      iso_em = iso_em - 0.0004*photon.pt();  //https://twiki.cern.ch/twiki/bin/viewauth/CMS/CutBasedPhotonIdentificationRun2
+      iso_nh = iso_nh - cut("coef_pfNhIso_EB", double())*photon.pt();  //https://twiki.cern.ch/twiki/bin/viewauth/CMS/CutBasedPhotonIdentificationRun2
+      iso_em = iso_em - cut("coef_pfPhIso_EB", double())*photon.pt();  //https://twiki.cern.ch/twiki/bin/viewauth/CMS/CutBasedPhotonIdentificationRun2
     }
     else {
-      iso_nh = iso_nh - 0.0116*photon.pt();  //https://twiki.cern.ch/twiki/bin/viewauth/CMS/CutBasedPhotonIdentificationRun2
-      iso_em = iso_em - 0.0037*photon.pt();  //https://twiki.cern.ch/twiki/bin/viewauth/CMS/CutBasedPhotonIdentificationRun2
+      iso_nh = iso_nh - cut("coef_pfNhIso_EE", double())*photon.pt();  //https://twiki.cern.ch/twiki/bin/viewauth/CMS/CutBasedPhotonIdentificationRun2
+      iso_em = iso_em - cut("coef_pfPhIso_EE", double())*photon.pt();  //https://twiki.cern.ch/twiki/bin/viewauth/CMS/CutBasedPhotonIdentificationRun2
     }
 
     const reco::SuperCluster photonSC = *(photon.superCluster()); 
