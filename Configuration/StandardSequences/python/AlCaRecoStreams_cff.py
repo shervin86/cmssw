@@ -45,7 +45,7 @@ from Calibration.EcalAlCaRecoProducers.ALCARECOEcalCalIsolElectron_cff import *
 # -- alcaraw 
 from Calibration.EcalAlCaRecoProducers.ALCARECOEcalUncalIsolElectron_cff import *
 # -- alcarereco (rereco done starting from alcaraw
-#from Calibration.EcalAlCaRecoProducers.ALCARECOEcalRecalIsolElectron_cff import *
+from Calibration.EcalAlCaRecoProducers.ALCARECOEcalRecalIsolElectron_cff import *
 
 ###############################################################
 # HCAL Calibration
@@ -133,7 +133,7 @@ pathALCARECOEcalUncalZSCElectron = cms.Path(seqALCARECOEcalUncalZSCElectron)
 pathALCARECOEcalUncalWElectron   = cms.Path(seqALCARECOEcalUncalWElectron)
 
 #### Not meant to be used for central production
-#pathALCARECOEcalRecalElectron = cms.Path(seqALCARECOEcalRecalElectron)
+pathALCARECOEcalRecalElectron = cms.Path(seqALCARECOEcalRecalElectron)
 
 ####
 pathALCARECOHcalCalDijets = cms.Path(seqALCARECOHcalCalDijets*ALCARECOHcalCalDiJetsDQM)
@@ -303,14 +303,14 @@ ALCARECOStreamEcalUncalWElectron = cms.FilteredStream(
 	dataTier = cms.untracked.string('ALCARECO')
 	)
 
-# ALCARECOStreamEcalRecalElectron = cms.FilteredStream(
-# 	responsible = 'Shervin Nourbakhsh',
-# 	name = 'EcalRecalElectron',
-# 	paths  = (pathALCARECOEcalRecalElectron),
-# 	content = OutALCARECOEcalRecalElectron.outputCommands,
-# 	selectEvents = cms.PSet(),
-# 	dataTier = cms.untracked.string('ALCARECO')
-# 	)
+ALCARECOStreamEcalRecalElectron = cms.FilteredStream(
+	responsible = 'Shervin Nourbakhsh',
+	name = 'EcalRecalElectron',
+	paths  = (pathALCARECOEcalRecalElectron),
+	content = OutALCARECOEcalRecalElectron.outputCommands,
+	selectEvents = cms.PSet(),
+	dataTier = cms.untracked.string('ALCARECO')
+	)
 
 ALCARECOStreamHcalCalDijets = cms.FilteredStream(
 	responsible = 'Grigory Safronov',
