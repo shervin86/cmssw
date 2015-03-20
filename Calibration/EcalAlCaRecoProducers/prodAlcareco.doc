@@ -1,0 +1,73 @@
+This is initial documentation on how to automatically generate and submit ALCARECO jobs using crab3.
+A special bash script has been adapted to do this: scripts/prodAlcareco.sh
+
+Before you begin, you must do:
+
+source initCmsEnv.sh
+
+This will set up the CRAB3 environment and generate a grid proxy.
+
+Then, you can actually use the script.
+
+Usage is as follows:
+
+./scripts/prodAlcareco.sh `parseDatasetFile.sh alcareco_datasets.dat | grep "query"` --option1 --option2 ...
+
+alcareco_datasets.dat contains information about the datasets which are available to run on. Select the required dataset using grep.
+parseDarasetFile.sh extracts the required information from the alcareco_datasets.dat entry.
+
+List of options:
+
+  --help : print list of options.
+
+---------- provided by parseDatasetFile (all mandatory)
+	-r runRange
+	-d, --datasetpath path
+	-n, --datasetname name
+	--store dir
+	--remote_dir dir
+  --dbs_url url: for not global dbs (user production)
+	---------- optional
+	--isMC: specify is the dataset is MC
+  	-s skim: ZSkim, WSkim, EleSkim. 
+		This will also dictate whether ALCA:EcalCalWElectron or ALCA:EcalCalZElectron is used.
+	--createOnly  
+		Only generate the CMSSW and CRAB3£ config files, but do not submit.
+	--submitOnly
+		Only submit using CRAB3
+	--check
+		Cheakc status of CRAB3 jobs.
+	--jobname jobname 
+		Name of your task, used to create folder structure and CRAB3 jobname.
+	--json jsonFile.txt
+		Apply lumiMask if required.
+	--publish
+		Publish output dataset on DAS. Default is not to publish.
+	----------
+
+An example, for a subsection of runA DoubleElectron, to be processed with ALCA:EcalCalZElectron:
+The alcareco_datasets.dat file has a line like this:
+
+190645-193621 /DoubleElectron/Run2012A-15Apr2014-v2/AOD DoubleElectron-ZHLTSkimPath-RUN2012A-15Apr-v2 caf group/alca_ecalcalib/ecalelf/alcareco VALID RUN2012A,RUN2012AB,RUN2012ABC,RUN2012ABCD 
+
+Select it  in the command using `parseDatasetFile.sh alcareco_datasets.dat | grep A`
+
+Create jobs using:
+./scripts/prodAlcareco.sh `parseDatasetFile.sh alcareco_datasets.dat | grep A` --json testJSON.txt --jobname InitialTest -skim ZSkim --createOnly
+
+testJSON.txt contains only one run number from runA: {"190645": [[1, 200]]}
+
+And inspect the CMSSWConfig reco_ALCA.py and CRAB3 config tmp/alcareco_cfg.py to make sure everything seems sensible.
+You can run a local test by specifiying a test sample in the reco_ALCA.py file and doing cmsRun reco_ALCA.py, which by default runs over 10 events.
+
+Submit the jobs using:
+ ./scripts/prodAlcareco.sh `parseDatasetFile.sh alcareco_datasets.dat | grep A` --json testJSON.txt --jobname InitialTest -skim  ZSkim --submitOnly
+
+CRAB3 should give information about submission success etc.
+
+Subsequently, you can check the jobs using:
+./scripts/prodAlcareco.sh `parseDatasetFile.sh alcareco_datasets.dat | grep A` --json testJSON.txt --jobname InitialTest -skim ZSkim --check
+
+This will query the status of the jobs using the CRAB3 interface.
+
+
