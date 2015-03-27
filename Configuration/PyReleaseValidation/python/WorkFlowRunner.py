@@ -38,6 +38,7 @@ def esReportWorkflow(**kwds):
   inError = False
   if exists(logFile):
     lines = file(logFile).read()
+    payload["message"] = lines
     for l in lines.split("\n"):
       if l.startswith("----- Begin Fatal Exception"):
         inException = True
@@ -68,7 +69,7 @@ def esReportWorkflow(**kwds):
       
   payload["hostname"] = gethostname()
   url = "https://%s/ib-matrix.%s/runTheMatrix-data/%s" % (es_hostname,
-                                                          d.strftime("%Y.%m"),
+                                                          d.strftime("%Y-%W-1"),
                                                           sha1_id)
   request = urllib2.Request(url)
   if es_auth:
@@ -86,7 +87,7 @@ def esReportWorkflow(**kwds):
       pass
 
 class WorkFlowRunner(Thread):
-    def __init__(self, wf, noRun=False,dryRun=False,cafVeto=True,dasOptions="",jobReport=False):
+    def __init__(self, wf, noRun=False,dryRun=False,cafVeto=True,dasOptions="",jobReport=False, nThreads=1):
         Thread.__init__(self)
         self.wf = wf
 
@@ -99,6 +100,7 @@ class WorkFlowRunner(Thread):
         self.cafVeto=cafVeto
         self.dasOptions=dasOptions
         self.jobReport=jobReport
+        self.nThreads=nThreads
         
         self.wfDir=str(self.wf.numId)+'_'+self.wf.nameId
         return
@@ -227,6 +229,8 @@ class WorkFlowRunner(Thread):
                         cmd+=' --fileout file:step%s.root '%(istep,)
                 if self.jobReport:
                   cmd += ' --suffix "-j JobReport%s.xml " ' % istep
+                if self.nThreads > 1:
+                  cmd += ' --nThreads %s' % self.nThreads
                 cmd+=closeCmd(istep,self.wf.nameId)            
                 
                 esReportWorkflow(workflow=self.wf.nameId,
