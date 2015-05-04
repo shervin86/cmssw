@@ -23,7 +23,7 @@
 #include "DataFormats/Common/interface/Handle.h"
 
 #include "SimDataFormats/PileupSummaryInfo/interface/PileupSummaryInfo.h"
-#include "SimDataFormats/CrossingFrame/interface/CrossingFramePlaybackInfoExtended.h"
+#include "SimDataFormats/CrossingFrame/interface/CrossingFramePlaybackInfoNew.h"
 
 #include <map>
 #include <vector>
@@ -50,6 +50,7 @@ namespace edm
       void addPileupInfo(const edm::EventPrincipal*,unsigned int EventId,
                          ModuleCallingContext const* mcc);
 
+      void getPileupInfo(std::vector<PileupSummaryInfo> &ps, int &bs) { ps=PileupSummaryStorage_; bs=bsStorage_;}
 
     private:
 
@@ -61,7 +62,7 @@ namespace edm
       edm::InputTag CFPlaybackInputTag_   ;   // InputTag for CrossingFrame Playback information
 
    
-      CrossingFramePlaybackInfoExtended CrossingFramePlaybackStorage_;
+      CrossingFramePlaybackInfoNew CrossingFramePlaybackStorage_;
 
       std::vector<PileupSummaryInfo> PileupSummaryStorage_;
       int bsStorage_;

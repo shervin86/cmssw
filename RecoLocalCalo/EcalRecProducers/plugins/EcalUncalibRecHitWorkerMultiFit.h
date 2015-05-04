@@ -14,7 +14,6 @@
 #include "RecoLocalCalo/EcalRecAlgos/interface/EcalUncalibRecHitTimeWeightsAlgo.h"
 #include "RecoLocalCalo/EcalRecAlgos/interface/EcalUncalibRecHitRecChi2Algo.h"
 #include "RecoLocalCalo/EcalRecAlgos/interface/EcalUncalibRecHitRatioMethodAlgo.h"
-#include "RecoLocalCalo/EcalRecAlgos/interface/EcalUncalibRecHitLeadingEdgeAlgo.h"
 #include "FWCore/Framework/interface/ESHandle.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include "CondFormats/EcalObjects/interface/EcalTimeCalibConstants.h"
@@ -30,23 +29,26 @@
 #include "CondFormats/EcalObjects/interface/EcalPulseCovariances.h"
 #include "RecoLocalCalo/EcalRecAlgos/interface/EigenMatrixTypes.h"
 
+
 namespace edm {
         class Event;
         class EventSetup;
         class ParameterSet;
+        class ParameterSetDescription;
 }
 
 class EcalUncalibRecHitWorkerMultiFit : public EcalUncalibRecHitWorkerBaseClass {
 
         public:
                 EcalUncalibRecHitWorkerMultiFit(const edm::ParameterSet&, edm::ConsumesCollector& c);
-				//EcalUncalibRecHitWorkerMultiFit(const edm::ParameterSet&);
+		EcalUncalibRecHitWorkerMultiFit() {};
                 virtual ~EcalUncalibRecHitWorkerMultiFit() {};
 
                 void set(const edm::EventSetup& es) override;
                 void set(const edm::Event& evt) override;
                 bool run(const edm::Event& evt, const EcalDigiCollection::const_iterator & digi, EcalUncalibratedRecHitCollection & result) override;
-
+		
+		edm::ParameterSetDescription getAlgoDescription();
         protected:
 
                 double pedVec[3];
@@ -128,13 +130,10 @@ class EcalUncalibRecHitWorkerMultiFit : public EcalUncalibRecHitWorkerBaseClass 
 
                 edm::ESHandle<EcalTimeBiasCorrections> timeCorrBias_;
 
-                // leading edge method
                 edm::ESHandle<EcalTimeCalibConstants> itime;
 		edm::ESHandle<EcalTimeOffsetConstant> offtime;
                 std::vector<double> ebPulseShape_;
                 std::vector<double> eePulseShape_;
-                EcalUncalibRecHitLeadingEdgeAlgo<EBDataFrame> leadingEdgeMethod_barrel_;
-                EcalUncalibRecHitLeadingEdgeAlgo<EEDataFrame> leadingEdgeMethod_endcap_;
 
 
                 // chi2 thresholds for flags settings

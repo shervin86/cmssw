@@ -23,6 +23,7 @@ for tracks in selectedTracks :
     locals()[label].doDCAPlots       = doPlotsPCA[tracks]
     locals()[label].doDCAwrtPVPlots  = doPlotsPCA[tracks]
     locals()[label].doDCAwrt000Plots = doPlotsPCA[tracks]
+    locals()[label].doSIPPlots       = doPlotsPCA[tracks]
     locals()[label].numCut           = numCutString[tracks]
     locals()[label].denCut           = denCutString[tracks]
     locals()[label].setLabel(label)
@@ -40,6 +41,7 @@ for tracks in selectedTracks :
     locals()[label].doDCAPlots       = doPlotsPCA[tracks]
     locals()[label].doDCAwrtPVPlots  = doPlotsPCA[tracks]
     locals()[label].doDCAwrt000Plots = doPlotsPCA[tracks]
+    locals()[label].doSIPPlots       = doPlotsPCA[tracks]
     locals()[label].numCut           = numCutString[tracks]
     locals()[label].denCut           = denCutString[tracks]
     locals()[label].setLabel(label)
@@ -155,11 +157,11 @@ for tracks in selectedTracks :
 # seeding monitoring
 for step in selectedIterTrackingStep :
     label = 'TrackSeedMon'+str(step)
-    TrackingDQMSourceTier0 += cms.Sequence(locals()[label])
+    TrackingDQMSourceTier0Common += cms.Sequence(locals()[label])
 # MessageLog
 for module in selectedModules :
     label = str(module)+'LogMessageMonCommon'
-    TrackingDQMSourceTier0 += cms.Sequence(locals()[label])
+    TrackingDQMSourceTier0Common += cms.Sequence(locals()[label])
 TrackingDQMSourceTier0Common += dqmInfoTracking
 
 TrackingDQMSourceTier0MinBias = cms.Sequence()
@@ -176,7 +178,7 @@ for tracks in selectedTracks :
 # seeding monitoring
 for step in selectedIterTrackingStep :
     label = 'TrackSeedMon'+str(step)
-    TrackingDQMSourceTier0 += cms.Sequence(locals()[label])
+    TrackingDQMSourceTier0MinBias += cms.Sequence(locals()[label])
 # MessageLog
 for module in selectedModules :
     label = str(module)+'LogMessageMonMB'

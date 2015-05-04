@@ -49,6 +49,8 @@ def customisePostLS1(process):
     # 25ns specific customisation
     if hasattr(process,'digitisation_step'):
         process = customise_Digi_25ns(process)
+    if hasattr(process,'dqmoffline_step'):
+        process = customise_DQM_25ns(process)
 
     return process
 
@@ -99,6 +101,16 @@ def customise_DQM(process):
     #process.dqmoffline_step.remove(process.jetMETAnalyzer)
     # Turn off flag of gangedME11a
     process.l1tCsctf.gangedME11a = cms.untracked.bool(False)
+    # Turn off "low bias voltage" region in HCAL noise filters
+    if hasattr(process,'HBHENoiseFilterResultProducer'):
+        process.HBHENoiseFilterResultProducer.IgnoreTS4TS5ifJetInLowBVRegion = cms.bool(False)
+    return process
+
+
+def customise_DQM_25ns(process):
+    # Switch the default decision of the HCAL noise filter
+    if hasattr(process,'HBHENoiseFilterResultProducer'):
+        process.HBHENoiseFilterResultProducer.defaultDecision = cms.string("HBHENoiseFilterResultRun2Loose")
     return process
 
 
@@ -206,6 +218,111 @@ def customise_Digi_50ns(process):
                 0.993944,
             )
             process.mix.digitizers.pixel.theLadderEfficiency_BPix3 = cms.vdouble(
+                0.996787,
+                0.996945,
+                0.996787,
+                0.996945,
+                0.996787,
+                0.996945,
+                0.996787,
+                0.996945,
+                0.996787,
+                0.996945,
+                0.996787,
+                0.996945,
+                0.996787,
+                0.996945,
+                0.996787,
+                0.996945,
+                0.996787,
+                0.996945,
+                0.996787,
+                0.996945,
+                0.996787,
+                0.996945,
+                0.996787,
+                0.996945,
+                0.996787,
+                0.996945,
+                0.996787,
+                0.996945,
+                0.996787,
+                0.996945,
+                0.996787,
+                0.996945,
+                0.996787,
+                0.996945,
+                0.996787,
+                0.996945,
+                0.996787,
+                0.996945,
+                0.996787,
+                0.996945,
+                0.996787,
+                0.996945,
+                0.996787,
+                0.996945,
+            )
+    if hasattr(process,'mixData'):
+            # pixel dynamic inefficency - 13TeV - 50ns case
+        process.mixData.theInstLumiScaleFactor = cms.double(246.4)
+        process.mixData.theLadderEfficiency_BPix1 = cms.vdouble(
+                0.979259,
+                0.976677,
+                0.979259,
+                0.976677,
+                0.979259,
+                0.976677,
+                0.979259,
+                0.976677,
+                0.979259,
+                0.976677,
+                0.979259,
+                0.976677,
+                0.979259,
+                0.976677,
+                0.979259,
+                0.976677,
+                0.979259,
+                0.976677,
+                0.979259,
+                0.976677,
+            )
+        process.mixData.theLadderEfficiency_BPix2 = cms.vdouble(
+                0.994321,
+                0.993944,
+                0.994321,
+                0.993944,
+                0.994321,
+                0.993944,
+                0.994321,
+                0.993944,
+                0.994321,
+                0.993944,
+                0.994321,
+                0.993944,
+                0.994321,
+                0.993944,
+                0.994321,
+                0.993944,
+                0.994321,
+                0.993944,
+                0.994321,
+                0.993944,
+                0.994321,
+                0.993944,
+                0.994321,
+                0.993944,
+                0.994321,
+                0.993944,
+                0.994321,
+                0.993944,
+                0.994321,
+                0.993944,
+                0.994321,
+                0.993944,
+            )
+        process.mixData.theLadderEfficiency_BPix3 = cms.vdouble(
                 0.996787,
                 0.996945,
                 0.996787,
@@ -392,6 +509,147 @@ def customise_Digi_25ns(process):
                 -2.28725e-15,
             )
             process.mix.digitizers.pixel.thePUEfficiency_BPix3 = cms.vdouble(
+                 1.00005,
+                -6.59249e-07,
+                 2.75277e-11,
+                -1.62683e-15,
+            )
+    if hasattr(process,'mixData'):
+            # pixel dynamic inefficency - 13TeV - 25ns case
+        process.mixData.theInstLumiScaleFactor = cms.double(364)
+        process.mixData.theLadderEfficiency_BPix1 = cms.vdouble(
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+            )
+        process.mixData.theLadderEfficiency_BPix2 = cms.vdouble(
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+            )
+        process.mixData.theLadderEfficiency_BPix3 = cms.vdouble(
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+            )
+        process.mixData.theModuleEfficiency_BPix1 = cms.vdouble(
+                1,
+                1,
+                1,
+                1,
+            )
+        process.mixData.theModuleEfficiency_BPix2 = cms.vdouble(
+                1,
+                1,
+                1,
+                1,
+                )
+        process.mixData.theModuleEfficiency_BPix3 = cms.vdouble(
+                1,
+                1,
+                1,
+                1,
+            )
+        process.mixData.thePUEfficiency_BPix1 = cms.vdouble(
+                 1.00023,
+                -3.18350e-06,
+                 5.08503e-10,
+                -6.79785e-14,
+            )
+        process.mixData.thePUEfficiency_BPix2 = cms.vdouble(
+                 9.99974e-01,
+                -8.91313e-07,
+                 5.29196e-12,
+                -2.28725e-15,
+            )
+        process.mixData.thePUEfficiency_BPix3 = cms.vdouble(
                  1.00005,
                 -6.59249e-07,
                  2.75277e-11,

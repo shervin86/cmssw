@@ -5,7 +5,6 @@
 #include "DataFormats/Common/interface/RefVectorHolderBase.h"
 #include "DataFormats/Common/interface/IndirectHolder.h"
 #include <memory>
-#include "FWCore/Utilities/interface/HideStdSharedPtrFromRoot.h"
 
 namespace edm {
   namespace reftobase {
@@ -44,9 +43,6 @@ namespace edm {
 	  Exception::throwThis( errors::InvalidReference,
 	    "In IndirectHolder<T> trying to push_back wrong reference type");
 	helper_->push_back( h->helper_ );
-      }
-      virtual const void * product() const {
-	return helper_->product();
       }
 
       /// Checks if product collection is in memory or available

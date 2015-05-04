@@ -538,6 +538,8 @@ class Process(object):
                 self.add_(item)
             elif isinstance(item,ProcessModifier):
                 item.apply(self)
+            elif isinstance(item,ProcessFragment):
+                self.extend(item)
 
         #now create a sequence which uses the newly made items
         for name in seqs.iterkeys():
@@ -795,7 +797,7 @@ class Process(object):
             self.endpaths_()[endpathname].insertInto(processPSet, endpathname, self.__dict__)
         processPSet.addVString(False, "@filters_on_endpaths", endpathValidator.filtersOnEndpaths)
 
-    def prune(self,verbose=False):
+    def prune(self,verbose=False,keepUnresolvedSequencePlaceholders=False):
         """ Remove clutter from the process which we think is unnecessary:
         tracked PSets, VPSets and unused modules and sequences. If a Schedule has been set, then Paths and EndPaths
         not in the schedule will also be removed, along with an modules and sequences used only by
@@ -809,9 +811,9 @@ class Process(object):
             delattr(self, name)
         #first we need to resolve any SequencePlaceholders being used
         for x in self.paths.itervalues():
-            x.resolve(self.__dict__)
+            x.resolve(self.__dict__,keepUnresolvedSequencePlaceholders)
         for x in self.endpaths.itervalues():
-            x.resolve(self.__dict__)
+            x.resolve(self.__dict__,keepUnresolvedSequencePlaceholders)
         usedModules = set()
         unneededPaths = set()
         if self.schedule_():
@@ -969,6 +971,34 @@ class Process(object):
                   found = True
                   self.__setattr__(esname+"_prefer",  ESPrefer(d[esname].type_()) )
             return found
+
+
+class ProcessFragment(object):
+    def __init__(self, process):
+        if isinstance(process, Process):
+            self.__process = process
+        elif isinstance(process, str):
+            self.__process = Process(process)
+        else:
+            raise TypeError('a ProcessFragment can only be constructed from an existig Process or from process name')
+    def __dir__(self):
+        return [ x for x in dir(self.__process) if isinstance(getattr(self.__process, x), _ConfigureComponent) ]
+    def __getattribute__(self, name):
+        if name == '_ProcessFragment__process':
+            return object.__getattribute__(self, '_ProcessFragment__process')
+        else:
+            return getattr(self.__process, name)
+    def __setattr__(self, name, value):
+        if name == '_ProcessFragment__process':
+            object.__setattr__(self, name, value)
+        else:
+            setattr(self.__process, name, value)
+    def __delattr__(self, name):
+        if name == '_ProcessFragment__process':
+            pass
+        else:
+            return delattr(self.__process, name)
+
 
 class FilteredStream(dict):
     """a dictionary with fixed keys"""
@@ -1831,6 +1861,16 @@ process.subProcess = cms.SubProcess( process = childProcess, SelectEvents = cms.
             self.assert_(hasattr(p, 'b'))
             self.assert_(hasattr(p, 's'))
             self.assert_(hasattr(p, 'pth'))
+            #test unresolved SequencePlaceholder
+            p = Process("test")
+            p.b = EDAnalyzer("YourAnalyzer")
+            p.s = Sequence(SequencePlaceholder("a")+p.b)
+            p.pth = Path(p.s)
+            p.prune(keepUnresolvedSequencePlaceholders=True)
+            self.assert_(hasattr(p, 'b'))
+            self.assert_(hasattr(p, 's'))
+            self.assert_(hasattr(p, 'pth'))
+            self.assertEqual(p.s.dumpPython(''),'cms.Sequence(cms.SequencePlaceholder("a")+process.b)\n')
         def testModifier(self):
             m1 = Modifier()
             p = Process("test",m1)

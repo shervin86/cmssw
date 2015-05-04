@@ -4,7 +4,7 @@ import FWCore.ParameterSet.Config as cms
 hltHiggsValidator = cms.EDAnalyzer("HLTHiggsValidator",
         
     hltProcessName = cms.string("HLT"),
-    analysis       = cms.vstring("HWW", "HZZ", "Hgg", "Htaunu", "H2tau", "VBFHbb_0btag", "VBFHbb_1btag", "VBFHbb_2btag",  "ZnnHbb","DoubleHinTaus","HiggsDalitz","X4b","TTHbbej"), 
+    analysis       = cms.vstring("HWW", "HZZ", "Hgg", "Htaunu", "H2tau", "VBFHbb_0btag", "VBFHbb_1btag", "VBFHbb_2btag",  "ZnnHbb","DoubleHinTaus","HiggsDalitz","X4b","TTHbbej","AHttH"), 
     histDirectory  = cms.string("HLT/Higgs"),
     
     # -- The instance name of the reco::GenParticles collection
@@ -150,10 +150,10 @@ hltHiggsValidator = cms.EDAnalyzer("HLTHiggsValidator",
         ),
     Hgg = cms.PSet( 
         hltPathsToCheck = cms.vstring(
+            "HLT_Diphoton30_18_R9Id85_OR_Iso50T80LCaloId24b40e_AND_HE10P0_R9Id50b80e_PixelSeed_Mass70_v",
             "HLT_Diphoton44_28_R9Id85_OR_Iso50T80LCaloId24b40e_AND_HE10P1_R9Id50b80e_v",
-            "HLT_Diphoton34_18_R9Id85_OR_Iso50T80LCaloId24b40e_AND_HE10P1_R9Id50b80e_Mass95_v",
-            "HLT_Diphoton36_18_R9Id85_OR_Iso50T80LCaloId24b40e_AND_HE10P5_R9Id50b80e_Mass70_v",
-            "HLT_Diphoton28_14_R9Id85_OR_Iso50T80LCaloId24b40e_AND_HE10P5_R9Id50b80e_Mass50_Eta_1p5_v",
+            "HLT_Diphoton30_18_R9Id85_OR_Iso50T80LCaloId24b40e_AND_HE10P0_R9Id50b80e_Mass95_v",
+            "HLT_Diphoton28_14_R9Id85_OR_Iso50T80LCaloId24b40e_AND_HE10P0_R9Id50b80e_Mass50_Eta_1p5_v",
             "HLT_Diphoton30_18_R9Id85_AND_Iso50T80LCaloId24b40e_AND_HE10P0_R9Id50b80e_Solid_Mass30_v",
             "HLT_Diphoton30_18_R9Id85_AND_Iso50T80LCaloId24b40e_AND_HE10P0_R9Id50b80e_PV_v",
             "HLT_Diphoton30_18_R9Id85_AND_Iso50T80LCaloId24b40e_AND_HE10P0_R9Id50b80e_DoublePV_v"
@@ -316,5 +316,18 @@ hltHiggsValidator = cms.EDAnalyzer("HLTHiggsValidator",
         minCandidates = cms.uint32(1),
         HtJetPtMin = cms.untracked.double(30),
         HtJetEtaMax = cms.untracked.double(3.0),
+        ),
+    AHttH  = cms.PSet(
+        hltPathsToCheck = cms.vstring(
+            "HLT_PFHT450_SixJet40_PFBTagCSV_v",
+            "HLT_PFHT400_SixJet30_BTagCSV0p5_2PFBTagCSV_v",
+            "HLT_PFHT450_SixJet40_v",
+            "HLT_PFHT400_SixJet30_v",
+            ),
+        #recElecLabel   = cms.string("gedGsfElectrons"),
+        recJetLabel  = cms.string("ak4PFJetsCHS"),
+        jetTagLabel  = cms.string("pfCombinedSecondaryVertexBJetTags"),
+        ## -- Analysis specific cuts
+        minCandidates = cms.uint32(6), 
         ),
 )

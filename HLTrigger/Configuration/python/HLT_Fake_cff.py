@@ -1,42 +1,45 @@
-# /dev/CMSSW_7_3_0/Fake/V30 (CMSSW_7_3_1_patch2_HLT3)
+# /dev/CMSSW_7_4_0/Fake/V7 (CMSSW_7_4_0)
 
 import FWCore.ParameterSet.Config as cms
 
+fragment = cms.ProcessFragment( "HLT" )
 
-HLTConfigVersion = cms.PSet(
-  tableName = cms.string('/dev/CMSSW_7_3_0/Fake/V30')
+fragment.HLTConfigVersion = cms.PSet(
+  tableName = cms.string('/dev/CMSSW_7_4_0/Fake/V7')
 )
 
-streams = cms.PSet(  A = cms.vstring( 'InitialPD' ) )
-datasets = cms.PSet(  InitialPD = cms.vstring( 'HLT_Physics_v1',
+fragment.streams = cms.PSet(  A = cms.vstring( 'InitialPD' ) )
+fragment.datasets = cms.PSet(  InitialPD = cms.vstring( 'HLT_Physics_v1',
   'HLT_Random_v1',
   'HLT_ZeroBias_v1' ) )
 
-CastorDbProducer = cms.ESProducer( "CastorDbProducer",
+fragment.CastorDbProducer = cms.ESProducer( "CastorDbProducer",
   appendToDataLabel = cms.string( "" )
 )
 
-hltGetConditions = cms.EDAnalyzer( "EventSetupRecordDataGetter",
+fragment.hltGetConditions = cms.EDAnalyzer( "EventSetupRecordDataGetter",
     toGet = cms.VPSet( 
     ),
     verbose = cms.untracked.bool( False )
 )
-hltGetRaw = cms.EDAnalyzer( "HLTGetRaw",
+fragment.hltGetRaw = cms.EDAnalyzer( "HLTGetRaw",
     RawDataCollection = cms.InputTag( "rawDataCollector" )
 )
-hltBoolFalse = cms.EDFilter( "HLTBool",
+fragment.hltBoolFalse = cms.EDFilter( "HLTBool",
     result = cms.bool( False )
 )
-hltTriggerType = cms.EDFilter( "HLTTriggerTypeFilter",
+fragment.hltTriggerType = cms.EDFilter( "HLTTriggerTypeFilter",
     SelectedTriggerType = cms.int32( 1 )
 )
-hltGtDigis = cms.EDProducer( "L1GlobalTriggerRawToDigi",
+fragment.hltGtDigis = cms.EDProducer( "L1GlobalTriggerRawToDigi",
     DaqGtFedId = cms.untracked.int32( 813 ),
-    DaqGtInputTag = cms.InputTag( "rawDataCollector" ),
+    Verbosity = cms.untracked.int32( 0 ),
     UnpackBxInEvent = cms.int32( 5 ),
-    ActiveBoardsMask = cms.uint32( 0xffff )
+    ActiveBoardsMask = cms.uint32( 0xffff ),
+    DaqGtInputTag = cms.InputTag( "rawDataCollector" )
 )
-hltGctDigis = cms.EDProducer( "GctRawToDigi",
+fragment.hltGctDigis = cms.EDProducer( "GctRawToDigi",
+    checkHeaders = cms.untracked.bool( False ),
     unpackSharedRegions = cms.bool( False ),
     numberOfGctSamplesToUnpack = cms.uint32( 1 ),
     verbose = cms.untracked.bool( False ),
@@ -46,7 +49,7 @@ hltGctDigis = cms.EDProducer( "GctRawToDigi",
     gctFedId = cms.untracked.int32( 745 ),
     hltMode = cms.bool( True )
 )
-hltL1GtObjectMap = cms.EDProducer( "L1GlobalTrigger",
+fragment.hltL1GtObjectMap = cms.EDProducer( "L1GlobalTrigger",
     TechnicalTriggersUnprescaled = cms.bool( True ),
     ProduceL1GtObjectMapRecord = cms.bool( True ),
     AlgorithmTriggersUnmasked = cms.bool( False ),
@@ -67,7 +70,7 @@ hltL1GtObjectMap = cms.EDProducer( "L1GlobalTrigger",
     WritePsbL1GtDaqRecord = cms.bool( False ),
     BstLengthBytes = cms.int32( -1 )
 )
-hltL1extraParticles = cms.EDProducer( "L1ExtraParticlesProd",
+fragment.hltL1extraParticles = cms.EDProducer( "L1ExtraParticlesProd",
     tauJetSource = cms.InputTag( 'hltGctDigis','tauJets' ),
     etHadSource = cms.InputTag( "hltGctDigis" ),
     isoTauJetSource = cms.InputTag( 'hltGctDigis','isoTauJets' ),
@@ -86,10 +89,10 @@ hltL1extraParticles = cms.EDProducer( "L1ExtraParticlesProd",
     nonIsolatedEmSource = cms.InputTag( 'hltGctDigis','nonIsoEm' ),
     hfRingBitCountsSource = cms.InputTag( "hltGctDigis" )
 )
-hltScalersRawToDigi = cms.EDProducer( "ScalersRawToDigi",
+fragment.hltScalersRawToDigi = cms.EDProducer( "ScalersRawToDigi",
     scalersInputTag = cms.InputTag( "rawDataCollector" )
 )
-hltOnlineBeamSpot = cms.EDProducer( "BeamSpotOnlineProducer",
+fragment.hltOnlineBeamSpot = cms.EDProducer( "BeamSpotOnlineProducer",
     maxZ = cms.double( 40.0 ),
     src = cms.InputTag( "hltScalersRawToDigi" ),
     gtEvmLabel = cms.InputTag( "" ),
@@ -97,21 +100,21 @@ hltOnlineBeamSpot = cms.EDProducer( "BeamSpotOnlineProducer",
     setSigmaZ = cms.double( 0.0 ),
     maxRadius = cms.double( 2.0 )
 )
-hltPrePhysics = cms.EDFilter( "HLTPrescaler",
+fragment.hltPrePhysics = cms.EDFilter( "HLTPrescaler",
     L1GtReadoutRecordTag = cms.InputTag( "hltGtDigis" ),
     offset = cms.uint32( 0 )
 )
-hltBoolEnd = cms.EDFilter( "HLTBool",
+fragment.hltBoolEnd = cms.EDFilter( "HLTBool",
     result = cms.bool( True )
 )
-hltRandomEventsFilter = cms.EDFilter( "HLTTriggerTypeFilter",
+fragment.hltRandomEventsFilter = cms.EDFilter( "HLTTriggerTypeFilter",
     SelectedTriggerType = cms.int32( 3 )
 )
-hltPreRandom = cms.EDFilter( "HLTPrescaler",
+fragment.hltPreRandom = cms.EDFilter( "HLTPrescaler",
     L1GtReadoutRecordTag = cms.InputTag( "hltGtDigis" ),
     offset = cms.uint32( 0 )
 )
-hltL1sL1ZeroBias = cms.EDFilter( "HLTLevel1GTSeed",
+fragment.hltL1sL1ZeroBias = cms.EDFilter( "HLTLevel1GTSeed",
     L1SeedsLogicalExpression = cms.string( "L1_ZeroBias" ),
     saveTags = cms.bool( True ),
     L1MuonCollectionTag = cms.InputTag( "hltL1extraParticles" ),
@@ -123,48 +126,44 @@ hltL1sL1ZeroBias = cms.EDFilter( "HLTLevel1GTSeed",
     L1GtObjectMapTag = cms.InputTag( "hltL1GtObjectMap" ),
     L1TechTriggerSeeding = cms.bool( False )
 )
-hltPreZeroBias = cms.EDFilter( "HLTPrescaler",
+fragment.hltPreZeroBias = cms.EDFilter( "HLTPrescaler",
     L1GtReadoutRecordTag = cms.InputTag( "hltGtDigis" ),
     offset = cms.uint32( 0 )
 )
-hltFEDSelector = cms.EDProducer( "EvFFEDSelector",
+fragment.hltFEDSelector = cms.EDProducer( "EvFFEDSelector",
     inputTag = cms.InputTag( "rawDataCollector" ),
     fedList = cms.vuint32( 1023 )
 )
-hltTriggerSummaryAOD = cms.EDProducer( "TriggerSummaryProducerAOD",
+fragment.hltTriggerSummaryAOD = cms.EDProducer( "TriggerSummaryProducerAOD",
     processName = cms.string( "@" )
 )
-hltTriggerSummaryRAW = cms.EDProducer( "TriggerSummaryProducerRAW",
+fragment.hltTriggerSummaryRAW = cms.EDProducer( "TriggerSummaryProducerRAW",
     processName = cms.string( "@" )
 )
 
-HLTL1UnpackerSequence = cms.Sequence( hltGtDigis + hltGctDigis + hltL1GtObjectMap + hltL1extraParticles )
-HLTBeamSpot = cms.Sequence( hltScalersRawToDigi + hltOnlineBeamSpot )
-HLTBeginSequence = cms.Sequence( hltTriggerType + HLTL1UnpackerSequence + HLTBeamSpot )
-HLTEndSequence = cms.Sequence( hltBoolEnd )
+fragment.HLTL1UnpackerSequence = cms.Sequence( fragment.hltGtDigis + fragment.hltGctDigis + fragment.hltL1GtObjectMap + fragment.hltL1extraParticles )
+fragment.HLTBeamSpot = cms.Sequence( fragment.hltScalersRawToDigi + fragment.hltOnlineBeamSpot )
+fragment.HLTBeginSequence = cms.Sequence( fragment.hltTriggerType + fragment.HLTL1UnpackerSequence + fragment.HLTBeamSpot )
+fragment.HLTEndSequence = cms.Sequence( fragment.hltBoolEnd )
 
-HLTriggerFirstPath = cms.Path( hltGetConditions + hltGetRaw + hltBoolFalse )
-HLT_Physics_v1 = cms.Path( HLTBeginSequence + hltPrePhysics + HLTEndSequence )
-HLT_Random_v1 = cms.Path( hltRandomEventsFilter + hltGtDigis + hltPreRandom + HLTEndSequence )
-HLT_ZeroBias_v1 = cms.Path( HLTBeginSequence + hltL1sL1ZeroBias + hltPreZeroBias + HLTEndSequence )
-HLTriggerFinalPath = cms.Path( hltGtDigis + hltScalersRawToDigi + hltFEDSelector + hltTriggerSummaryAOD + hltTriggerSummaryRAW )
-
-
-HLTSchedule = cms.Schedule( *(HLTriggerFirstPath, HLT_Physics_v1, HLT_Random_v1, HLT_ZeroBias_v1, HLTriggerFinalPath ))
+fragment.HLTriggerFirstPath = cms.Path( fragment.hltGetConditions + fragment.hltGetRaw + fragment.hltBoolFalse )
+fragment.HLT_Physics_v1 = cms.Path( fragment.HLTBeginSequence + fragment.hltPrePhysics + fragment.HLTEndSequence )
+fragment.HLT_Random_v1 = cms.Path( fragment.hltRandomEventsFilter + fragment.hltGtDigis + fragment.hltPreRandom + fragment.HLTEndSequence )
+fragment.HLT_ZeroBias_v1 = cms.Path( fragment.HLTBeginSequence + fragment.hltL1sL1ZeroBias + fragment.hltPreZeroBias + fragment.HLTEndSequence )
+fragment.HLTriggerFinalPath = cms.Path( fragment.hltGtDigis + fragment.hltScalersRawToDigi + fragment.hltFEDSelector + fragment.hltTriggerSummaryAOD + fragment.hltTriggerSummaryRAW )
 
 
+fragment.HLTSchedule = cms.Schedule( *(fragment.HLTriggerFirstPath, fragment.HLT_Physics_v1, fragment.HLT_Random_v1, fragment.HLT_ZeroBias_v1, fragment.HLTriggerFinalPath ))
 
-
-# CMSSW version specific customizations
-import os
-cmsswVersion = os.environ['CMSSW_VERSION']
-
-# none for now
 
 # dummyfy hltGetConditions in cff's
-if 'hltGetConditions' in locals() and 'HLTriggerFirstPath' in locals() :
-    hltDummyConditions = cms.EDFilter( "HLTBool",
+if 'hltGetConditions' in fragment.__dict__ and 'HLTriggerFirstPath' in fragment.__dict__ :
+    fragment.hltDummyConditions = cms.EDFilter( "HLTBool",
         result = cms.bool( True )
     )
-    HLTriggerFirstPath.replace(hltGetConditions,hltDummyConditions)
+    fragment.HLTriggerFirstPath.replace(fragment.hltGetConditions,fragment.hltDummyConditions)
+
+# add specific customizations
+from HLTrigger.Configuration.customizeHLTforALL import customizeHLTforAll
+fragment = customizeHLTforAll(fragment)
 
