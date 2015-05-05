@@ -1,4 +1,4 @@
-# /dev/CMSSW_7_4_0/Fake/V5 (CMSSW_7_4_0_pre7_HLT4)
+# /dev/CMSSW_7_4_0/Fake/V7 (CMSSW_7_4_0)
 
 import FWCore.ParameterSet.Config as cms
 
@@ -7,7 +7,7 @@ fragment = cms.ProcessFragment( "HLT" )
 fragment.load( "FastSimulation.HighLevelTrigger.HLTSetup_cff" )
 
 fragment.HLTConfigVersion = cms.PSet(
-  tableName = cms.string('/dev/CMSSW_7_4_0/Fake/V5')
+  tableName = cms.string('/dev/CMSSW_7_4_0/Fake/V7')
 )
 
 fragment.hltGetConditions = cms.EDAnalyzer( "EventSetupRecordDataGetter",
@@ -22,7 +22,7 @@ fragment.hltBoolFalse = cms.EDFilter( "HLTBool",
     result = cms.bool( False )
 )
 fragment.hltPrePhysics = cms.EDFilter( "HLTPrescaler",
-    L1GtReadoutRecordTag = cms.InputTag( "simGtDigis" ),
+    L1GtReadoutRecordTag = cms.InputTag( "gtDigis" ),
     offset = cms.uint32( 0 )
 )
 fragment.hltL1sL1ZeroBias = cms.EDFilter( "HLTLevel1GTSeed",
@@ -31,14 +31,14 @@ fragment.hltL1sL1ZeroBias = cms.EDFilter( "HLTLevel1GTSeed",
     L1MuonCollectionTag = cms.InputTag( "l1extraParticles" ),
     L1UseL1TriggerObjectMaps = cms.bool( True ),
     L1UseAliasesForSeeding = cms.bool( True ),
-    L1GtReadoutRecordTag = cms.InputTag( "simGtDigis" ),
+    L1GtReadoutRecordTag = cms.InputTag( "gtDigis" ),
     L1CollectionsTag = cms.InputTag( "l1extraParticles" ),
     L1NrBxInEvent = cms.int32( 3 ),
-    L1GtObjectMapTag = cms.InputTag( "simGtDigis" ),
+    L1GtObjectMapTag = cms.InputTag( "gtDigis" ),
     L1TechTriggerSeeding = cms.bool( False )
 )
 fragment.hltPreZeroBias = cms.EDFilter( "HLTPrescaler",
-    L1GtReadoutRecordTag = cms.InputTag( "simGtDigis" ),
+    L1GtReadoutRecordTag = cms.InputTag( "gtDigis" ),
     offset = cms.uint32( 0 )
 )
 fragment.hltTriggerSummaryAOD = cms.EDProducer( "TriggerSummaryProducerAOD",
@@ -51,15 +51,11 @@ fragment.hltTriggerSummaryRAW = cms.EDProducer( "TriggerSummaryProducerRAW",
 fragment.HLTriggerFirstPath = cms.Path( fragment.hltGetConditions + fragment.hltGetRaw + fragment.hltBoolFalse )
 fragment.HLT_Physics_v1 = cms.Path( fragment.HLTBeginSequence + fragment.hltPrePhysics + cms.SequencePlaceholder( "HLTEndSequence" ) )
 fragment.HLT_ZeroBias_v1 = cms.Path( fragment.HLTBeginSequence + fragment.hltL1sL1ZeroBias + fragment.hltPreZeroBias + cms.SequencePlaceholder( "HLTEndSequence" ) )
-fragment.HLTriggerFinalPath = cms.Path( fragment.HLTBeginSequence + fragment.hltScalersRawToDigi + fragment.hltFEDSelector + fragment.hltTriggerSummaryAOD + fragment.hltTriggerSummaryRAW )
+fragment.HLTriggerFinalPath = cms.Path( fragment.hltGtDigis + fragment.hltScalersRawToDigi + fragment.hltFEDSelector + fragment.hltTriggerSummaryAOD + fragment.hltTriggerSummaryRAW )
 
 
 fragment.HLTSchedule = cms.Schedule( *(fragment.HLTriggerFirstPath, fragment.HLT_Physics_v1, fragment.HLT_ZeroBias_v1, fragment.HLTriggerFinalPath ))
 
-
-# add release-specific customizations
-from HLTrigger.Configuration.customizeHLTforCMSSW import customise
-fragment = customise(fragment)
 
 # dummyfy hltGetConditions in cff's
 if 'hltGetConditions' in fragment.__dict__ and 'HLTriggerFirstPath' in fragment.__dict__ :
@@ -67,4 +63,8 @@ if 'hltGetConditions' in fragment.__dict__ and 'HLTriggerFirstPath' in fragment.
         result = cms.bool( True )
     )
     fragment.HLTriggerFirstPath.replace(fragment.hltGetConditions,fragment.hltDummyConditions)
+
+# add specific customizations
+from HLTrigger.Configuration.customizeHLTforALL import customizeHLTforAll
+fragment = customizeHLTforAll(fragment)
 

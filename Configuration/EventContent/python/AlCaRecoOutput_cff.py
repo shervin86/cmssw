@@ -36,8 +36,6 @@ from Alignment.CommonAlignmentProducer.ALCARECOTkAlBeamHalo_Output_cff import *
 ###############################################################
 # ECAL Calibration
 ###############################################################
-# ECAL calibration with phi symmetry 
-from Calibration.EcalAlCaRecoProducers.ALCARECOEcalCalPhiSym_Output_cff import *
 # ECAL calibration with isol. electrons
 from Calibration.EcalAlCaRecoProducers.ALCARECOEcalCalIsolElectron_Output_cff import *
 from Calibration.EcalAlCaRecoProducers.ALCARECOEcalUncalIsolElectron_Output_cff import *
