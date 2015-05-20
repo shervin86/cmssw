@@ -332,7 +332,7 @@ elif((options.type=='ALCARECO' or options.type=='ALCARECOSIM' or options.type=='
 
 ################################# FILTERING EVENTS
 process.PUDumperSeq = cms.Sequence()
-#process.load('Calibration.EcalAlCaRecoProducers.trackerDrivenFinder_cff')
+process.load('Calibration.EcalAlCaRecoProducers.trackerDrivenFinder_cff')
 if(MC):
     # PUDumper
     process.TFileService = cms.Service(
@@ -380,16 +380,16 @@ process.NtupleFilter.HLTPaths = [ 'pathALCARECOEcalUncalZElectron',   'pathALCAR
 process.NtupleFilter.TriggerResultsTag = cms.InputTag("TriggerResults","","ALCARECO")
 #
 
-process.NtupleFilterSeq = cms.Sequence()
+process.NtupleFilterSeq = cms.Sequence(process.ecalDrivenOnlyElectrons)
 #process.NtupleFilterSeq = cms.Sequence(process.WZFilter)
 if(ZSkim):
-    process.NtupleFilterSeq = cms.Sequence(process.WZFilter)
+    process.NtupleFilterSeq = cms.Sequence()#process.WZFilter)
     #    process.NtupleFilterSeq= cms.Sequence(process.NtupleFilter)
     process.NtupleFilter.HLTPaths = [ 'pathALCARECOEcalCalZElectron', 'pathALCARECOEcalUncalZElectron',
                                       'pathALCARECOEcalCalZSCElectron', 'pathALCARECOEcalUncalZSCElectron',
                                       ]
 elif(WSkim):
-    process.NtupleFilterSeq = cms.Sequence(process.WZFilter)
+    process.NtupleFilterSeq = cms.Sequence()#process.WZFilter)
     #    process.NtupleFilterSeq= cms.Sequence(process.NtupleFilter)
     process.NtupleFilter.HLTPaths = [ 'pathALCARECOEcalCalWElectron', 'pathALCARECOEcalUncalWElectron' ]
 elif(ZmmgSkim):
@@ -872,7 +872,8 @@ else:
 #process.PassingHLT.InputProducer = myEleCollection
 
 #process.eleRegressionEnergy.inputElectronsTag = myEleCollection
-process.patElectrons.electronSource = myEleCollection
+#process.patElectrons.electronSource = myEleCollection
+process.patElectrons.electronSource =  cms.InputTag("ecalDrivenOnlyElectrons")
 process.eleSelectionProducers.electronCollection = myEleCollection
 process.electronMatch.src = myEleCollection
 #process.eleNewEnergiesProducer.electronCollection = myEleCollection
