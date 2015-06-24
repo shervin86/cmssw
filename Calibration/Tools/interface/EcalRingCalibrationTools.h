@@ -25,7 +25,7 @@ class EcalRingCalibrationTools
   
   /// Retrieve the phi-ring index corresponding to a DetId 
   static short getRingIndex(DetId aDetId); 
-
+  short getRingIndexInSubdet(DetId id);
   static short getModuleIndex(DetId aDetId); 
   
   /// Retrieve the DetIds in a phi-ring 
