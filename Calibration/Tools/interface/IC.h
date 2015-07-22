@@ -43,6 +43,7 @@ class IC {
 
 
                 IC();
+				IC(const DRings &dr){ dr_ = dr; idr_=true;} ///< constructor with rings
 
                 EcalIntercalibConstants & ic() { return _ic; }
                 EcalIntercalibErrors & eic() { return _eic; }
@@ -65,6 +66,10 @@ class IC {
                 static void reciprocal(const IC & a, IC & res);
                 static void multiply(const IC & a, float c, IC & res, DS & d);
                 static void multiply(const IC & a, const IC & b, IC & res);
+				IC operator *(const IC &b);
+				IC operator /(const IC &b);
+				void operator /=(const IC &b);
+
                 static void add(const IC & a, const IC & b, IC & res);
                 static void combine(const IC & a, const IC & b, IC & res, bool arithmetic = false); // N.B. arithmetic average is for value and errrors
                 static void fillHoles(const IC & a, const IC & b, IC & res);
@@ -75,12 +80,26 @@ class IC {
                 // tools
                 static void applyEtaScale(IC & ic);
                 static void scaleEta(IC & ic, const IC & ic_scale, bool reciprocalScale = false);
+				inline void scaleEta(const IC& ic_scale){
+					scaleEta(*this, ic_scale, false);
+				}
+				inline void unscaleEta(void){
+					scaleEta(*this, *this, true);
+				}
                 static void applyTwoCrystalEffect(IC & ic);
                 static void setToUnit(IC & ic, DS & selector);
+				bool isUnit(void);
+
                 static void dump(const IC & a, const char * fileName, DS & d);
+				inline void dump(const char *fileName, DS &d){
+					dump(*this, fileName, d);
+				}
+
                 static void dumpXML(const IC & a, const char * fileName, DS & d, bool errors = false);
                 static void readSimpleTextFile(const char * fileName, IC & ic);
+				void readSimpleTextFile(const char * fileName);
                 static void readTextFile(const char * fileName, IC & ic);
+				void readTextFile(const char * fileName);
                 static void readXMLFile(const char * fileName, IC & ic);
                 static void readCmscondXMLFile(const char * fileName, IC & ic);
                 static void readEcalChannelStatusFromTextFile(const char * fileName, EcalChannelStatus & channelStatus);

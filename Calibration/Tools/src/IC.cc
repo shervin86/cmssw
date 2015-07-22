@@ -194,6 +194,55 @@ void IC::multiply(const IC & a, const IC & b, IC & res)
 }
 
 
+IC IC::operator *( const IC &b)
+{
+	IC res;
+	for (size_t i = 0; i < ids().size(); ++i) {
+		DetId id(ids()[i]);
+		float va = ic()[id];
+		float ea = eic()[id];
+		float vb = b.ic()[id];
+		float eb = b.eic()[id];
+		res.ic().setValue(id, va * vb);
+		res.eic().setValue(id, sqrt(vb * vb * ea * ea + va * va * eb * eb));
+	}
+	return res;
+}
+
+
+IC IC::operator /( const IC &b)
+{
+	IC res;
+	for (size_t i = 0; i < ids().size(); ++i) {
+		DetId id(ids()[i]);
+		float va = ic()[id];
+		float ea = eic()[id];
+		float vb = b.ic()[id];
+		float eb = b.eic()[id];
+		float ratio=va/vb;
+		
+		res.ic().setValue(id, va / vb);
+		res.eic().setValue(id, ratio * sqrt(eb * eb/(vb*vb) + ea * ea / (va*va)));
+	}
+	return res;
+}
+
+void IC::operator /=( const IC &b)
+{
+	for (size_t i = 0; i < ids().size(); ++i) {
+		DetId id(ids()[i]);
+		float va = ic()[id];
+		float ea = eic()[id];
+		float vb = b.ic()[id];
+		float eb = b.eic()[id];
+		float ratio=va/vb;
+		
+		ic().setValue(id, va / vb);
+		eic().setValue(id, ratio * sqrt(eb * eb/(vb*vb) + ea * ea / (va*va)));
+	}
+	return;
+}
+
 void IC::add(const IC & a, const IC & b, IC & res)
 {
         for (size_t i = 0; i < a.ids().size(); ++i) {
@@ -710,7 +759,7 @@ bool IC::isValid(float v, float e)
 {
         //if (v < 0 || v > 2) return false;
         //if (v < 0) return false;
-        if (fabs(e) > 100 || v < 0) return false;
+        if (fabs(e) > 100 || v <= 0.1) return false;
         //if (fabs(e) > 100 || v < 0.4 || v > 2.5) return false;
         //if (v < 0.3 || v > 3) return false;
         return true;
@@ -858,6 +907,30 @@ void IC::readSimpleTextFile(const char * fileName, IC & ic)
         fclose(fd);
 }
 
+void IC::readSimpleTextFile(const char * fileName)
+{
+        FILE * fd = fopen(fileName, "r");
+        if (fd == NULL) {
+                fprintf(stderr, "[readSimpleTextFile] cannot open file %s\n", fileName);
+                exit(-1);
+        }
+        char * line = NULL;
+        size_t len = 0;
+        ssize_t read;
+        int id;
+        float c, e;
+        while ((read = getline(&line, &len, fd)) != EOF) {
+                if (line[0] == '#') continue;
+                sscanf(line, "%d %f %f", &id, &c, &e);
+                ic().setValue(id, c);
+                eic().setValue(id, e);
+//				printf("%f %f\n",c, ic()[id]);
+//				printf("%d %f %f\n", id, ic()[id], eic()[id]);
+
+        }
+        fclose(fd);
+}
+
 
 void IC::readTextFile(const char * fileName, IC & ic)
 {
@@ -883,6 +956,30 @@ void IC::readTextFile(const char * fileName, IC & ic)
         fclose(fd);
 }
 
+
+void IC::readTextFile(const char * fileName)
+{
+        FILE * fd = fopen(fileName, "r");
+        if (fd == NULL) {
+                fprintf(stderr, "[readTextFile] cannot open file %s\n", fileName);
+                exit(-1);
+        }
+        char * line = NULL;
+        size_t len = 0;
+        ssize_t read;
+        int ix, iy, iz;
+        float c, e;
+        DetId id;
+        while ((read = getline(&line, &len, fd)) != EOF) {
+                if (line[0] == '#') continue;
+                sscanf(line, "%d %d %d %f %f", &ix, &iy, &iz, &c, &e);
+                if (iz == 0) id = EBDetId(ix, iy);
+                else         id = EEDetId(ix, iy, iz);
+                _ic.setValue(id, c);
+                _eic.setValue(id, e);
+        }
+        fclose(fd);
+}
 
 void IC::readCmscondXMLFile(const char * fileName, IC & ic)
 {
@@ -985,4 +1082,14 @@ void IC::readEcalChannelStatusFromTextFile(const char * fileName, EcalChannelSta
 
 void IC::makeRootTree(TTree & t, const IC & ic)
 {
+}
+
+
+bool IC::isUnit(void){
+	bool retVal=true;
+
+	for (size_t id = 0; id < ids().size() || retVal==false; ++id) {
+		retVal = (ic()[id]==1);
+	}
+	return retVal;
 }
