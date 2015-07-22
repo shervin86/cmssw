@@ -1,0 +1,46 @@
+unset key
+set view map
+set palette defined ( 0 'blue', 1 'light-blue', 2 'yellow', 3 'light-red', 4 'dark-red')
+set cbrange [0.99:1.01]
+
+set title '251244/251244'
+sp [1:360][-85:85][0:10]  'data/run-251244.pm3d' u 2:1:($3==0 ? $4 : 1/0) with pm3d t '251244'
+@OUTPUT '251244_251244.pdf'
+
+set title '251251/251244'
+sp [1:360][-85:85][0:10]  'data/run-251251.pm3d' u 2:1:($3==0 ? $4 : 1/0) with pm3d t '251251'
+@OUTPUT '251251_251244.pdf'
+
+set title '251252/251244'
+sp [1:360][-85:85][0:10]  'data/run-251252.pm3d' u 2:1:($3==0 ? $4 : 1/0) with pm3d t '251252'
+@OUTPUT '251252_251244.pdf'
+
+set title '251521/251244'
+sp [1:360][-85:85][0:10]  'data/run-251521.pm3d' u 2:1:($3==0 ? $4 : 1/0) with pm3d t '251521'
+@OUTPUT '251521_251244.pdf'
+
+set title '251522/251244'
+sp [1:360][-85:85][0:10]  'data/run-251522.pm3d' u 2:1:($3==0 ? $4 : 1/0) with pm3d t '251522'
+@OUTPUT '251522_251244.pdf'
+
+set title '251548/251244'
+sp [1:360][-85:85][0:10]  'data/run-251548.pm3d' u 2:1:($3==0 ? $4 : 1/0) with pm3d t '251548'
+@OUTPUT '251548_251244.pdf'
+
+set title '251559/251244'
+sp [1:360][-85:85][0:10]  'data/run-251559.pm3d' u 2:1:($3==0 ? $4 : 1/0) with pm3d t '251559'
+@OUTPUT '251559_251244.pdf'
+
+set title '251560/251244'
+sp [1:360][-85:85][0:10]  'data/run-251560.pm3d' u 2:1:($3==0 ? $4 : 1/0) with pm3d t '251560'
+@OUTPUT '251560_251244.pdf'
+
+set title '251561/251244'
+sp [1:360][-85:85][0:10]  'data/run-251561.pm3d' u 2:1:($3==0 ? $4 : 1/0) with pm3d t '251561'
+@OUTPUT '251561_251244.pdf'
+
+set title '251562/251244'
+sp [1:360][-85:85][0:10]  'data/run-251562.pm3d' u 2:1:($3==0 ? $4 : 1/0) with pm3d t '251562'
+@OUTPUT '251562_251244.pdf'
+
+
