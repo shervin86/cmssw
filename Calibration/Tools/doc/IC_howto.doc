@@ -1,0 +1,13 @@
+/**
+ - create a milestone on 
+\code 
+https://gitlab.cern.ch/shervin/ecal-calibration-ic
+\endcode
+ - clone the git repository under data/
+ - create a new cycle: create a subdirectory with the name of the cycle (same name of the milestone)
+ - put the txt files in that
+ - add an info.txt file with all the useful informations for the cycle and the analysis performed
+
+
+*/
+ 
