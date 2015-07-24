@@ -43,7 +43,7 @@ class IC {
 
 
                 IC();
-				IC(const DRings &dr){ dr_ = dr; idr_=true;} ///< constructor with rings
+				//IC(const DRings &dr){ dr_ = dr; idr_=true;} ///< constructor with rings, missing constructor function
 
                 EcalIntercalibConstants & ic() { return _ic; }
                 EcalIntercalibErrors & eic() { return _eic; }
@@ -63,6 +63,7 @@ class IC {
                 static bool isValid(float v, float e);
 
                 // IC manipulation
+				bool operator ==(const IC &b);
                 static void reciprocal(const IC & a, IC & res);
                 static void multiply(const IC & a, float c, IC & res, DS & d);
                 static void multiply(const IC & a, const IC & b, IC & res);
@@ -74,6 +75,7 @@ class IC {
                 static void combine(const IC & a, const IC & b, IC & res, bool arithmetic = false); // N.B. arithmetic average is for value and errrors
                 static void fillHoles(const IC & a, const IC & b, IC & res);
                 static void removeOutliers(const IC & a, IC & res, float min = 0.4, float max = 2.5);
+                void removeOutliers(float min = 0.4, float max = 2.5);
                 static void smear(const IC & a, float sigma, IC & res);
                 static void smear(const IC & a, IC & res);
 
@@ -90,9 +92,9 @@ class IC {
                 static void setToUnit(IC & ic, DS & selector);
 				bool isUnit(void);
 
-                static void dump(const IC & a, const char * fileName, DS & d);
-				inline void dump(const char *fileName, DS &d){
-					dump(*this, fileName, d);
+                static void dump(const IC & a, const char * fileName, DS & d, bool invalid=true);
+				inline void dump(const char *fileName, DS &d, bool invalid=true){ //invalid to indicate if you want to dump invalid values
+					dump(*this, fileName, d, invalid);
 				}
 
                 static void dumpXML(const IC & a, const char * fileName, DS & d, bool errors = false);

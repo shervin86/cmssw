@@ -31,7 +31,8 @@ ic_2012DphiSym_rel.unscaleEta()
 
 ic_2012DphiSym_abs = ic_2012DphiSym_rel * ic_2012D
 
-file_2015BphiSym_rel = dir + "/phiSym/2015B_251252_251252_newThr_74X_dataRun2_Prompt_v0_REL_kCh_21072015.dat"
+#file_2015BphiSym_rel = dir + "/phiSym/2015B_251252_251252_newThr_74X_dataRun2_Prompt_v0_REL_kCh_21072015.dat"
+file_2015BphiSym_rel = dir + "/phiSym/2015B_251562_251562_newThr_74X_dataRun2_Prompt_v0_REL_kCh_21072015.dat"
 ic_2015BphiSym_rel = IC(rings)
 ic_2015BphiSym_rel.readTextFile( file_2015BphiSym_rel )
 ic_2015BphiSym_rel.unscaleEta() # normalize all the new ICs to have etaScale=1
@@ -48,8 +49,34 @@ ic_2015BphiSym_abs_check.readTextFile( file_2015BphiSym_abs_check )
 #    (ic_2015BphiSym_abs_check / ic_2015BphiSym_abs).dump('data/icPhiSym_abs_check_ratio.dat', all)
 
 
+#WF2_2015_ICtransp2012_v1: 2012* (2015prompt * phiSym2015/(2012*phiSym2012))
+#WF2_2015_ICtransp2012_v2: 2012* (2015prompt * phiSym2015/(2012*phiSym2012))_without etaScale
+#WF2_2015_ICtransp2012_v3: 2012* ( (2015prompt * phiSym2015)_unscaledEta / (2012*phiSym2012)_unscaledEta )
+#WF2_2015_ICtransp2012_v4: 2012* ( (2015prompt * phiSym2015)_unscaledEta / (2012*phiSym2012)_unscaledEta )_without etaScale
+
 
 ic_transport_2012_2015 = (ic_2015BphiSym_abs/ic_2012DphiSym_abs) 
+WF2_2015_ICtransp2012_v1 = ic_2012DphiSym_abs * ic_transport_2012_2015
+
+ic_transport_2012_2015.unscaleEta()
+WF2_2015_ICtransp2012_v2 = ic_2012DphiSym_abs * ic_transport_2012_2015
+
+ic_2015BphiSym_abs_noEta = ic_2015BphiSym_abs
+ic_2015BphiSym_abs_noEta.unscaleEta()
+
+ic_2012DphiSym_abs_noEta = ic_2012DphiSym_abs
+ic_2012DphiSym_abs_noEta.unscaleEta()
+
+WF2_2015_ICtransp2012_v3 = ic_2012DphiSym_abs * (ic_2015BphiSym_abs_noEta/ic_2012DphiSym_abs_noEta)
+WF2_2015_ICtransp2012_v4 = WF2_2015_ICtransp2012_v3
+WF2_2015_ICtransp2012_v4.unscaleEta()
+
+
+IC.dumpXML(WF2_2015_ICtransp2012_v1, "data/WF2_2015_ICtransp2012_v1.xml", all, False)
+IC.dumpXML(WF2_2015_ICtransp2012_v2, "data/WF2_2015_ICtransp2012_v2.xml", all, False)
+IC.dumpXML(WF2_2015_ICtransp2012_v3, "data/WF2_2015_ICtransp2012_v3.xml", all, False)
+IC.dumpXML(WF2_2015_ICtransp2012_v4, "data/WF2_2015_ICtransp2012_v4.xml", all, False)
+#IC.dumpXML(WF2_2015_ICtransp2012_v5, "data/WF2_2015_ICtransp2012_v5.xml", all, False)
 
 
 
@@ -75,7 +102,6 @@ ic_2012DphiSym_abs.dump("data/ic_2012DphiSym_abs.dat", all)
 ic_2012DphiSym_rel.dump("data/ic_2012DphiSym_rel.dat", all)
 
 ic_transport_2012_2015.dump("data/ic_transport_2012_2015.dat", all)
-
 
 
 '''

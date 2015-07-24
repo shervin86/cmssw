@@ -1,9 +1,11 @@
 #include "Calibration/Tools/interface/IC.h"
 #include "Calibration/Tools/interface/DS.h"
-
+#include <iostream>
+//#define DEBUG
 std::vector<DetId> IC::_detId;
 DRings IC::dr_;
 bool IC::idr_;
+
 
 IC::IC()
 {
@@ -203,8 +205,20 @@ IC IC::operator *( const IC &b)
 		float ea = eic()[id];
 		float vb = b.ic()[id];
 		float eb = b.eic()[id];
-		res.ic().setValue(id, va * vb);
-		res.eic().setValue(id, sqrt(vb * vb * ea * ea + va * va * eb * eb));
+		bool aValid = isValid(va, ea);
+		bool bValid = isValid(vb, eb);
+		if( aValid && bValid){
+			res.ic().setValue(id, va * vb);
+			res.eic().setValue(id, sqrt(vb * vb * ea * ea + va * va * eb * eb));
+		} else{
+			if(aValid){
+				res.ic().setValue(id, va);
+				res.eic().setValue(id, ea);
+			} else { // if are both invalid or only a is invalid
+				res.ic().setValue(id, vb);
+				res.eic().setValue(id, eb);
+			}
+		}
 	}
 	return res;
 }
@@ -220,9 +234,20 @@ IC IC::operator /( const IC &b)
 		float vb = b.ic()[id];
 		float eb = b.eic()[id];
 		float ratio=va/vb;
-		
-		res.ic().setValue(id, va / vb);
-		res.eic().setValue(id, ratio * sqrt(eb * eb/(vb*vb) + ea * ea / (va*va)));
+
+		bool aValid = isValid(va, ea);
+		bool bValid = isValid(vb, eb);
+		if( aValid && bValid){
+			res.ic().setValue(id, ratio);
+			res.eic().setValue(id, ratio * sqrt(eb * eb/(vb*vb) + ea * ea / (va*va)));
+		}else if(aValid){
+			res.ic().setValue(id, va);
+			res.eic().setValue(id, ea);
+		}else{ // 
+			res.ic().setValue(id, vb);
+			res.eic().setValue(id, eb);
+		}
+			
 	}
 	return res;
 }
@@ -315,7 +340,7 @@ void IC::smear(const IC & a, IC & res)
 }
 
 
-void IC::dump(const IC & a, const char * fileName, DS & selector)
+void IC::dump(const IC & a, const char * fileName, DS & selector, bool invalid)
 {
         FILE * fd = fopen(fileName, "w");
         if (fd == NULL) {
@@ -325,13 +350,20 @@ void IC::dump(const IC & a, const char * fileName, DS & selector)
         for (size_t i = 0; i < a.ids().size(); ++i) {
                 DetId id(a.ids()[i]);
                 if (!selector(id)) continue;
-                //fprintf(fd, "%d %f %f\n", id.rawId(), a.ic()[id], a.eic()[id]);
+
+                float va = a.ic()[id];
+                float ve = a.eic()[id];
+				if(invalid==false && isValid(va, ve) == false){
+					va=1;
+					ve=999;
+				}
+
                 if (id.subdetId() == EcalBarrel) {
                         EBDetId eid(id);
-                        fprintf(fd, "%d %d %d %f %f\n", eid.ieta(), eid.iphi(), 0, a.ic()[id], a.eic()[id]);
+                        fprintf(fd, "%d %d %d %f %f\n", eid.ieta(), eid.iphi(), 0, va, ve);
                 } else if (id.subdetId() == EcalEndcap) {
                         EEDetId eid(id);
-                        fprintf(fd, "%d %d %d %f %f\n", eid.ix(), eid.iy(), eid.zside(), a.ic()[id], a.eic()[id]);
+                        fprintf(fd, "%d %d %d %f %f\n", eid.ix(), eid.iy(), eid.zside(), va, ve);
                 } else {
                         fprintf(stderr, "[dump] invalid DetId: %d\n", id.rawId());
                         exit(-1);
@@ -787,6 +819,7 @@ void IC::scaleEta(IC & ic, const IC & ic_scale, bool reciprocalScale)
                 float v = ic.ic()[id];
                 float e = ic.eic()[id];
                 if (!isValid(v, e)) continue;
+//				std::cout << "\t" << v << "\t" <<  e <<std::endl;
                 int idx = dr_.ieta(id) + DRings::nHalfIEta;
                 float s = etasum[idx] / n[idx];
                 if (reciprocalScale) s = 1 / s;
@@ -814,6 +847,29 @@ void IC::removeOutliers(const IC & a, IC & res, float low_thr, float high_thr)
                 }
         }
 }
+
+
+void IC::removeOutliers(float low_thr, float high_thr)
+{
+        for (size_t i = 0; i < ids().size(); ++i) {
+                DetId id(ids()[i]);
+                float va = ic()[id];
+
+                if (va > high_thr){
+                        ic().setValue(id, high_thr);
+						eic().setValue(id, 999);
+                        fprintf(stderr, "[IC::RemoveOutlier] !!! set to 2.5 IC for crystal %d was %f now %f\n", id.rawId(), va, ic()[id]);
+                }
+
+                if (va < low_thr ){
+                        ic().setValue(id, low_thr);
+						eic().setValue(id, 999);
+                        fprintf(stderr, "[IC::RemoveOutlier] !!! set to 0.4 IC for crystal %d was %f now %f\n", id.rawId(), va, ic()[id]);
+
+                }
+        }
+}
+
 
 
 void IC::dumpOutliers(const IC & a, float min, float max)
@@ -972,13 +1028,21 @@ void IC::readTextFile(const char * fileName)
         DetId id;
         while ((read = getline(&line, &len, fd)) != EOF) {
                 if (line[0] == '#') continue;
+
                 sscanf(line, "%d %d %d %f %f", &ix, &iy, &iz, &c, &e);
                 if (iz == 0) id = EBDetId(ix, iy);
                 else         id = EEDetId(ix, iy, iz);
-                _ic.setValue(id, c);
+#ifdef DEBUG
+				std::cout << line << ix << "\t" << iy << "\t" << iz << "\t" << c << "\t" <<e<< std::endl;
+#endif
+
+                ic().setValue(id, c);
                 _eic.setValue(id, e);
         }
         fclose(fd);
+		if(ids().size()==0){
+			std::cerr << "[WARNING] File " << fileName <<": filled with " << ids().size() << " values" << std::endl;
+		}
 }
 
 void IC::readCmscondXMLFile(const char * fileName, IC & ic)

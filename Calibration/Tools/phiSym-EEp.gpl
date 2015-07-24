@@ -3,45 +3,48 @@ set view map
 set cbrange [0.99:1.01]
 set palette defined ( 0 'white', 1 'blue', 2 'light-blue', 3 'yellow', 4 'light-red', 5 'dark-red')
 
-set title '251244/251252'
-p [1:100][1:100][0:10]  'data/run-251244-EEp.map' nonuniform matrix  w image t '251244'
-@OUTPUT '251244_251244.pdf'
+set xlabel 'ix'
+set ylabel 'iy'
 
-set title '251251/251252'
-sp [1:100][1:100][0:10]  'data/run-251251-EEp.map' nonuniform matrix  w image t '251251'
-@OUTPUT '251251_251244.pdf'
+set title '251244/251562'
+p [1:100][1:100][0:10]  'data/work/run-251244-EEp.map' nonuniform matrix  u 2:1:3 w image t '251244'
+@OUTPUT '251244_on_251562-EEp.pdf'
 
-set title '251252/251252'
-sp [1:100][1:100][0:10]  'data/run-251252-EEp.map' nonuniform matrix  w image t '251252'
-@OUTPUT '251252_251244.pdf'
+set title '251251/251562'
+sp [1:100][1:100][0:10]  'data/work/run-251251-EEp.map' nonuniform matrix  u 2:1:3 w image t '251251'
+@OUTPUT '251251_on_251562-EEp.pdf'
 
-set title '251521/251252'
-sp [1:100][1:100][0:10]  'data/run-251521-EEp.map' nonuniform matrix  w image t '251521'
-@OUTPUT '251521_251244.pdf'
+set title '251252/251562'
+sp [1:100][1:100][0:10]  'data/work/run-251252-EEp.map' nonuniform matrix  u 2:1:3 w image t '251252'
+@OUTPUT '251252_on_251562-EEp.pdf'
 
-set title '251522/251252'
-sp [1:100][1:100][0:10]  'data/run-251522-EEp.map' nonuniform matrix  w image t '251522'
-@OUTPUT '251522_251244.pdf'
+set title '251521/251562'
+sp [1:100][1:100][0:10]  'data/work/run-251521-EEp.map' nonuniform matrix  u 2:1:3 w image t '251521'
+@OUTPUT '251521_on_251562-EEp.pdf'
 
-set title '251548/251252'
-sp [1:100][1:100][0:10]  'data/run-251548-EEp.map' nonuniform matrix  w image t '251548'
-@OUTPUT '251548_251244.pdf'
+set title '251522/251562'
+sp [1:100][1:100][0:10]  'data/work/run-251522-EEp.map' nonuniform matrix  u 2:1:3 w image t '251522'
+@OUTPUT '251522_on_251562-EEp.pdf'
 
-set title '251559/251252'
-sp [1:100][1:100][0:10]  'data/run-251559-EEp.map' nonuniform matrix  w image t '251559'
-@OUTPUT '251559_251244.pdf'
+set title '251548/251562'
+sp [1:100][1:100][0:10]  'data/work/run-251548-EEp.map' nonuniform matrix  u 2:1:3 w image t '251548'
+@OUTPUT '251548_on_251562-EEp.pdf'
 
-set title '251560/251252'
-sp [1:100][1:100][0:10]  'data/run-251560-EEp.map' nonuniform matrix  w image t '251560'
-@OUTPUT '251560_251244.pdf'
+set title '251559/251562'
+sp [1:100][1:100][0:10]  'data/work/run-251559-EEp.map' nonuniform matrix  u 2:1:3 w image t '251559'
+@OUTPUT '251559_on_251562-EEp.pdf'
 
-set title '251561/251252'
-sp [1:100][1:100][0:10]  'data/run-251561-EEp.map' nonuniform matrix  w image t '251561'
-@OUTPUT '251561_251244.pdf'
+set title '251560/251562'
+sp [1:100][1:100][0:10]  'data/work/run-251560-EEp.map' nonuniform matrix  u 2:1:3 w image t '251560'
+@OUTPUT '251560_on_251562-EEp.pdf'
 
-set title '251562/251252'
-sp [1:100][1:100][0:10]  'data/run-251562-EEp.map' nonuniform matrix  w image t '251562'
-@OUTPUT '251562_251244.pdf'
+set title '251561/251562'
+sp [1:100][1:100][0:10]  'data/work/run-251561-EEp.map' nonuniform matrix  u 2:1:3 w image t '251561'
+@OUTPUT '251561_on_251562-EEp.pdf'
+
+set title '251562/251562'
+sp [1:100][1:100][0:10]  'data/work/run-251562-EEp.map' nonuniform matrix  u 2:1:3 w image t '251562'
+@OUTPUT '251562_on_251562-EEp.pdf'
 
 
 

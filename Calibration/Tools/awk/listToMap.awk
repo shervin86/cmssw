@@ -2,9 +2,9 @@
 # x y z
 # to be transformed into an image
 (NF!=0){
-	if(	(region=="EB" && $3==0) 	|| 		(region=="EE+" && $3==1)		||		(region=="EE-" && $3==-1)		){ 
-		z[$2,$1]=$4;
-	}
+     if(	(region=="EB" && $3==0) || (region=="EE+" && $3==1) || (region=="EE-" && $3==-1) || (region=="EE" && $3!=0)){ 
+	  z[$1,$2]=$4;
+     }
 }
 
 END{
@@ -17,6 +17,8 @@ END{
 		split(coord, axis, SUBSEP);
 		x=axis[1];
 		y=axis[2];
+		#z=axis[3];
+		
 		if( x < x_min)	x_min=x;
 		if( x > x_max)  x_max=x;
 		if( y < y_min)	y_min=y;
