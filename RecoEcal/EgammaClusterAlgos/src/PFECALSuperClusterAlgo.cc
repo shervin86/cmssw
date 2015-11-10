@@ -10,6 +10,7 @@
 #include "TROOT.h"
 #include "TMath.h"
 
+#include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include "FWCore/MessageLogger/interface/MessageLogger.h"
 
 #include <stdexcept>
@@ -183,10 +184,7 @@ void PFECALSuperClusterAlgo::setTokens(const edm::ParameterSet &iConfig, edm::Co
     cc.consumes<reco::BeamSpot>(iConfig.getParameter<edm::InputTag>("BeamSpot"));    
     
   if (useRegression_) {
-    const edm::ParameterSet &regconf = iConfig.getParameter<edm::ParameterSet>("regressionConfig");
-    
-    regr_.reset(new PFSCRegressionCalc(regconf));
-    regr_->varCalc()->setTokens(regconf,std::move(cc));  
+    regr_.setTokens(cc); 
   }
   
 }
@@ -194,7 +192,7 @@ void PFECALSuperClusterAlgo::setTokens(const edm::ParameterSet &iConfig, edm::Co
 void PFECALSuperClusterAlgo::update(const edm::EventSetup& setup) {
  
   if (useRegression_) {
-    regr_->update(setup);
+    regr_.setEventSetup(setup);
   }
   
 }
@@ -222,7 +220,7 @@ loadAndSortPFClusters(const edm::Event &iEvent) {
   
   //initialize regression for this event
   if (useRegression_) {
-    regr_->varCalc()->setEvent(iEvent);
+    regr_.setEvent(iEvent);
   }  
   
   // reset the system for running
@@ -470,9 +468,8 @@ buildSuperCluster(CalibClusterPtr& seed,
   new_sc.rawEnergy();
 
   //apply regression energy corrections
-  if( useRegression_ ) {    
-    double cor = regr_->getCorrection(new_sc);
-    new_sc.setEnergy(cor*new_sc.correctedEnergy());
+  if( useRegression_ ) {
+    regr_.modifyObject(new_sc);
   }
   
   // save the super cluster to the appropriate list (if it passes the final
