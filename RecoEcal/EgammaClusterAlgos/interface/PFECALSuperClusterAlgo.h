@@ -13,9 +13,10 @@
 #include "DataFormats/EgammaReco/interface/SuperClusterFwd.h"
 #include "DataFormats/EgammaReco/interface/BasicCluster.h"
 #include "DataFormats/EgammaReco/interface/BasicClusterFwd.h"
+#include "DataFormats/BeamSpot/interface/BeamSpot.h"
 
 #include "RecoParticleFlow/PFClusterTools/interface/PFEnergyCalibration.h"
-#include "RecoEgamma/EgammaTools/interface/BaselinePFSCRegression.h"
+#include "RecoEgamma/EgammaTools/interface/SCEnergyCorrectorSemiParm.h"
 
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/ESHandle.h"
@@ -146,7 +147,7 @@ class PFECALSuperClusterAlgo {
   
   // regression
   bool useRegression_;
-  std::unique_ptr<PFSCRegressionCalc> regr_;  
+  SCEnergyCorrectorSemiParm regr_;  
   
   double threshSuperClusterEt_;  
 
