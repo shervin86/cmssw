@@ -19,6 +19,7 @@
 #include "FWCore/ParameterSet/interface/FileInPath.h"
 #include "FWCore/Utilities/interface/isFinite.h"
 #include <vdt/vdtMath.h>
+#include "FWCore/ParameterSet/interface/ParameterSet.h"
 
 using namespace reco;
 
@@ -58,12 +59,11 @@ SCEnergyCorrectorSemiParm::~SCEnergyCorrectorSemiParm()
 }
 
 //--------------------------------------------------------------------------------------------------
-void SCEnergyCorrectorSemiParm::setTokens(edm::ConsumesCollector &cc) {
+void SCEnergyCorrectorSemiParm::setTokens(edm::ConsumesCollector &cc, const edm::ParameterSet& iConfig) {
   
-  tokenEBRecHits_      = cc.consumes<EcalRecHitCollection>(edm::InputTag("ecalRecHit","EcalRecHitsEB"));
-  tokenEERecHits_      = cc.consumes<EcalRecHitCollection>(edm::InputTag("ecalRecHit","EcalRecHitsEE"));
-  tokenVertices_       = cc.consumes<reco::VertexCollection>(edm::InputTag("offlinePrimaryVertices"));   
-  
+	tokenEBRecHits_      = cc.consumes<EcalRecHitCollection>  (iConfig.getParameter<edm::InputTag>("ecalRecHitsEB"));
+	tokenEERecHits_      = cc.consumes<EcalRecHitCollection>  (iConfig.getParameter<edm::InputTag>("ecalRecHitsEE"));
+	tokenVertices_       = cc.consumes<reco::VertexCollection>(iConfig.getParameter<edm::InputTag>("vertexCollection"));
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -93,9 +93,7 @@ void SCEnergyCorrectorSemiParm::setEvent(const edm::Event &e) {
   
 }
 
-//--------------------------------------------------------------------------------------------------
-void SCEnergyCorrectorSemiParm::modifyObject(reco::SuperCluster &sc) {
-  
+std::pair<double, double> SCEnergyCorrectorSemiParm::GetCorrections(const reco::SuperCluster &sc) const {
   std::array<float, 29> eval;  
   const reco::CaloCluster &seedCluster = *(sc.seed());
   const bool iseb = seedCluster.hitsAndFractions()[0].first.subdetId() == EcalBarrel;
@@ -232,10 +230,20 @@ void SCEnergyCorrectorSemiParm::modifyObject(reco::SuperCluster &sc) {
   
   double ecor = mean*(eval[1]);
   const double sigmacor = sigma*ecor;
+
+  std::pair<double, double> p;
+  p.first  = ecor;
+  p.second = sigmacor;
+  return p;
+}
+
+//--------------------------------------------------------------------------------------------------
+void SCEnergyCorrectorSemiParm::modifyObject(reco::SuperCluster &sc) {
   
-  sc.setEnergy(ecor);
-  sc.setCorrectedEnergy(ecor);
-  sc.setCorrectedEnergyUncertainty(sigmacor);
+	std::pair<double, double> cor = GetCorrections(sc);
+  sc.setEnergy(cor.first);
+  sc.setCorrectedEnergy(cor.first);
+  sc.setCorrectedEnergyUncertainty(cor.second);
   
 }
 

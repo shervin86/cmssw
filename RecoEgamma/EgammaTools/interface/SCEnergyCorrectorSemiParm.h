@@ -31,10 +31,11 @@ class SCEnergyCorrectorSemiParm {
     SCEnergyCorrectorSemiParm();
     ~SCEnergyCorrectorSemiParm(); 
         
-    void setTokens(edm::ConsumesCollector &cc);
+    void setTokens(edm::ConsumesCollector &cc, const edm::ParameterSet& iConfig);
     
+	std::pair<double,double> GetCorrections(const reco::SuperCluster &sc) const;
     void modifyObject(reco::SuperCluster &sc);
-    
+
     void setEventSetup(const edm::EventSetup &es);
     void setEvent(const edm::Event &e);
     
