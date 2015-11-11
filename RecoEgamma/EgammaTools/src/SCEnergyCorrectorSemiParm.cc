@@ -93,9 +93,7 @@ void SCEnergyCorrectorSemiParm::setEvent(const edm::Event &e) {
   
 }
 
-//--------------------------------------------------------------------------------------------------
-void SCEnergyCorrectorSemiParm::modifyObject(reco::SuperCluster &sc) {
-  
+std::pair<double, double> SCEnergyCorrectorSemiParm::GetCorrections(reco::SuperCluster &sc){
   std::array<float, 29> eval;  
   const reco::CaloCluster &seedCluster = *(sc.seed());
   const bool iseb = seedCluster.hitsAndFractions()[0].first.subdetId() == EcalBarrel;
@@ -232,10 +230,20 @@ void SCEnergyCorrectorSemiParm::modifyObject(reco::SuperCluster &sc) {
   
   double ecor = mean*(eval[1]);
   const double sigmacor = sigma*ecor;
+
+  std::pair<double, double> p;
+  p.first  = ecor;
+  p.second = sigmacor;
+  return p;
+}
+
+//--------------------------------------------------------------------------------------------------
+void SCEnergyCorrectorSemiParm::modifyObject(reco::SuperCluster &sc) {
   
-  sc.setEnergy(ecor);
-  sc.setCorrectedEnergy(ecor);
-  sc.setCorrectedEnergyUncertainty(sigmacor);
+	std::pair<double, double> cor = GetCorrections(sc);
+  sc.setEnergy(cor.first);
+  sc.setCorrectedEnergy(cor.first);
+  sc.setCorrectedEnergyUncertainty(cor.second);
   
 }
 
