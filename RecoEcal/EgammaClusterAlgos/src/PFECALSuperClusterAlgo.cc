@@ -184,7 +184,7 @@ void PFECALSuperClusterAlgo::setTokens(const edm::ParameterSet &iConfig, edm::Co
     cc.consumes<reco::BeamSpot>(iConfig.getParameter<edm::InputTag>("BeamSpot"));    
     
   if (useRegression_) {
-    regr_.setTokens(cc); 
+	  regr_.setTokens(cc, iConfig.getParameterSet("regressionConfig")); 
   }
   
 }

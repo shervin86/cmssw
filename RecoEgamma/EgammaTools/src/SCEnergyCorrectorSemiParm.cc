@@ -19,6 +19,7 @@
 #include "FWCore/ParameterSet/interface/FileInPath.h"
 #include "FWCore/Utilities/interface/isFinite.h"
 #include <vdt/vdtMath.h>
+#include "FWCore/ParameterSet/interface/ParameterSet.h"
 
 using namespace reco;
 
@@ -58,12 +59,11 @@ SCEnergyCorrectorSemiParm::~SCEnergyCorrectorSemiParm()
 }
 
 //--------------------------------------------------------------------------------------------------
-void SCEnergyCorrectorSemiParm::setTokens(edm::ConsumesCollector &cc) {
+void SCEnergyCorrectorSemiParm::setTokens(edm::ConsumesCollector &cc, const edm::ParameterSet& iConfig) {
   
-  tokenEBRecHits_      = cc.consumes<EcalRecHitCollection>(edm::InputTag("ecalRecHit","EcalRecHitsEB"));
-  tokenEERecHits_      = cc.consumes<EcalRecHitCollection>(edm::InputTag("ecalRecHit","EcalRecHitsEE"));
-  tokenVertices_       = cc.consumes<reco::VertexCollection>(edm::InputTag("offlinePrimaryVertices"));   
-  
+	tokenEBRecHits_      = cc.consumes<EcalRecHitCollection>  (iConfig.getParameter<edm::InputTag>("ecalRecHitsEB"));
+	tokenEERecHits_      = cc.consumes<EcalRecHitCollection>  (iConfig.getParameter<edm::InputTag>("ecalRecHitsEE"));
+	tokenVertices_       = cc.consumes<reco::VertexCollection>(iConfig.getParameter<edm::InputTag>("vertexCollection"));
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -93,7 +93,7 @@ void SCEnergyCorrectorSemiParm::setEvent(const edm::Event &e) {
   
 }
 
-std::pair<double, double> SCEnergyCorrectorSemiParm::GetCorrections(reco::SuperCluster &sc){
+std::pair<double, double> SCEnergyCorrectorSemiParm::GetCorrections(const reco::SuperCluster &sc) const {
   std::array<float, 29> eval;  
   const reco::CaloCluster &seedCluster = *(sc.seed());
   const bool iseb = seedCluster.hitsAndFractions()[0].first.subdetId() == EcalBarrel;
