@@ -1,6 +1,8 @@
 #include "Calibration/Tools/interface/IC.h"
 #include "Calibration/Tools/interface/DS.h"
 #include <iostream>
+#include <fstream>
+#include <string>
 //#define DEBUG
 std::vector<DetId> IC::_detId;
 DRings IC::dr_;
@@ -26,6 +28,12 @@ IC::IC()
         }
         assert(_detId.size() == 75848);
         assert(_detId.size() == EBDetId::MAX_HASH + 1 + EEDetId::kSizeForDenseIndexing);
+        for (size_t i = 0; i < ids().size(); ++i) {
+                DetId id(ids()[i]);
+				ic().setValue(id, 1);
+				eic().setValue(id, 1000);
+        }
+
 }
 
 void IC::coord(DetId id, Coord * c)
@@ -223,6 +231,20 @@ IC IC::operator *( const IC &b)
 	return res;
 }
 
+bool IC::operator==(const IC& b){
+
+	if(ids().size()!=b.ids().size()) return false;
+	
+	for (size_t i = 0; i < ids().size(); ++i) {
+		DetId id(ids()[i]);
+		float va = ic()[id];
+//		float ea = eic()[id];
+		float vb = b.ic()[id];
+//		float eb = b.eic()[id];
+		if(va!=vb) return false;//|| ea!=eb) return false;
+	}
+	return true;
+}
 
 IC IC::operator /( const IC &b)
 {
@@ -311,6 +333,114 @@ void IC::combine(const IC & a, const IC & b, IC & res, bool arithmetic)
                         res.eic().setValue(id, 999);
                 }
         }
+}
+
+IC IC::combine(const IC & a, const IC & b, bool arithmetic)
+{
+	IC res=a;
+
+        for (size_t i = 0; i < a.ids().size(); ++i) {
+                DetId id(a.ids()[i]);
+                float va = a.ic()[id];
+                float ea = a.eic()[id];
+                float vb = b.ic()[id];
+                float eb = b.eic()[id];
+                if (isValid(va, ea) && isValid(vb, eb)) {
+                        float wa = 1. / ea / ea;
+                        float wb = 1. / eb / eb;
+                        if (arithmetic) {
+                                res.ic().setValue(id, 0.5 * (va + vb));
+                                res.eic().setValue(id, 0.5 * (ea + eb));
+                        } else {
+                                res.ic().setValue(id, (wa * va + wb * vb) / (wa + wb));
+                                res.eic().setValue(id, 1. / sqrt(wa + wb));
+                        }
+                } else if (isValid(va, ea)) {
+                        res.ic().setValue(id, va);
+                        res.eic().setValue(id, ea);
+                } else if (isValid(vb, eb)) {
+                        res.ic().setValue(id, vb);
+                        res.eic().setValue(id, eb);
+                } else {
+                        res.ic().setValue(id, 1);
+                        res.eic().setValue(id, 999);
+                }
+        }
+		return res;
+}
+
+IC IC::combine(const IC & a, const IC & b, const IC& c, bool arithmetic)
+{
+	IC res=*this;
+
+        for (size_t i = 0; i < a.ids().size(); ++i) {
+                DetId id(a.ids()[i]);
+                float va = a.ic()[id];
+                float ea = a.eic()[id];
+                float vb = b.ic()[id];
+                float eb = b.eic()[id];
+                float vc = c.ic()[id];
+                float ec = c.eic()[id];
+
+				float ea2 = ea*ea;
+				float eb2 = eb*eb;
+				float ec2 = ec*ec;
+                if (isValid(va, ea) && isValid(vb, eb) && isValid(vc, ec)) {
+					float wa = 1. / ea2;
+					float wb = 1. / eb2;
+					float wc = 1./  ec2;
+                        if (arithmetic) {
+                                res.ic().setValue(id, (va + vb + vc)/3.);
+                                res.eic().setValue(id, sqrt(ea2 + eb2 + ec2)/3.);
+                        } else {
+                                res.ic().setValue(id, (wa * va + wb * vb + wc*vc) / (wa + wb+wc));
+                                res.eic().setValue(id, 1. / sqrt(wa + wb+wc));
+                        }
+				} else if (isValid(va, ea) && isValid(vb, eb)) {
+					float wa = 1. / ea / ea;
+					float wb = 1. / eb / eb;
+					if (arithmetic) {
+						res.ic().setValue(id, 0.5 * (va + vb));
+						res.eic().setValue(id, 0.5 * sqrt(ea2 + eb2));
+					} else {
+						res.ic().setValue(id, (wa * va + wb * vb) / (wa + wb));
+						res.eic().setValue(id, 1. / sqrt(wa + wb));
+					}
+				} else  if (isValid(va, ea) && isValid(vc, ec)) {
+					float wa = 1. / ea / ea;
+					float wc = 1. / ec / ec;
+					if (arithmetic) {
+						res.ic().setValue(id, 0.5 * (va + vc));
+						res.eic().setValue(id, 0.5 * sqrt(ea2 + ec2));
+					} else {
+						res.ic().setValue(id, (wa * va + wc * vc) / (wa + wc));
+						res.eic().setValue(id, 1. / sqrt(wa + wc));
+					} 
+				} else  if (isValid(vc, ec) && isValid(vb, eb)) {
+					float wc = 1. / ec / ec;
+					float wb = 1. / eb / eb;
+					if (arithmetic) {
+						res.ic().setValue(id, 0.5 * (vc + vb));
+						res.eic().setValue(id, 0.5 * sqrt(ec2 + eb2));
+					} else {
+						res.ic().setValue(id, (wc * vc + wb * vb) / (wc + wb));
+						res.eic().setValue(id, 1. / sqrt(wc + wb));
+					}
+                } else if (isValid(va, ea)) {
+                        res.ic().setValue(id, va);
+                        res.eic().setValue(id, ea);
+                } else if (isValid(vb, eb)) {
+                        res.ic().setValue(id, vb);
+                        res.eic().setValue(id, eb);
+                } else if (isValid(vc, ec)) {
+                        res.ic().setValue(id, vc);
+                        res.eic().setValue(id, ec);
+                } else {
+                        res.ic().setValue(id, 1);
+                        res.eic().setValue(id, 999);
+                }
+        }
+		return res;
 }
 
 
@@ -791,10 +921,42 @@ bool IC::isValid(float v, float e)
 {
         //if (v < 0 || v > 2) return false;
         //if (v < 0) return false;
-        if (fabs(e) > 100 || v <= 0.1) return false;
+        if (fabs(e) > 100 || v <= 0.1 || v>10) return false;
         //if (fabs(e) > 100 || v < 0.4 || v > 2.5) return false;
         //if (v < 0.3 || v > 3) return false;
         return true;
+}
+
+
+IC IC::getEtaScale(){
+	IC etaScale(*this);
+        float etasum[DRings::nHalfIEta * 2 + 1]; // ieta = 0 does not exist
+        int n[DRings::nHalfIEta * 2 + 1]; // ieta = 0 does not exist
+        for (int i = 0; i < DRings::nHalfIEta * 2 + 1; ++i) {
+                etasum[i] = 0;
+                n[i] = 0;
+        }
+        for (size_t i = 0; i < ids().size(); ++i) {
+                DetId id(ids()[i]);
+                float v = ic()[id];
+                float e = eic()[id];
+                if (!isValid(v, e)) continue;
+                int idx = dr_.ieta(id) + DRings::nHalfIEta;
+                etasum[idx] += v;
+                n[idx]++;
+        }
+        for (size_t i = 0; i < ids().size(); ++i) {
+			DetId id(etaScale.ids()[i]);
+			float e = etaScale.eic()[id];
+//                if (!isValid(v, e)) continue;
+//				std::cout << "\t" << v << "\t" <<  e <<std::endl;
+			int idx = dr_.ieta(id) + DRings::nHalfIEta;
+			float s = etasum[idx] / n[idx];
+			
+			etaScale.ic().setValue(id, s);
+			etaScale.eic().setValue(id, e);
+        }
+		return etaScale;
 }
 
 void IC::scaleEta(IC & ic, const IC & ic_scale, bool reciprocalScale)
@@ -819,12 +981,13 @@ void IC::scaleEta(IC & ic, const IC & ic_scale, bool reciprocalScale)
                 float v = ic.ic()[id];
                 float e = ic.eic()[id];
                 if (!isValid(v, e)) continue;
-//				std::cout << "\t" << v << "\t" <<  e <<std::endl;
+				//std::cout << "\t" << v << "\t" <<  e <<std::endl;
                 int idx = dr_.ieta(id) + DRings::nHalfIEta;
                 float s = etasum[idx] / n[idx];
                 if (reciprocalScale) s = 1 / s;
                 ic.ic().setValue(id, v * s);
                 ic.eic().setValue(id, e * s);
+				//std::cout << "\t" << v << "\t" <<  e << "\t" << s << std::endl;
         }
 }
 
@@ -940,6 +1103,28 @@ void IC::fillHoles(const IC & a, const IC & b, IC & res)
                 }
         }
 }
+
+void IC::fillHoles(const IC & b, bool preserveErrors)
+{
+        for (size_t i = 0; i < ids().size(); ++i) {
+                DetId id(ids()[i]);
+                float va = ic()[id];
+                float ea = eic()[id];
+                float vb = b.ic()[id];
+                float eb = b.eic()[id];
+                if (isValid(va, ea))  continue;
+				else if (isValid(vb, eb)) {
+					ic().setValue(id, vb);
+					if(preserveErrors) eic().setValue(id, eb);
+					else eic().setValue(id, 997);
+                } else {
+                        fprintf(stderr, "[IC::fillHoles] WARNING: no IC for crystal %d\n", id.rawId());
+                        ic().setValue(id, 1);
+                        eic().setValue(id, 999);
+                }
+        }
+}
+
 
 
 void IC::readSimpleTextFile(const char * fileName, IC & ic)
@@ -1120,7 +1305,43 @@ void IC::readXMLFile(const char * fileName, IC & ic)
                         sscanf(line, " <cell ix=\"%d\" iy=\"%d\" zside=\"%d\"", &ix, &iy, &iz);
                         nvalue = 1;
                 }
+				std::cout << ix << " " << iy << " " << iz << " " << nvalue << std::endl;
         }
+}
+
+
+void IC::readXMLFile(const char * fileName)
+{
+	std::ifstream file(fileName);
+	char line[200];
+	unsigned int i=0;
+
+	while(file.peek()!=EOF && file.good()){
+		if(file.peek()==10){ // 10 = \n
+			file.get(); 
+			continue;
+		}
+
+		if(file.peek() == 35){ // 35 = #
+			file.ignore(1000,10); // ignore the rest of the line until \n
+			continue;
+		}
+		
+		file.getline(line, 200);
+		std::string line_string(line);
+
+		std::size_t start_pos=0; //, end_pos=0;
+		start_pos=line_string.find("<item>");
+		if(start_pos!=std::string::npos){
+			start_pos+=6;
+						
+			std::string val = line_string.substr(start_pos, 15);
+			DetId id = ids()[i];
+			ic().setValue(id, std::stod(val));
+			eic().setValue(id, 0);
+			i++;
+		}
+	}
 }
 
 

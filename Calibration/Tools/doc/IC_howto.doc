@@ -7,6 +7,22 @@ https://gitlab.cern.ch/shervin/ecal-calibration-ic
  - create a new cycle: create a subdirectory with the name of the cycle (same name of the milestone)
  - put the txt files in that
  - add an info.txt file with all the useful informations for the cycle and the analysis performed
+   - dataset
+   - release
+   - git tag
+   - GT
+   - json 
+ - create a check_prevalidate.py script with the commands to create the xml file and the automatic plots
+   - map of EB, EE+, EE- GT reference
+   - map of EB, EE+, EE- absolute
+   - map of EB, EE+, EE- relative
+   - etaScale
+   - 1D ICs of EB, EE+, EE-
+   - ICs profile vs eta 
+   - map of non calibrated channels
+ - make the .db files
+ - start ECALELF validation procedure with defined
+   - rereco name
 
 
 */

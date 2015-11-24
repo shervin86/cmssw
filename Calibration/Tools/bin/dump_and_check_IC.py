@@ -53,7 +53,7 @@ dir = "dumps_" + bn + "/"
 os.system("mkdir -p " + dir)
 
 rings = DRings()
-rings.setEERings("../data/eerings.dat")
+rings.setEERings("./data/eerings.dat")
 
 ic = IC()
 #IC.readTextFile(file, ic)

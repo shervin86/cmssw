@@ -73,20 +73,27 @@ class IC {
 
                 static void add(const IC & a, const IC & b, IC & res);
                 static void combine(const IC & a, const IC & b, IC & res, bool arithmetic = false); // N.B. arithmetic average is for value and errrors
+				IC combine(const IC& a, const IC&b, bool arithmetic = false);
+				IC combine(const IC & a, const IC & b, const IC& c, bool arithmetic);
+
                 static void fillHoles(const IC & a, const IC & b, IC & res);
+				void fillHoles(const IC & b, bool preserveErrors=true); ///< fill the non-calibrated channels with the values of a second set of ICs
+
                 static void removeOutliers(const IC & a, IC & res, float min = 0.4, float max = 2.5);
                 void removeOutliers(float min = 0.4, float max = 2.5);
                 static void smear(const IC & a, float sigma, IC & res);
                 static void smear(const IC & a, IC & res);
 
                 // tools
-                static void applyEtaScale(IC & ic);
+				IC getEtaScale();
+				static void applyEtaScale(IC & ic);
                 static void scaleEta(IC & ic, const IC & ic_scale, bool reciprocalScale = false);
 				inline void scaleEta(const IC& ic_scale){
 					scaleEta(*this, ic_scale, false);
 				}
 				inline void unscaleEta(void){
-					scaleEta(*this, *this, true);
+					*this/=getEtaScale();
+					//scaleEta(*this, *this, true);
 				}
                 static void applyTwoCrystalEffect(IC & ic);
                 static void setToUnit(IC & ic, DS & selector);
@@ -103,12 +110,16 @@ class IC {
                 static void readTextFile(const char * fileName, IC & ic);
 				void readTextFile(const char * fileName);
                 static void readXMLFile(const char * fileName, IC & ic);
+				void readXMLFile(const char *fileName);
                 static void readCmscondXMLFile(const char * fileName, IC & ic);
                 static void readEcalChannelStatusFromTextFile(const char * fileName, EcalChannelStatus & channelStatus);
                 static void makeRootTree(TTree & t, const IC & ic);
 
                 // dumps for checking
                 static void dumpEtaScale(const IC & a, const char * fileName, bool allIC = false);
+				void dumpEtaScale(const char *fileName){
+					dumpEtaScale(*this, fileName);
+				}
                 static void dumpOutliers(const IC & a, float min = 0.4, float max = 2.5);
 
                 static float average(const IC & a, DS & d, bool errors = false);
