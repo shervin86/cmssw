@@ -78,12 +78,12 @@ else:
 ################################################
 
 EfficiencyBins = cms.PSet(
-    probe_et = cms.vdouble( 25., 30., 35., 40., 45., 50., 60., 70., 90., 130., 180., 250. ),
-    #probe_eta = cms.vdouble( -2.5, 2.5 ),
+    probe_Ele_et = cms.vdouble( 25., 250. ),
+    probe_Ele_e = cms.vdouble( 0, 20000.5 ),
     )
 
 EfficiencyBinningSpecification = cms.PSet(
-    UnbinnedVariables = cms.vstring("mass", "totWeight", "Ele_dRTau", "probe_dRTau"),
+    UnbinnedVariables = cms.vstring("mass", "totWeight"),
     BinnedVariables = cms.PSet(EfficiencyBins,
                                mcTrue = cms.vstring("true")
                                ),
@@ -91,7 +91,7 @@ EfficiencyBinningSpecification = cms.PSet(
     )
 
 if (not options.isMC):
-    EfficiencyBinningSpecification.UnbinnedVariables = cms.vstring("mass", "totWeight", "Ele_dRTau", "probe_dRTau")
+    EfficiencyBinningSpecification.UnbinnedVariables = cms.vstring("mass")
     EfficiencyBinningSpecification.BinnedVariables = cms.PSet(EfficiencyBins)
 
 mcTruthModules = cms.PSet()
@@ -112,21 +112,27 @@ process.TnPMeasurement = cms.EDAnalyzer("TagProbeFitTreeAnalyzer",
                                         floatShapeParameters = cms.bool(True),
                                         binnedFit = cms.bool(True),
                                         binsForFit = cms.uint32(60),
-                                        #WeightVariable = cms.string("totWeight"),
+                                        WeightVariable = cms.string("totWeight"),
                                         #fixVars = cms.vstring("meanP", "meanF", "sigmaP", "sigmaF", "sigmaP_2", "sigmaF_2"),
                                         
                                         # defines all the real variables of the probes available in the input tree and intended for use in the efficiencies
                                         Variables = cms.PSet(mass = cms.vstring("Tag-Probe Mass", "60.0", "120.0", "GeV/c^{2}"),
-                                                             probe_et = cms.vstring("Probe E_{T}", "0", "1000", "GeV/c"),
-                                                             probe_eta = cms.vstring("Probe #eta", "-2.5", "2.5", ""), 
+                                                             probe_Ele_et = cms.vstring("Probe E_{T}", "0", "1000", "GeV/c"),
+                                                             probe_Ele_eta = cms.vstring("Probe #eta", "-2.5", "2.5", ""), 
                                                              totWeight = cms.vstring("totWeight", "-1000000000", "100000000", ""),
-                                                             Ele_dRTau = cms.vstring("Ele_dRTau", "0.2", "100000", ""),
-                                                             probe_dRTau = cms.vstring("probe_dRTau", "0.2", "100000", ""),
+                                                             probe_Ele_e = cms.vstring("probe_Ele_e", "0", "1000", ""),
+                                                             probe_Ele_pt = cms.vstring("probe_Ele_pt", "0", "1000", ""),
+                                                             probe_Ele_trigMVA = cms.vstring("probe_Ele_trigMVA", "-1", "1", "")
                                                              ),
                                         
                                         # defines all the discrete variables of the probes available in the input tree and intended for use in the efficiency calculations
                                         Categories = cms.PSet(),
-                                        
+
+                                        Expressions = cms.PSet(myeop = cms.vstring("myeop", "probe_Ele_e/probe_Ele_pt", "probe_Ele_e", "probe_Ele_pt") 
+                                                               ), 
+                                        Cuts = cms.PSet(#mvaCut = cms.vstring("probe_Ele_trigMVA", "0.5", "above"),
+                                                        #fakeEoPCut = cms.vstring("myeop", "2.", "above")
+                                                        ),
                                         # defines all the PDFs that will be available for the efficiency calculations; 
                                         # uses RooFit's "factory" syntax;
                                         # each pdf needs to define "signal", "backgroundPass", "backgroundFail" pdfs, "efficiency[0.9,0,1]" 

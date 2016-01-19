@@ -26,7 +26,7 @@ class TagProbeFitter {
   bool addExpression(std::string expressionName, std::string title, std::string expression, const std::vector<std::string>& arguments);
 
   ///adds a new category based on a cut
-  bool addThresholdCategory(std::string categoryName, std::string title, std::string varName, double cutValue);
+  bool addThresholdCategory(std::string categoryName, std::string varName, double cutValue, std::string cutType);
 
   ///add a new PDF to the list of available PDFs; "pdfCommands" are parsed by factory().
   /// the user needs to define efficiency[0.9,0,1] for the initial value, "signal" PDF, "backgroundPass" PDF and "backgroundFail" PDF

@@ -91,16 +91,16 @@ TagProbeFitTreeAnalyzer::TagProbeFitTreeAnalyzer(const edm::ParameterSet& pset):
     const ParameterSet cuts = pset.getParameter<ParameterSet>("Cuts");
     vector<string> cutNames = cuts.getParameterNamesForType<vector<string> >();
     for (vector<string>::const_iterator name = cutNames.begin(); name != cutNames.end(); name++) {
-        vector<string> cat = cuts.getParameter<vector<string> >(*name);
-        if(cat.size()==3){
-            fitter.addThresholdCategory(*name, cat[0], cat[1], atof(cat[2].c_str()));
-        }else{
-            LogError("TagProbeFitTreeAnalyzer")<<"Could not create cut: "<<*name<<
-                ". Example: matched = cms.vstring(\"Matched\", \"deltaR\", \"0.5\") ";
-        }
+      vector<string> cat = cuts.getParameter<vector<string> >(*name);
+      if(cat.size()==3){
+	fitter.addThresholdCategory(*name, cat[0], atof(cat[1].c_str()), cat[2]);
+      }else{
+	LogError("TagProbeFitTreeAnalyzer")<<"Could not create cut: "<<*name<<
+	  ". Example: matched = cms.vstring(\"Matched\", \"deltaR\", \"0.5\") ";
+      }
     }
   }
-
+  
   if(pset.existsAs<ParameterSet>("PDFs")){
     const ParameterSet pdfs = pset.getParameter<ParameterSet>("PDFs");
     vector<string> pdfNames = pdfs.getParameterNamesForType<vector<string> >();
