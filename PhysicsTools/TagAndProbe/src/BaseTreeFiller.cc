@@ -145,6 +145,15 @@ tnp::BaseTreeFiller::addBranches_(TTree *tree, const edm::ParameterSet &iConfig,
 
 tnp::BaseTreeFiller::~BaseTreeFiller() {}
 
+void tnp::BaseTreeFiller::initPerObject(const edm::Event &iEvent) const {
+  for (std::vector<tnp::ProbeVariable>::const_iterator it = vars_.begin(), ed = vars_.end(); it != ed; ++it) {
+    it->init(iEvent);
+  }
+  for (std::vector<tnp::ProbeFlag>::const_iterator it = flags_.begin(), ed = flags_.end(); it != ed; ++it) {
+    it->init(iEvent);
+  }
+}
+
 void tnp::BaseTreeFiller::init(const edm::Event &iEvent) const {
 
   run_  = iEvent.id().run();

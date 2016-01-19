@@ -39,11 +39,12 @@ ProbeVariablesToStore = cms.PSet(
     probe_Ele_sigmaIEtaIEta = cms.string("sigmaIetaIeta"),
     probe_Ele_hoe           = cms.string("hadronicOverEm"),
     probe_Ele_ooemoop       = cms.string("(1.0/ecalEnergy - eSuperClusterOverP/ecalEnergy)"),
+
     probe_Ele_mHits         = cms.InputTag("eleVarHelper:missinghits"),
     probe_Ele_dz            = cms.InputTag("eleVarHelper:dz"),
     probe_Ele_dxy           = cms.InputTag("eleVarHelper:dxy"),
-    probe_Ele_nonTrigMVA    = cms.InputTag("electronMVAValueMapProducer:ElectronMVAEstimatorRun2Spring15NonTrig25nsV1Categories"),
-    probe_Ele_trigMVA       = cms.InputTag("electronMVAValueMapProducer:ElectronMVAEstimatorRun2Spring15Trig25nsV1Categories"),
+    probe_Ele_nonTrigMVA    = cms.InputTag("electronMVAValueMapProducer:ElectronMVAEstimatorRun2Spring15NonTrig25nsV1Values"),
+    probe_Ele_trigMVA       = cms.InputTag("electronMVAValueMapProducer:ElectronMVAEstimatorRun2Spring15Trig25nsV1Values"),
      
     #isolation
     probe_Ele_chIso         = cms.string("pfIsolationVariables().sumChargedHadronPt"),
@@ -64,6 +65,13 @@ TagVariablesToStore = cms.PSet(
     sc_et     = cms.string("superCluster.energy*sin(superClusterPosition.theta)"),    
     sc_eta    = cms.string("superCluster.eta"),
     sc_abseta = cms.string("abs(superCluster.eta)"),
+    
+    Ele_mHits         = cms.InputTag("eleVarHelper:missinghits"),
+    Ele_dz            = cms.InputTag("eleVarHelper:dz"),
+    Ele_dxy           = cms.InputTag("eleVarHelper:dxy"),
+    Ele_nonTrigMVA    = cms.InputTag("electronMVAValueMapProducer:ElectronMVAEstimatorRun2Spring15NonTrig25nsV1Values"),
+    Ele_trigMVA       = cms.InputTag("electronMVAValueMapProducer:ElectronMVAEstimatorRun2Spring15Trig25nsV1Values"),
+
     )
 
 CommonStuffForGsfElectronProbe = cms.PSet(

@@ -163,10 +163,10 @@ void TagProbeFitTreeProducer::analyze(const edm::Event& iEvent, const edm::Event
   Handle<vector<reco::GenParticle> > genParticlesH;
 
   treeFiller_->init(iEvent); // read out info from the event if needed (external vars, list of passing probes, ...)
-  //if (oldTagFiller_.get()) oldTagFiller_->init(iEvent);
-  //if (tagFiller_.get())    tagFiller_->init(iEvent);
-  //if (pairFiller_.get())   pairFiller_->init(iEvent);
-  //if (mcFiller_.get())     mcFiller_->init(iEvent);
+  if (oldTagFiller_.get()) oldTagFiller_->init(iEvent);
+  if (tagFiller_.get())    tagFiller_->initPerObject(iEvent);
+  if (pairFiller_.get())   pairFiller_->initPerObject(iEvent);
+  if (mcFiller_.get())     mcFiller_->initPerObject(iEvent);
 
   // get the list of (tag+probe) pairs, performing arbitration
   tnp::TagProbePairs pairs = tagProbePairMaker_.run(iEvent);
