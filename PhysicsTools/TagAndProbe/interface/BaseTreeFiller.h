@@ -66,7 +66,7 @@ class ProbeVariable {
 
         /// To be called at the beginning of the event (will fetch ValueMap if needed)
         void init(const edm::Event &iEvent) const {
-            if (external_) iEvent.getByToken(srcToken_, handle_);
+	  if (external_) iEvent.getByToken(srcToken_, handle_);
         }
 
         /// To be called for each item
@@ -115,7 +115,7 @@ class ProbeFlag {
         const std::string & name() const { return name_; }
 
         /// To be called at the beginning of the event (will fetch Candidate View if needed)
-        void init(const edm::Event &iEvent) const ;
+        void init(const edm::Event &iEvent) const ;        
 
         /// To be called for each item
         void fill(const reco::CandidateBaseRef &probe) const ;
@@ -158,6 +158,7 @@ class BaseTreeFiller : boost::noncopyable {
 
         /// To be called once per event, to load possible external variables
         void init(const edm::Event &iEvent) const ;
+	void initPerObject(const edm::Event &iEvent) const ;
 
         /// To be called once per probe, to fill the values for this probe
         void fill(const reco::CandidateBaseRef &probe) const ;

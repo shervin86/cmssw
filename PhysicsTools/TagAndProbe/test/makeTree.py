@@ -23,13 +23,13 @@ options['ELECTRON_CUTS']           = "(abs(superCluster.eta)<2.5) && (ecalEnergy
 options['ELECTRON_TAG_CUTS']       = "(abs(superCluster.eta)<=2.5) && !(1.4442<=abs(superCluster.eta)<=1.566) && pt >= 25.0"
 options['SUPERCLUSTER_COLL']       = "reducedEgamma:reducedSuperClusters"
 options['SUPERCLUSTER_CUTS']       = "abs(eta)<2.5 && !(1.4442< abs(eta) <1.566) && et>10.0"
-options['MAXEVENTS']               = cms.untracked.int32(100) 
+options['MAXEVENTS']               = cms.untracked.int32(1000) 
 options['useAOD']                  = cms.bool(False)
 options['DOTRIGGER']               = cms.bool(False)
 options['DORECO']                  = cms.bool(False)
 options['DOID']                    = cms.bool(True)
 options['OUTPUTEDMFILENAME']       = 'edmFile.root'
-options['DEBUG']                   = cms.bool(True)
+options['DEBUG']                   = cms.bool(False)
 
 from PhysicsTools.TagAndProbe.treeMakerOptions_cfi import *
 
@@ -216,9 +216,6 @@ if (varOptions.isMC):
         process.pileupReweightingProducer +
         process.mc_sequence +
         process.eleVarHelper +
-        #process.GsfDRToNearestTauProbe + 
-        #process.GsfDRToNearestTauTag + 
-        #process.GsfDRToNearestTauSC + 
         process.tree_sequence
         )
 else:
