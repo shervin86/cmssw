@@ -1,6 +1,5 @@
 #include "PhysicsTools/TagAndProbe/interface/TagProbeFitter.h"
 #include <stdexcept>
-//#include "TagProbeFitter.h"
 
 #include "TROOT.h"
 #include "TSystem.h"
@@ -38,8 +37,6 @@
 #include "RooExtendPdf.h"
 #include "RooTrace.h"
 #include "RooMsgService.h"
-
-//#include "PhysicsTools/TagAndProbe/interface/RooCBExGaussShape.h"
 
 #include "Math/QuantFuncMathCore.h"
 
@@ -110,8 +107,8 @@ bool TagProbeFitter::addExpression(string expressionName, string title, string e
 }
 
 
-bool TagProbeFitter::addThresholdCategory(string categoryName, string title, string varName, double cutValue){
-  thresholdCategories.push_back(make_pair(make_pair(categoryName,title), make_pair(varName,cutValue)));
+bool TagProbeFitter::addThresholdCategory(string categoryName, string varName, double cutValue, string cutType){
+  thresholdCategories.push_back(make_pair(make_pair(categoryName, cutType), make_pair(varName,cutValue)));
   return true;
 }
 
@@ -207,9 +204,11 @@ string TagProbeFitter::calculateEfficiency(string dirName,const std::vector<stri
    }
  
    // And add all dynamic categories from thresholds
+   std::vector<std::string> dynamicCuts;
    for(vector<pair<pair<string,string>, pair<string, double> > >::const_iterator tc = thresholdCategories.begin(), tce = thresholdCategories.end(); tc != tce; ++tc){
-     RooThresholdCategory tmp(tc->first.first.c_str(), tc->first.second.c_str(), (RooAbsReal &)dataVars[tc->second.first.c_str()], "above", 1);
-     tmp.addThreshold(tc->second.second, "below",0);
+     RooThresholdCategory tmp(tc->first.first.c_str(), "", (RooAbsReal &)dataVars[tc->second.first.c_str()], "above", 1);
+     tmp.addThreshold(tc->second.second, "below", 0);
+     dynamicCuts.push_back(tc->first.first+"=="+tc->first.first+"::"+tc->first.second);
      RooCategory *cat = (RooCategory *) data.addColumn(tmp);
      dataVars.addClone(*cat);
    }
@@ -246,7 +245,7 @@ string TagProbeFitter::calculateEfficiency(string dirName,const std::vector<stri
      pdfCategory.map(binToPDFmap[i].c_str(), binToPDFmap[i+1].c_str());
    }
    data.addColumn( pdfCategory );
-
+   
    //create the empty efficiency datasets from the binned variables
    RooRealVar efficiency("efficiency", "Efficiency", 0, 1);
    
@@ -271,9 +270,15 @@ string TagProbeFitter::calculateEfficiency(string dirName,const std::vector<stri
      TString catName = t->GetName();
      //skip unmapped states
      if(catName.Contains("NotMapped")) continue;
+
+     std::string dynamicCutString = dynamicCuts[0];
+     for (unsigned int i=1; i<dynamicCuts.size(); i++)
+       dynamicCutString += " && " + dynamicCuts[i]; 
+
      //create the dataset
      RooDataSet* data_bin = (RooDataSet*) data.reduce(//SelectVars(RooArgSet(variables["mass"], variables["passing"])),
-						      Cut(TString::Format("allCats==%d",t->getVal())));
+						      Cut(TString::Format("allCats==%d && %s",t->getVal(), dynamicCutString.c_str())));
+     
      //set the category variables by reading the first event
      const RooArgSet* row = data_bin->get();
      
@@ -432,11 +437,11 @@ void TagProbeFitter::doFitEfficiency(RooWorkspace* w, string pdfName, RooRealVar
       // fix them
       varFixer(w,true);
       //do fit 
-      w->pdf("simPdf")->fitTo(*data, Minimizer("migrad"), Save(true), SumW2Error(true), Extended(true), NumCPU(numCPU), PrintLevel(quiet?-1:3), PrintEvalErrors(quiet?-1:1), Warnings(!quiet));
+      w->pdf("simPdf")->fitTo(*data, Minimizer("migrad"), Save(true), SumW2Error(true), Extended(true), NumCPU(numCPU), PrintLevel(quiet?-1:-1), PrintEvalErrors(quiet?-1:1), Warnings(!quiet));
       //release vars
       varFixer(w,false);
       //do fit 
-      w->pdf("simPdf")->fitTo(*data, Minimizer("migrad"), Save(true), SumW2Error(true) , Extended(true), NumCPU(numCPU), PrintLevel(quiet?-1:3), PrintEvalErrors(quiet?-1:1), Warnings(!quiet));
+      w->pdf("simPdf")->fitTo(*data, Minimizer("migrad"), Save(true), SumW2Error(true) , Extended(true), NumCPU(numCPU), PrintLevel(quiet?-1:-1), PrintEvalErrors(quiet?-1:1), Warnings(!quiet));
       //save vars
       varSaver(w);
       // now we have a starting point. Fit will converge faster.
@@ -450,13 +455,13 @@ void TagProbeFitter::doFitEfficiency(RooWorkspace* w, string pdfName, RooRealVar
     //fix vars
     varFixer(w,true);
     //do fit
-    res = w->pdf("simPdf")->fitTo(*data, Save(true), Hesse(false), Extended(true), NumCPU(numCPU), Minos(*w->var("efficiency")), PrintLevel(quiet?-1:3), PrintEvalErrors(quiet?-1:1), Warnings(!quiet));
+    res = w->pdf("simPdf")->fitTo(*data, Save(true), Hesse(false), Extended(true), NumCPU(numCPU), Minos(*w->var("efficiency")), PrintLevel(quiet?-1:-1), PrintEvalErrors(quiet?-1:1), Warnings(!quiet));
   } else {
     //release vars
     varFixer(w,false);
     
     //do fit
-    res = w->pdf("simPdf")->fitTo(*data, Save(true), Hesse(false),Extended(true), Minos(*w->var("efficiency")), Strategy(2), PrintLevel(quiet?-1:9), PrintEvalErrors(quiet?-1:1), Warnings(!quiet)), NumCPU(numCPU);
+    res = w->pdf("simPdf")->fitTo(*data, Save(true), Hesse(false),Extended(true), Minos(*w->var("efficiency")), Strategy(2), PrintLevel(quiet?-1:0), PrintEvalErrors(quiet?-1:1), Warnings(!quiet)), NumCPU(numCPU);
   }
   
   // save everything
