@@ -53,25 +53,6 @@ def setModules(process, options):
     process.tagTightRECO = cms.EDProducer("CandViewShallowCloneCombiner",
                                           decay = cms.string("goodPhotonsTagHLT@+ goodPhotonsProbeHLT@-"), 
                                           checkCharge = cms.bool(False),
-                                          cut = cms.string("40<mass<1000"),
+                                          cut = cms.string("60<mass<120"),
                                           )
     
-###################################################################
-## MC MATCHING
-###################################################################
-    
-    process.McMatchTag = cms.EDProducer("MCTruthDeltaRMatcherNew",
-                                        matchPDGId = cms.vint32(11),
-                                        src = cms.InputTag("goodPhotonsTAGCutBasedTight"),
-                                        distMin = cms.double(0.2),
-                                        matched = cms.InputTag("prunedGenParticles"),
-                                        checkCharge = cms.bool(False)
-                                        )
-    
-    process.McMatchRECO = cms.EDProducer("MCTruthDeltaRMatcherNew",
-                                         matchPDGId = cms.vint32(11),
-                                         src = cms.InputTag("goodPhotons"),
-                                         distMin = cms.double(0.2),
-                                         matched = cms.InputTag("prunedGenParticles"),
-                                         checkCharge = cms.bool(False)
-                                         )

@@ -125,60 +125,24 @@ def setModules(process, options):
                                                   )
     
 ###################################################################
-## MC MATCHES
-###################################################################
-    
-   #process.McMatchHLT = cms.EDProducer("MCTruthDeltaRMatcherNew",
-   #                                    matchPDGId = cms.vint32(11),
-   #                                    src = cms.InputTag("goodElectrons"),
-   #                                    distMin = cms.double(0.3),
-   #                                    matched = cms.InputTag("prunedGenParticles"),
-   #                                    checkCharge = cms.bool(True)
-   #                                    )
-   #
-   #process.McMatchSC = cms.EDProducer("MCTruthDeltaRMatcherNew",
-   #                                   matchPDGId = cms.vint32(11),
-   #                                   src = cms.InputTag("goodSuperClusters"),
-   #                                   distMin = cms.double(0.3),
-   #                                   matched = cms.InputTag("prunedGenParticles"),
-   #                                   checkCharge = cms.bool(False)
-   #                                   )
-   #
-   #process.McMatchTag = cms.EDProducer("MCTruthDeltaRMatcherNew",
-   #                                    matchPDGId = cms.vint32(11),
-   #                                    src = cms.InputTag("goodElectronsTAGCutBasedTight"),
-   #                                    distMin = cms.double(0.2),
-   #                                    matched = cms.InputTag("prunedGenParticles"),
-   #                                    checkCharge = cms.bool(True)
-   #                                    )
-   #
-   #process.McMatchRECO = cms.EDProducer("MCTruthDeltaRMatcherNew",
-   #                                     matchPDGId = cms.vint32(11),
-   #                                     src = cms.InputTag("goodElectrons"),
-   #                                     distMin = cms.double(0.2),
-   #                                     matched = cms.InputTag("prunedGenParticles"),
-   #                                     checkCharge = cms.bool(True)
-   #                                     )
-    
-###################################################################
 ## TnP PAIRS
 ###################################################################
     
     process.tagTightHLT = cms.EDProducer("CandViewShallowCloneCombiner",
                                          decay = cms.string("goodElectronsTagHLT@+ goodElectronsProbeMeasureHLT@-"), 
                                          checkCharge = cms.bool(True),
-                                         cut = cms.string("40<mass<1000"),
+                                         cut = cms.string("60<mass<120"),
                                          )
     
     process.tagTightSC = cms.EDProducer("CandViewShallowCloneCombiner",
                                         decay = cms.string("goodElectronsTagHLT goodSuperClustersHLT"), 
                                         checkCharge = cms.bool(False),
-                                        cut = cms.string("40<mass<1000"),
+                                        cut = cms.string("60<mass<120"),
                                         )
     
     process.tagTightRECO = cms.EDProducer("CandViewShallowCloneCombiner",
                                           decay = cms.string("goodElectronsTagHLT@+ goodElectronsProbeHLT@-"), 
                                           checkCharge = cms.bool(True),
-                                          cut = cms.string("40<mass<1000"),
+                                          cut = cms.string("60<mass<120"),
                                           )
     
