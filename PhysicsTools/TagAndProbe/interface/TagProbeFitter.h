@@ -44,6 +44,8 @@ class TagProbeFitter {
 
   std::string calculateEfficiency(std::string dirName,const std::vector<std::string>& efficiencyCategories, const std::vector<std::string>& efficiencyStates, std::vector<std::string>& unbinnedVariables, std::map<std::string, std::vector<double> >& binnedReals, std::map<std::string, std::vector<std::string> >& binnedCategories, std::vector<std::string>& binToPDFmap);
 
+std::string calculateEfficiencyBigFiles(std::string dirName,const std::vector<std::string>& efficiencyCategories, const std::vector<std::string>& efficiencyStates, std::vector<std::string>& unbinnedVariables, std::map<std::string, std::vector<double> >& binnedReals, std::map<std::string, std::vector<std::string> >& binnedCategories, std::vector<std::string>& binToPDFmap);
+
   /// set if to do a binned fit 
   void setBinnedFit(bool binned, int bins=0) { binnedFit = binned; massBins = bins; }
 
@@ -71,7 +73,8 @@ class TagProbeFitter {
 
   ///the default option wether to save the workspace for each bin
   bool saveWorkspace;
-  bool docutandcount_;
+  bool docutandcount;
+
   ///do binned fit; 0 = automatic, 1 = yes, -1 = no. d
   int binnedFit;
 
@@ -119,6 +122,7 @@ class TagProbeFitter {
 
   ///calculate the efficiecny with a simulataneous maximum likelihood fit in the dataset found in the workspace with PDF pdfName
   void doFitEfficiency(RooWorkspace* w, std::string pdfName, RooRealVar& efficiency);
+  void doFitEfficiencyBigFiles(RooWorkspace* w, RooAbsData* data, std::string pdfName, RooRealVar& efficiency);
 
   ///calculate the efficiecny with side band substraction in the dataset found in the workspace
   void doSBSEfficiency(RooWorkspace* w, RooRealVar& efficiency);
@@ -130,7 +134,7 @@ class TagProbeFitter {
   void createPdf(RooWorkspace* w, std::vector<std::string>& pdfCommands);
 
   ///sets initial values of the PDF parameters based on the data available in the workspace
-  void setInitialValues(RooWorkspace* w);
+  void setInitialValues(RooWorkspace* w, RooAbsData* data=0);
 
   ///saves the fit canvas
   void saveFitPlot(RooWorkspace* w);

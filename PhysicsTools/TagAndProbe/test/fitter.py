@@ -14,6 +14,7 @@ options.register(
 
 options.register(
     "inputFileName",
+    #"~/work/TnPTree_mc_Powheg.root",
     "TnPTree_mc.root",
     VarParsing.multiplicity.singleton,
     VarParsing.varType.string,
@@ -30,6 +31,7 @@ options.register(
 
 options.register(
     "idName",
+    #"passingIDMVA",
     "passingTight",
     VarParsing.multiplicity.singleton,
     VarParsing.varType.string,
@@ -79,7 +81,7 @@ else:
 
 EfficiencyBins = cms.PSet(
     probe_Ele_et = cms.vdouble( 25., 250. ),
-    probe_Ele_e = cms.vdouble( 0, 20000.5 ),
+    probe_Ele_eta = cms.vdouble( 0, 1.479, 2.5 ),
     )
 
 EfficiencyBinningSpecification = cms.PSet(
