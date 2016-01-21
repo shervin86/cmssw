@@ -114,9 +114,9 @@ TagProbeFitTreeAnalyzer::TagProbeFitTreeAnalyzer(const edm::ParameterSet& pset):
   vector<string> efficiencyNames = efficiencies.getParameterNamesForType<ParameterSet>();
   for (vector<string>::const_iterator name = efficiencyNames.begin(); name != efficiencyNames.end(); name++) {
     try {
-        calculateEfficiency(*name, efficiencies.getParameter<ParameterSet>(*name));
+      calculateEfficiency(*name, efficiencies.getParameter<ParameterSet>(*name));
     } catch (std::exception &ex) {
-        throw cms::Exception("Error", ex.what());
+      throw cms::Exception("Error", ex.what());
     }
   }
 }
@@ -127,12 +127,12 @@ void TagProbeFitTreeAnalyzer::calculateEfficiency(string name, const edm::Parame
     cout<<"EfficiencyCategoryAndState must be a even-sized list of category names and states of that category (cat1, state1, cat2, state2, ...)."<<endl;
     exit(1);
   }
-
+  
   vector<string> unbinnedVariables;
   if(pset.existsAs<vector<string> >("UnbinnedVariables")){
     unbinnedVariables = pset.getParameter<vector<string> >("UnbinnedVariables");
   }
-
+  
   const ParameterSet binVars = pset.getParameter<ParameterSet>("BinnedVariables");
   map<string, vector<double> >binnedVariables;
   vector<string> variableNames = binVars.getParameterNamesForType<vector<double> >();
@@ -140,7 +140,7 @@ void TagProbeFitTreeAnalyzer::calculateEfficiency(string name, const edm::Parame
     vector<double> binning = binVars.getParameter<vector<double> >(*var);
     binnedVariables[*var] = binning;
   }
-
+  
   map<string, vector<string> >mappedCategories;
   vector<string> categoryNames = binVars.getParameterNamesForType<vector<string> >();
   for (vector<string>::const_iterator var = categoryNames.begin(); var != categoryNames.end(); var++) {
@@ -164,7 +164,7 @@ void TagProbeFitTreeAnalyzer::calculateEfficiency(string name, const edm::Parame
     effStates.push_back(effCatState[2*i+1]);
   }
 
-  fitter.calculateEfficiency(name, effCats, effStates, unbinnedVariables, binnedVariables, mappedCategories, binToPDFmap);
+  fitter.calculateEfficiencyBigFiles(name, effCats, effStates, unbinnedVariables, binnedVariables, mappedCategories, binToPDFmap);
 }
 
 //define this as a plug-in
