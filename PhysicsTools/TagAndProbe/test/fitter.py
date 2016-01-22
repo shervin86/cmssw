@@ -14,8 +14,8 @@ options.register(
 
 options.register(
     "inputFileName",
-    #"~/work/TnPTree_mc_Powheg.root",
-    "TnPTree_mc.root",
+    "/afs/cern.ch/work/i/ishvetso/public/for_Matteo/TnPTree_mc-powheg.root",
+    #"TnPTree_mc.root",
     VarParsing.multiplicity.singleton,
     VarParsing.varType.string,
     "Input filename"
@@ -32,7 +32,7 @@ options.register(
 options.register(
     "idName",
     #"passingIDMVA",
-    "passingTight",
+    "passingTrigWP90",
     VarParsing.multiplicity.singleton,
     VarParsing.varType.string,
     "ID variable name as in the fitter_tree"
@@ -80,8 +80,8 @@ else:
 ################################################
 
 EfficiencyBins = cms.PSet(
-    probe_Ele_et = cms.vdouble( 25., 250. ),
-    probe_Ele_eta = cms.vdouble( 0, 1.479, 2.5 ),
+    probe_Ele_eta = cms.vdouble( -2.5, -1.566, -1.4442, -0.8, 0.0, 0.8, 1.4442, 1.566, 2.5 ),
+    probe_Ele_pt = cms.vdouble(15., 25., 35., 45., 55., 5000.),
     )
 
 EfficiencyBinningSpecification = cms.PSet(
@@ -119,12 +119,13 @@ process.TnPMeasurement = cms.EDAnalyzer("TagProbeFitTreeAnalyzer",
                                         
                                         # defines all the real variables of the probes available in the input tree and intended for use in the efficiencies
                                         Variables = cms.PSet(mass = cms.vstring("Tag-Probe Mass", "60.0", "120.0", "GeV/c^{2}"),
-                                                             probe_Ele_et = cms.vstring("Probe E_{T}", "0", "1000", "GeV/c"),
+                                                             #probe_Ele_et = cms.vstring("Probe E_{T}", "0", "1000", "GeV/c"),
                                                              probe_Ele_eta = cms.vstring("Probe #eta", "-2.5", "2.5", ""), 
                                                              totWeight = cms.vstring("totWeight", "-1000000000", "100000000", ""),
-                                                             probe_Ele_e = cms.vstring("probe_Ele_e", "0", "1000", ""),
+                                                             #probe_Ele_e = cms.vstring("probe_Ele_e", "0", "1000", ""),
                                                              probe_Ele_pt = cms.vstring("probe_Ele_pt", "0", "1000", ""),
-                                                             probe_Ele_trigMVA = cms.vstring("probe_Ele_trigMVA", "-1", "1", "")
+                                                             #probe_Ele_trigMVA = cms.vstring("probe_Ele_trigMVA", "-1", "1", ""),
+                                                             #passingTrigWP90 = cms.vstring("passingTrigWP90", "-1", "1", ""),
                                                              ),
                                         
                                         # defines all the discrete variables of the probes available in the input tree and intended for use in the efficiency calculations

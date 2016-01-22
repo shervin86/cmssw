@@ -140,7 +140,7 @@ std::string calculateEfficiencyBigFiles(std::string dirName,const std::vector<st
   void saveFitPlot(RooWorkspace* w);
 
   ///saves the distributions canvas
-  void saveDistributionsPlot(RooWorkspace* w);
+  void saveDistributionsPlot(RooWorkspace* w, RooAbsData* data);
 
   ///saves the efficiency plots
   void saveEfficiencyPlots(RooDataSet& eff, const TString& effName, RooArgSet& binnedVariables, RooArgSet& mappedCategories);
