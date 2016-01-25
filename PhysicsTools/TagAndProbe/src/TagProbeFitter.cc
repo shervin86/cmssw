@@ -1,11 +1,12 @@
 #include "PhysicsTools/TagAndProbe/interface/TagProbeFitter.h"
 #include <stdexcept>
+#include <sys/stat.h>
 
 #include "TROOT.h"
 #include "TSystem.h"
-#include "TFile.h"
-#include "TPad.h"
-#include "TText.h"
+//#include "TFile.h"
+//#include "TPad.h"
+//#include "TText.h"
 #include "TCanvas.h"
 #include "TTreeFormula.h"
 #include "TH2F.h"
@@ -73,10 +74,12 @@ TagProbeFitter::TagProbeFitter(const std::vector<std::string>& inputFileNames, s
 }
 
 TagProbeFitter::~TagProbeFitter(){
-  if(inputTree)
+  if (inputTree)
     delete inputTree;
-  if(outputFile)
+  if (outputFile)
     outputFile->Close();
+  if (outputTemp)
+    outputTemp->Close();
 }
 
 void TagProbeFitter::setQuiet(bool quiet_) { 
@@ -141,7 +144,7 @@ string TagProbeFitter::calculateEfficiencyBigFiles(string dirName,const std::vec
   //collect unbinned variables
   for(vector<string>::iterator v=unbinnedVariables.begin(); v!=unbinnedVariables.end(); v++){
     vars.push_back(v->c_str());
-    std::cout << v->c_str() << std::endl;
+    //std::cout << v->c_str() << std::endl;
     dataVars.addClone(variables[v->c_str()], true);
     if (binnedFit && (v == unbinnedVariables.begin())) {
       ((RooRealVar&)dataVars[v->c_str()]).setBins(massBins);	
@@ -158,13 +161,14 @@ string TagProbeFitter::calculateEfficiencyBigFiles(string dirName,const std::vec
     }
   }
 
+  char aChar[100];
   //collect the binned variables and the corresponding bin categories
   RooArgSet binnedVariables;
   std::vector<std::string> binnedVariableNames;
   RooArgSet binCategories;
   std::vector<std::vector<std::string> > binnedCategories;
   for(map<string, vector<double> >::iterator v=binnedReals.begin(); v!=binnedReals.end(); v++){
-    std::vector<std::string> temp;
+    std::vector<std::string> aString;
     std::string name = v->first;
     binnedVariableNames.push_back(name);
     //if (dataVars.find(variables[v->first.c_str()]) == 0) { 
@@ -172,14 +176,13 @@ string TagProbeFitter::calculateEfficiencyBigFiles(string dirName,const std::vec
     //  return "Error"; 
     //}
     for (unsigned int i=0; i<v->second.size()-1; i++) {
-      char cut[100];
       float lowThr = v->second[i];
       float highThr = v->second[i+1];
-      sprintf(cut, "%s>%f&&%s<%f", name.c_str(), lowThr, name.c_str(), highThr);
-      temp.push_back(cut);
+      sprintf(aChar, "%s>%f&&%s<%f", name.c_str(), lowThr, name.c_str(), highThr);
+      aString.push_back(aChar);
     }
     
-    binnedCategories.push_back(temp);
+    binnedCategories.push_back(aString);
     binnedVariables.addClone(variables[name.c_str()]);
     ((RooRealVar&)binnedVariables[name.c_str()]).setBinning( RooBinning(v->second.size()-1, &v->second[0]) );
     binCategories.addClone( RooBinningCategory((name+"_bins").c_str(), (name+"_bins").c_str(), (RooRealVar&)binnedVariables[name.c_str()]) );
@@ -227,17 +230,16 @@ string TagProbeFitter::calculateEfficiencyBigFiles(string dirName,const std::vec
   // And add all dynamic categories from thresholds
   for(vector<pair<pair<string,string>, pair<string, double> > >::const_iterator tc = thresholdCategories.begin(), tce = thresholdCategories.end(); tc != tce; ++tc){
 
-    char cut[100];
     std::string cutName = tc->second.first.c_str();
     if (dynamicExpressions.find(cutName) != dynamicExpressions.end())
       cutName = "("+dynamicExpressions[cutName]+")";
 
     if (tc->first.second == "above")
-      sprintf(cut, "%s>%f", cutName.c_str(), tc->second.second);
+      sprintf(aChar, "%s>%f", cutName.c_str(), tc->second.second);
     else
-      sprintf(cut, "%s<%f", cutName.c_str(), tc->second.second);
+      sprintf(aChar, "%s<%f", cutName.c_str(), tc->second.second);
     
-    dynamicCuts.push_back(cut);
+    dynamicCuts.push_back(aChar);
   }
 
   std::string dynamicCutString = "1";
@@ -265,92 +267,115 @@ string TagProbeFitter::calculateEfficiencyBigFiles(string dirName,const std::vec
       pdfNames.push_back(binToPDFmap[pdfIndex]);
 
       categorySelection.push_back(binnedCategories[0][i]+" && " + binnedCategories[1][j]+ " && " + dynamicCutString);
-      std::cout << binnedCategories[0][i]+" && " + binnedCategories[1][j]+ " && " + dynamicCutString << std::endl;
+      //std::cout << binnedCategories[0][i]+" && " + binnedCategories[1][j]+ " && " + dynamicCutString << std::endl;
       
-      char temp[1000];
-      sprintf(temp, "%s_bin%d__%s_bin%d", binnedVariableNames[0].c_str(), i, binnedVariableNames[1].c_str(), j);//+"__"+effCats"
-      catNames.push_back(temp);
+      sprintf(aChar, "%s_bin%d__%s_bin%d", binnedVariableNames[0].c_str(), i, binnedVariableNames[1].c_str(), j);//+"__"+effCats"
+      catNames.push_back(aChar);
 
       nCats++;
     }
   }
   
-  dataVars.Print();
-  // Fill a dataset per categories
-  std::vector<RooDataSet*> datasets;
-  //std::vector<TTree*> trees;
-  std::vector<TTreeFormula*> formulas;
-  for (int category=0; category<nCats; category++) {
-    char dataName[100];
-    sprintf(dataName, "tree%d", category);
-    datasets.push_back(new RooDataSet(dataName, dataName, dataVars, (weightVar.empty() ? 0 : weightVar.c_str())));
-    //datasets.push_back(inputTree->Clone(dataName));
-    sprintf(dataName, "formula%d", category);
-    formulas.push_back(new TTreeFormula(dataName, categorySelection[category].c_str(), inputTree));
-  }
-  
-  int entries = inputTree->GetEntries();
-  std::map<std::string, float> treeVarsF;
-  std::map<std::string, double> treeVarsD;
-  std::map<std::string, int> treeVarsI;
-  inputTree->SetBranchStatus("*", 0);
-  TIterator* vit = dataVars.createIterator();
-  for(RooRealVar* v = (RooRealVar*)vit->Next(); v!=0; v = (RooRealVar*)vit->Next() ){
-    inputTree->SetBranchStatus(v->GetName(), 1);
-    //std::cout << v->GetName() << " " << inputTree->GetLeaf(v->GetName())->GetTypeName() << std::endl;
-    if (strcmp(inputTree->GetLeaf(v->GetName())->GetTypeName(), "Float_t") == 0)
-      inputTree->SetBranchAddress(v->GetName(), &(treeVarsF[v->GetName()]));
-    else if (strcmp(inputTree->GetLeaf(v->GetName())->GetTypeName(), "Double_t") == 0)
-      inputTree->SetBranchAddress(v->GetName(), &(treeVarsD[v->GetName()]));
-    else if (strcmp(inputTree->GetLeaf(v->GetName())->GetTypeName(), "Int_t") == 0)
-      inputTree->SetBranchAddress(v->GetName(), &(treeVarsI[v->GetName()]));
-  }
+  //dataVars.Print();
 
-  for (int z=0; z<entries; z++) {
-    if (z % 100000 == 0)
-      std::cout << z << std::endl;
-    inputTree->GetEntry(z);
-    int chosenCat = -1;
+  // Fill a dataset per categories
+  //std::vector<RooDataSet*> datasets;
+  //TFile* temputputTemp;
+  std::vector<TTree*> trees;
+  std::vector<TTreeFormula*> formulas;
+
+  std::string treeDirectory = effCats[0]+"_"+catNames.back();
+  //std::cout << treeDirectory << std::endl;
+
+  struct stat sb;
+  if (stat(treeDirectory.c_str(), &sb) == 0 && S_ISDIR(sb.st_mode)) {    
+    outputTemp = TFile::Open((treeDirectory+std::string("/temp.root")).c_str());
+    outputTemp->cd();
     for (int i=0; i<nCats; i++) {
-      if (formulas[i]->EvalInstance() != 0 ) {
-	chosenCat = i;
-	break;
-      }
+      sprintf(aChar, "tree_cat%d", i);
+      trees.push_back((TTree*)outputTemp->Get(aChar));
+    }  
+  } else {  
+    std::map<std::string, float> treeVarsF;
+    std::map<std::string, double> treeVarsD;
+    std::map<std::string, int> treeVarsI;
+    
+    inputTree->SetBranchStatus("*", 0);
+    TIterator* vit = dataVars.createIterator();
+    for(RooRealVar* v = (RooRealVar*)vit->Next(); v!=0; v = (RooRealVar*)vit->Next() ){
+      inputTree->SetBranchStatus(v->GetName(), 1);
+      
+      if (strcmp(inputTree->GetLeaf(v->GetName())->GetTypeName(), "Float_t") == 0)
+	inputTree->SetBranchAddress(v->GetName(), &(treeVarsF[v->GetName()]));
+      else if (strcmp(inputTree->GetLeaf(v->GetName())->GetTypeName(), "Double_t") == 0)
+	inputTree->SetBranchAddress(v->GetName(), &(treeVarsD[v->GetName()]));
+      else if (strcmp(inputTree->GetLeaf(v->GetName())->GetTypeName(), "Int_t") == 0)
+	inputTree->SetBranchAddress(v->GetName(), &(treeVarsI[v->GetName()]));
     }
 
-    if (chosenCat != -1) {
-      TIterator* vit = dataVars.createIterator();
-      //for(RooRealVar* v = (RooRealVar*)vit->Next(); v!=0; v = (RooRealVar*)vit->Next() ) {
-      TObject *obj;
-      while (obj = vit->Next()) {
-	//std::cout << "obj=" << obj << " class=" << obj->ClassName() << std::endl;
-	RooRealVar *var = dynamic_cast<RooRealVar *>(obj);
-	if (var != NULL) {
-	  if (strcmp(inputTree->GetLeaf(var->GetName())->GetTypeName(), "Float_t") == 0)
-	    var->setVal(treeVarsF[var->GetName()]);
-	  else if (strcmp(inputTree->GetLeaf(var->GetName())->GetTypeName(), "Double_t") == 0)
-	    var->setVal(treeVarsD[var->GetName()]);
-	  else
-	    var->setVal(treeVarsI[var->GetName()]);
-	} else {
-	  RooCategory *cat = dynamic_cast<RooCategory *>(obj);
-	  cat->setIndex(treeVarsI[cat->GetName()]);
+    mkdir(treeDirectory.c_str(), S_IRUSR | S_IWUSR | S_IXUSR);
+    outputTemp = new TFile((treeDirectory+std::string("/temp.root")).c_str(), "recreate");
+    for (int category=0; category<nCats; category++) {
+      trees.push_back(inputTree->CloneTree(0));
+      sprintf(aChar, "formula%d", category);
+      formulas.push_back(new TTreeFormula(aChar, categorySelection[category].c_str(), inputTree));
+    }
+  
+    std::cout << "Splitting original tree according to chosen categorization..." << std::endl;
+    for (int z=0; z<inputTree->GetEntries(); z++) {
+      //if (z % 100000 == 0)
+      //std::cout << z << std::endl;
+      inputTree->GetEntry(z);
+      int chosenCat = -1;
+      for (int i=0; i<nCats; i++) {
+	if (formulas[i]->EvalInstance() != 0 ) {
+	  chosenCat = i;
+	  break;
 	}
       }
-  
-      datasets[chosenCat]->add(dataVars, treeVarsD["totWeight"]);
+      
+      if (chosenCat != -1) {
+	trees[chosenCat]->Fill();
+      }
+      //  TIterator* vit = dataVars.createIterator();
+      //  TObject *obj;
+      //  while (obj = vit->Next()) {
+      //	RooRealVar *var = dynamic_cast<RooRealVar *>(obj);
+      //	if (var != NULL) {
+      //	  if (treeVarsF.find(var->GetName()) != treeVarsF.end())
+      //	    var->setVal(treeVarsF[var->GetName()]);
+      //	  else if (treeVarsD.find(var->GetName()) != treeVarsD.end())
+      //	    var->setVal(treeVarsD[var->GetName()]);
+      //	  else if (treeVarsI.find(var->GetName()) != treeVarsI.end())
+      //	    var->setVal(treeVarsI[var->GetName()]);
+      //
+      //	  //if (strcmp(inputTree->GetLeaf(var->GetName())->GetTypeName(), "Float_t") == 0)
+      //	  //  var->setVal(treeVarsF[var->GetName()]);
+      //	  //else if (strcmp(inputTree->GetLeaf(var->GetName())->GetTypeName(), "Double_t") == 0)
+      //	  //  var->setVal(treeVarsD[var->GetName()]);
+      //	  //else
+      //	  //  var->setVal(treeVarsI[var->GetName()]);
+      //	} else {
+      //	  RooCategory *cat = dynamic_cast<RooCategory *>(obj);
+      //	  cat->setIndex(treeVarsI[cat->GetName()]);
+      //	}
+      //  }
+      //
+      //  datasets[chosenCat]->add(dataVars, treeVarsD["totWeight"]);
+      //}
     }
+    
+    outputTemp->cd();
+    for (unsigned int i=0; i<trees.size(); i++) {
+      sprintf(aChar, "tree_cat%d", i);
+      trees[i]->SetName(aChar);
+      trees[i]->Write();
+    }  
   }
+
   delete inputTree;
-  //  // FIXME SAVE ROODATASET TO A FILE
-
-  //// MATTEO
-  //std::vector<TTree*> trees;
-  //for (int category=0; category<nCats; category++) {
-  //  trees.push_back(inputTree->CopyTree(categorySelection[category].c_str()));
-  //}
-
-  //abort();
+  outputDirectory->cd();
+  gDirectory->cd(dirName.c_str());
 
   //create the empty efficiency datasets from the binned variables
   RooRealVar efficiency("efficiency", "Efficiency", 0, 1); 
@@ -361,7 +386,7 @@ string TagProbeFitter::calculateEfficiencyBigFiles(string dirName,const std::vec
   for (int category=0; category<nCats; category++) {
     
     //create the dataset
-    RooDataSet* data = datasets[category];//new RooDataSet("data", "data", inputTree, dataVars, categorySelection[category].c_str(), (weightVar.empty() ? 0 : weightVar.c_str()));
+    RooDataSet* data = new RooDataSet("data", "data", trees[category], dataVars, categorySelection[category].c_str(), (weightVar.empty() ? 0 : weightVar.c_str()));
     
     if(!floatShapeParameters){
       //fitting whole dataset to get initial values for some parameters
