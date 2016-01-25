@@ -78,8 +78,8 @@ TagProbeFitter::~TagProbeFitter(){
     delete inputTree;
   if (outputFile)
     outputFile->Close();
-  if (outputTemp)
-    outputTemp->Close();
+  //if (outputTemp)
+  //  outputTemp->Close();
 }
 
 void TagProbeFitter::setQuiet(bool quiet_) { 
@@ -289,12 +289,6 @@ string TagProbeFitter::calculateEfficiencyBigFiles(string dirName,const std::vec
 
   struct stat sb;
   if (stat(treeDirectory.c_str(), &sb) == 0 && S_ISDIR(sb.st_mode)) {    
-    outputTemp = TFile::Open((treeDirectory+std::string("/temp.root")).c_str());
-    outputTemp->cd();
-    for (int i=0; i<nCats; i++) {
-      sprintf(aChar, "tree_cat%d", i);
-      trees.push_back((TTree*)outputTemp->Get(aChar));
-    }  
   } else {  
     std::map<std::string, float> treeVarsF;
     std::map<std::string, double> treeVarsD;
@@ -371,7 +365,17 @@ string TagProbeFitter::calculateEfficiencyBigFiles(string dirName,const std::vec
       trees[i]->SetName(aChar);
       trees[i]->Write();
     }  
+    //outputTemp->Flush();
+    outputTemp->Close();
   }
+  
+  outputTemp = TFile::Open((treeDirectory+std::string("/temp.root")).c_str());
+  outputTemp->cd();
+  trees.resize(0);
+  for (int i=0; i<nCats; i++) {
+    sprintf(aChar, "tree_cat%d", i);
+    trees.push_back((TTree*)outputTemp->Get(aChar));
+  }  
 
   delete inputTree;
   outputDirectory->cd();
