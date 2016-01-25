@@ -251,21 +251,28 @@ string TagProbeFitter::calculateEfficiencyBigFiles(string dirName,const std::vec
 
   // NEED TO HANDLE 1D case
   std::vector<std::string> pdfNames;
-  pdfNames.push_back(binToPDFmap[0]);
+  //pdfNames.push_back(binToPDFmap[0]);
   std::vector<std::string> categorySelection;
   std::vector<std::string> catNames;
+
+
+
+
+
+
 
   int nCats = 0;
   for (unsigned int i=0; i<binnedCategories[0].size(); i++) {
     for (unsigned int j=0; j<binnedCategories[1].size(); j++) {
-      
-      unsigned int pdfIndex = (i*binnedCategories[1].size()+j+1)*2;
-      if (pdfIndex > binToPDFmap.size()) {
-	//std::cerr << "WARNING number of bins not matching PDF definitions" << std::endl;
-	pdfIndex = 0;
-      }
-      pdfNames.push_back(binToPDFmap[pdfIndex]);
 
+      unsigned int pdfIndex = (i*binnedCategories[1].size()+j+1)*2;
+      //std::cout << i << " " << j << " " << pdfIndex << " " << binToPDFmap.size() << std::endl;
+
+      if (pdfIndex > binToPDFmap.size())
+	pdfNames.push_back(binToPDFmap[0]);
+      else
+	pdfNames.push_back(binToPDFmap[pdfIndex]);
+      //std::cout << pdfNames.back() << std::endl;
       categorySelection.push_back(binnedCategories[0][i]+" && " + binnedCategories[1][j]+ " && " + dynamicCutString);
       //std::cout << binnedCategories[0][i]+" && " + binnedCategories[1][j]+ " && " + dynamicCutString << std::endl;
       
@@ -392,17 +399,18 @@ string TagProbeFitter::calculateEfficiencyBigFiles(string dirName,const std::vec
     //create the dataset
     RooDataSet* data = new RooDataSet("data", "data", trees[category], dataVars, categorySelection[category].c_str(), (weightVar.empty() ? 0 : weightVar.c_str()));
     
-    if(!floatShapeParameters){
-      //fitting whole dataset to get initial values for some parameters
-      RooWorkspace* w = new RooWorkspace();
-      //w->import(data);
-      w->import(*(data->get(0)));
-      efficiency.setVal(0);//reset
-      efficiency.setAsymError(0,0);
-      doFitEfficiencyBigFiles(w, data, pdfNames[category], efficiency);
-      delete w;
-    }
+    //if(!floatShapeParameters) {
+    //  //fitting whole dataset to get initial values for some parameters
+    //  RooWorkspace* w = new RooWorkspace();
+    //  //w->import(data);
+    //  w->import(*(data->get(0)));
+    //  efficiency.setVal(0);//reset
+    //  efficiency.setAsymError(0,0);
+    //  doFitEfficiencyBigFiles(w, data, pdfNames[category], efficiency);
+    //  delete w;
+    //}
 
+    std::cout << "PDFNAME: " << pdfNames[category] << std::endl;
     //get PDF name and make directory name
     TString dirName = catNames[category];
     dirName.ReplaceAll("{","").ReplaceAll("}","").ReplaceAll(";","__");
@@ -468,6 +476,7 @@ string TagProbeFitter::calculateEfficiencyBigFiles(string dirName,const std::vec
       	doCntEfficiency(w, efficiency);
       	cntEfficiency.add( RooArgSet(meanOfVariables, efficiency) );
       } else {
+	std::cout << "PDFNAME:" << pdfNames[category] << std::endl;
 	doFitEfficiencyBigFiles(w, data, pdfNames[category], efficiency);
 	fitEfficiency.add( RooArgSet(meanOfVariables, efficiency) );
       }
@@ -508,7 +517,7 @@ void TagProbeFitter::doFitEfficiencyBigFiles(RooWorkspace* w, RooAbsData* data, 
   if(pdfName == ""){
     return;
   }
-  
+  std::cout << "PDFNAME:" << pdfName << std::endl;
   //create the simultaneous pdf of name pdfName
   createPdf(w, pdfs[pdfName]);
   //set the initial values for the yields of signal and background
