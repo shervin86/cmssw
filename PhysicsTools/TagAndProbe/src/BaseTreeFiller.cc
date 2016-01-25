@@ -49,11 +49,11 @@ tnp::BaseTreeFiller::BaseTreeFiller(const char *name, const edm::ParameterSet& i
     tree_->Branch("weight", &weight_, "weight/D");
   }
 
-  //storePUweight_ = iConfig.existsAs<edm::InputTag>("PUWeightSrc") ? true: false;
-  //if(storePUweight_) {
-  PUweightSrc_   = iC.consumes<double>(iConfig.getParameter<edm::InputTag>("PUWeightSrc")); 
-  tree_->Branch("PUweight", &PUweight_, "PUweight/D");
-    //}
+  storePUweight_ = iConfig.existsAs<edm::InputTag>("PUWeightSrc") ? true: false;
+  if(storePUweight_) {
+    PUweightSrc_   = iC.consumes<double>(iConfig.getParameter<edm::InputTag>("PUWeightSrc")); 
+    tree_->Branch("PUweight", &PUweight_, "PUweight/D");
+  }
 
   pileupInfoToken_ = iC.consumes<std::vector<PileupSummaryInfo> >(iConfig.getParameter<edm::InputTag>("pileupInfoTag"));
   addRunLumiInfo_ = iConfig.existsAs<bool>("addRunLumiInfo") ? iConfig.getParameter<bool>("addRunLumiInfo") : false;
@@ -180,16 +180,15 @@ void tnp::BaseTreeFiller::init(const edm::Event &iEvent) const {
     weight_ = weight->weight();
   }
 
-  ///// ********** Pileup weight: needed for MC re-weighting for PU *************  
-  //if(storePUweight_) {
-  edm::Handle<double> weightPU;
-  bool isPresent = iEvent.getByToken(PUweightSrc_, weightPU);
-  //iEvent.getByToken(PUweightSrc_, weightPU);
-  if(isPresent) 
-    PUweight_ = (*weightPU);
-  else 
-    PUweight_ = 1.0;
-  //}
+  // ********** Pileup weight: needed for MC re-weighting for PU *************  
+  if(storePUweight_) {
+    edm::Handle<double> weightPU;
+    bool isPresent = iEvent.getByToken(PUweightSrc_, weightPU);
+    if(isPresent) 
+      PUweight_ = (*weightPU);
+    else 
+      PUweight_ = 1.0;
+  }
   
   if (addEventVariablesInfo_) {
     /// *********** store some event variables: MET, SumET ******

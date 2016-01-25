@@ -64,6 +64,7 @@ std::string calculateEfficiencyBigFiles(std::string dirName,const std::vector<st
 
   ///pointer to the output file
   TFile* outputFile;
+  TFile* outputTemp;
 
   ///pointer to the TDirectory in the output file that is the root directory for this fitter
   TDirectory* outputDirectory;

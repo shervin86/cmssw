@@ -14,8 +14,8 @@ options.register(
 
 options.register(
     "inputFileName",
-    "/afs/cern.ch/work/i/ishvetso/public/for_Matteo/TnPTree_mc-powheg.root",
-    #"TnPTree_mc.root",
+    #"/afs/cern.ch/work/i/ishvetso/public/for_Matteo/TnPTree_mc-powheg.root",
+    "TnPTree_mc.root",
     VarParsing.multiplicity.singleton,
     VarParsing.varType.string,
     "Input filename"
@@ -31,8 +31,8 @@ options.register(
 
 options.register(
     "idName",
-    #"passingIDMVA",
-    "passingTrigWP90",
+    "passingTight",
+    #"passingTrigWP90",
     VarParsing.multiplicity.singleton,
     VarParsing.varType.string,
     "ID variable name as in the fitter_tree"
@@ -80,8 +80,10 @@ else:
 ################################################
 
 EfficiencyBins = cms.PSet(
-    probe_Ele_eta = cms.vdouble( -2.5, -1.566, -1.4442, -0.8, 0.0, 0.8, 1.4442, 1.566, 2.5 ),
-    probe_Ele_pt = cms.vdouble(15., 25., 35., 45., 55., 5000.),
+    #probe_Ele_eta = cms.vdouble( -2.5, -1.566, -1.4442, -0.8, 0.0, 0.8, 1.4442, 1.566, 2.5 ),
+    #probe_Ele_pt = cms.vdouble(15., 25., 35., 45., 55., 5000.),
+    probe_Ele_eta = cms.vdouble( -2.5, 0.0, 2.5 ),
+    probe_Ele_pt = cms.vdouble(25., 35., 5000.),
     )
 
 EfficiencyBinningSpecification = cms.PSet(

@@ -269,16 +269,18 @@ void TagProbeFitTreeProducer::beginLuminosityBlock(const edm::LuminosityBlock& i
   
 void TagProbeFitTreeProducer::endLuminosityBlock(edm::LuminosityBlock const& iLumi, edm::EventSetup const& iEventS) {
 
-  edm::Handle<edm::MergeableDouble> totWeight;
-  iLumi.getByToken(totGenWeightToken_, totWeight);
-  if (totWeight.isValid()) 
-    totGenWeight_ += totWeight->value; 
-     
-  edm::Handle<edm::MergeableDouble> totEvents;
-  iLumi.getByToken(totEventsToken_, totEvents);
-  
-  if (totEvents.isValid())
-    totEvents_ += totEvents->value;
+  if (isMC_) {
+    edm::Handle<edm::MergeableDouble> totWeight;
+    iLumi.getByToken(totGenWeightToken_, totWeight);
+    if (totWeight.isValid()) 
+      totGenWeight_ += totWeight->value; 
+    
+    edm::Handle<edm::MergeableDouble> totEvents;
+    iLumi.getByToken(totEventsToken_, totEvents);
+    
+    if (totEvents.isValid())
+      totEvents_ += totEvents->value;
+  }
 }
 
 void TagProbeFitTreeProducer::endJob() {
