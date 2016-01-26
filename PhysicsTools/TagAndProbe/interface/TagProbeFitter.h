@@ -44,8 +44,6 @@ class TagProbeFitter {
 
   std::string calculateEfficiency(std::string dirName,const std::vector<std::string>& efficiencyCategories, const std::vector<std::string>& efficiencyStates, std::vector<std::string>& unbinnedVariables, std::map<std::string, std::vector<double> >& binnedReals, std::map<std::string, std::vector<std::string> >& binnedCategories, std::vector<std::string>& binToPDFmap);
 
-std::string calculateEfficiencyBigFiles(std::string dirName,const std::vector<std::string>& efficiencyCategories, const std::vector<std::string>& efficiencyStates, std::vector<std::string>& unbinnedVariables, std::map<std::string, std::vector<double> >& binnedReals, std::map<std::string, std::vector<std::string> >& binnedCategories, std::vector<std::string>& binToPDFmap);
-
   /// set if to do a binned fit 
   void setBinnedFit(bool binned, int bins=0) { binnedFit = binned; massBins = bins; }
 
@@ -122,8 +120,7 @@ std::string calculateEfficiencyBigFiles(std::string dirName,const std::vector<st
   void varRestorer(RooWorkspace* w);
 
   ///calculate the efficiecny with a simulataneous maximum likelihood fit in the dataset found in the workspace with PDF pdfName
-  void doFitEfficiency(RooWorkspace* w, std::string pdfName, RooRealVar& efficiency);
-  void doFitEfficiencyBigFiles(RooWorkspace* w, RooAbsData* data, std::string pdfName, RooRealVar& efficiency);
+  void doFitEfficiency(RooWorkspace* w, RooAbsData* data, std::string pdfName, RooRealVar& efficiency);
 
   ///calculate the efficiecny with side band substraction in the dataset found in the workspace
   void doSBSEfficiency(RooWorkspace* w, RooRealVar& efficiency);
