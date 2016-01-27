@@ -13,7 +13,7 @@ public:
   ZGeneratorLineShape() {} ; 
   ZGeneratorLineShape(const char *name, const char *title,
 		      RooAbsReal& _m,
-                      const char* genfile = "../data/ZeeGenLevel.root", const char* histoName= "Mass"
+                      char* genfile=0, const char* histoName= "Mass"
 		      );
 
   ZGeneratorLineShape(const ZGeneratorLineShape& other, const char* name);
