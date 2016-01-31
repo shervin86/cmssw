@@ -23,7 +23,7 @@ options['ELECTRON_CUTS']           = "(abs(superCluster.eta)<2.5) && (ecalEnergy
 options['ELECTRON_TAG_CUTS']       = "(abs(superCluster.eta)<=2.5) && !(1.4442<=abs(superCluster.eta)<=1.566) && pt >= 25.0"
 options['SUPERCLUSTER_COLL']       = "reducedEgamma:reducedSuperClusters"
 options['SUPERCLUSTER_CUTS']       = "abs(eta)<2.5 && !(1.4442< abs(eta) <1.566) && et>10.0"
-options['MAXEVENTS']               = cms.untracked.int32(1000) 
+options['MAXEVENTS']               = cms.untracked.int32(-1) 
 options['useAOD']                  = cms.bool(False)
 options['DOTRIGGER']               = cms.bool(False)
 options['DORECO']                  = cms.bool(False)
@@ -43,13 +43,13 @@ if (varOptions.isMC):
     options['GLOBALTAG']           = '76X_mcRun2_asymptotic_v12'
     options['EVENTSToPROCESS']     = cms.untracked.VEventRange()
 else:
-    options['INPUT_FILE_NAME']     = "/store/data/Run2015B/SingleElectron/MINIAOD/PromptReco-v1/000/251/244/00000/12EE24E2-8F27-E511-80D1-02163E013793.root"
+    options['INPUT_FILE_NAME']     = "/store/data/Run2015D/SingleElectron/MINIAOD/16Dec2015-v1/20000/FC4F7BEE-FCA6-E511-A99F-0CC47A4D7686.root"
     options['OUTPUT_FILE_NAME']    = "TnPTree_data.root"
-    options['TnPPATHS']            = ["HLT_Ele23_WPLoose_Gsf_v1",]
+    options['TnPPATHS']            = ["HLT_Ele23_WPLoose_Gsf_v*",]
     options['TnPHLTTagFilters']    = ["hltEle23WPLooseGsfTrackIsoFilter"]
     options['TnPHLTProbeFilters']  = cms.vstring()
     options['HLTFILTERTOMEASURE']  = cms.vstring("")
-    options['GLOBALTAG']           = 'GR_P_V56'
+    options['GLOBALTAG']           = '76X_dataRun2_v15'
     options['EVENTSToPROCESS']     = cms.untracked.VEventRange()
 
 ###################################################################
