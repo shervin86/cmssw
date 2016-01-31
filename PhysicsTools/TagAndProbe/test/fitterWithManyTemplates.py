@@ -1,6 +1,6 @@
 import FWCore.ParameterSet.Config as cms
 from FWCore.ParameterSet.VarParsing import VarParsing
-import PhysicsTools.TagAndProbe.commonFit as common
+import PhysicsTools.TagAndProbe.parametricTemplatesWP80MC as common
 
 options = VarParsing('analysis')
 options.register(
@@ -13,7 +13,7 @@ options.register(
 
 options.register(
     "inputFileName",
-    "TnPTree_mc.root",
+    "/afs/cern.ch/work/i/ishvetso/public/for_Matteo/TnPTree_mc-powheg.root",
     VarParsing.multiplicity.singleton,
     VarParsing.varType.string,
     "Input filename"
@@ -103,7 +103,7 @@ DataBinningSpecification = cms.PSet(
     )
 
 McBinningSpecification = cms.PSet(
-    UnbinnedVariables = cms.vstring("mass", "totWeight", "Ele_dRTau", "probe_dRTau"),
+    UnbinnedVariables = cms.vstring("mass", "totWeight"),
     BinnedVariables = cms.PSet(EfficiencyBins, mcTrue = cms.vstring("true")),
     BinToPDFmap = cms.vstring(
         "tight_20p0To40p0_0p0To1p5", 
@@ -135,12 +135,11 @@ process.TnPMeasurement = cms.EDAnalyzer("TagProbeFitTreeAnalyzer",
         mass = cms.vstring("Tag-Probe Mass", "60.0", "120.0", "GeV/c^{2}"),
         probe_Ele_et = cms.vstring("Probe E_{T}", "0", "100", "GeV/c"),
         probe_sc_eta = cms.vstring("Probe #eta", "-2.5", "2.5", ""), 
-        totWeight = cms.vstring("totWeight", "-1000000", "100000000", ""), 
-        Ele_dRTau = cms.vstring("Ele_dRTau", "0.2", "100000", ""),
-        probe_dRTau = cms.vstring("probe_dRTau", "0.2", "100000", ""),
+        totWeight = cms.vstring("totWeight", "-1000000", "100000000", ""),
         ),
                                         
                                         # defines all the discrete variables of the probes available in the input tree and intended for use in the efficiency calculation
+                                        Expressions = cms.PSet(),
                                         Categories = cms.PSet(),
                                         PDFs = common.all_pdfs,
                                         Efficiencies = cms.PSet()

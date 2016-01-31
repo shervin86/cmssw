@@ -145,7 +145,8 @@ string TagProbeFitter::calculateEfficiency(string dirName,const std::vector<stri
   }
   
   //add weight
-  dataVars.addClone(variables[weightVar.c_str()], true);
+  if (!weightVar.empty())
+    dataVars.addClone(variables[weightVar.c_str()], true);
 
   //add efficiency var
   for (vector<string>::const_iterator effCat = effCats.begin(); effCat != effCats.end(); ++effCat) {
