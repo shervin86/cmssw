@@ -71,8 +71,8 @@ TagProbeFitter::TagProbeFitter(const std::vector<std::string>& inputFileNames, s
 }
 
 TagProbeFitter::~TagProbeFitter(){
-  if (inputTree)
-    delete inputTree;
+  //if (inputTree)
+  //  delete inputTree;
   if (outputFile)
     outputFile->Close();
 }
@@ -417,7 +417,7 @@ string TagProbeFitter::calculateEfficiency(string dirName,const std::vector<stri
       efficiency.setAsymError(0,0);
       
       if (docutandcount) {
-      	doCntEfficiency(w, efficiency);
+      	doCntEfficiency(w, data, efficiency);
       	cntEfficiency.add( RooArgSet(meanOfVariables, efficiency) );
       } else {
 	doFitEfficiency(w, data, pdfNames[category], efficiency);
@@ -922,7 +922,7 @@ void TagProbeFitter::makeEfficiencyPlot2D(RooDataSet& eff, RooRealVar& v1, RooRe
 void TagProbeFitter::doSBSEfficiency(RooWorkspace* w, RooRealVar& efficiency){
 }
 
-void TagProbeFitter::doCntEfficiency(RooWorkspace* w, RooRealVar& efficiency){
+void TagProbeFitter::doCntEfficiency(RooWorkspace* w, RooAbsData* data, RooRealVar& efficiency){
   int pass = w->data("data")->sumEntries("_efficiencyCategory_==_efficiencyCategory_::Passed");
   int fail = w->data("data")->sumEntries("_efficiencyCategory_==_efficiencyCategory_::Failed");
   double e = (pass+fail == 0) ? 0 : pass/double(pass+fail);

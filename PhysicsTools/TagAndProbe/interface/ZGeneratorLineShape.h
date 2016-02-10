@@ -13,7 +13,7 @@ public:
   ZGeneratorLineShape() {} ; 
   ZGeneratorLineShape(const char *name, const char *title,
 		      RooAbsReal& _m,
-                      char* genfile=0, const char* histoName= "Mass"
+                      const char* genfile=0, const char* histoName= "Mass"
 		      );
 
   ZGeneratorLineShape(const ZGeneratorLineShape& other, const char* name);

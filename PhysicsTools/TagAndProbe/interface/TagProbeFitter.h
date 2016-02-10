@@ -126,7 +126,7 @@ class TagProbeFitter {
   void doSBSEfficiency(RooWorkspace* w, RooRealVar& efficiency);
 
   ///calculate the efficiecny by counting in the dataset found in the workspace
-  void doCntEfficiency(RooWorkspace* w, RooRealVar& efficiency);
+  void doCntEfficiency(RooWorkspace* w, RooAbsData* data, RooRealVar& efficiency);
 
   ///creates the simultaneous PDF in the workspace according to the "pdfCommands"
   void createPdf(RooWorkspace* w, std::vector<std::string>& pdfCommands);
