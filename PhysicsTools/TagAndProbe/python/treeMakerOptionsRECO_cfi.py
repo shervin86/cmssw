@@ -57,9 +57,13 @@ def setModules(process, options):
 ###################################################################                                                                     
 ## SUPERCLUSTER MODULES                                                     
 ###################################################################         
+    process.superClusterMerger =  cms.EDProducer("EgammaSuperClusterMerger",
+                                                 src = cms.VInputTag(cms.InputTag("particleFlowSuperClusterECAL:particleFlowSuperClusterECALBarrel"),
+                                                                     cms.InputTag("particleFlowSuperClusterECAL:particleFlowSuperClusterECALEndcapWithPreshower"))
+                                                 )
     
     process.superClusterCands = cms.EDProducer("ConcreteEcalCandidateProducer",
-                                               src = cms.InputTag(options['SUPERCLUSTER_COLL']),
+                                               src = cms.InputTag("superClusterMerger"),
                                                particleType = cms.int32(11),
                                                )
     
@@ -69,7 +73,7 @@ def setModules(process, options):
                                              filter = cms.bool(True)
                                              )
     
-    process.GsfMatchedSuperClusterCands = cms.EDProducer("ElectronMatchedCandidateProducer",
+    process.GsfMatchedSuperClusterCands = cms.EDProducer("GsfElectronMatchedCandidateProducer",
                                                          src     = cms.InputTag("superClusterCands"),
                                                          ReferenceElectronCollection = cms.untracked.InputTag("goodElectrons"),
                                                          cut = cms.string(options['SUPERCLUSTER_CUTS'])

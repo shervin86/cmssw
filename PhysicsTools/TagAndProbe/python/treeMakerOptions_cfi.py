@@ -44,7 +44,7 @@ def setModules(process, options):
                                              filter = cms.bool(True)
                                              )
     
-    process.GsfMatchedSuperClusterCands = cms.EDProducer("ElectronMatchedCandidateProducer",
+    process.GsfMatchedSuperClusterCands = cms.EDProducer("PatElectronMatchedCandidateProducer",
                                                          src     = cms.InputTag("superClusterCands"),
                                                          ReferenceElectronCollection = cms.untracked.InputTag("goodElectrons"),
                                                          cut = cms.string(options['SUPERCLUSTER_CUTS'])

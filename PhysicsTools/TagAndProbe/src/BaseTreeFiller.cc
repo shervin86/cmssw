@@ -83,7 +83,8 @@ tnp::BaseTreeFiller::BaseTreeFiller(const char *name, const edm::ParameterSet& i
   
   saveMET_ =  iConfig.existsAs<edm::InputTag>("pfMet") ? true: false;
   if (saveMET_) {
-    pfmetToken_ = iC.consumes<pat::METCollection>(iConfig.getParameter<edm::InputTag>("pfMet"));
+    pfmetToken_ = iC.mayConsume<pat::METCollection>(iConfig.getParameter<edm::InputTag>("pfMet"));
+    pfmetAODToken_ = iC.mayConsume<reco::PFMETCollection>(iConfig.getParameter<edm::InputTag>("pfMet"));
     tree_->Branch("event_met_pfmet"    ,&mpfMET_   ,"mpfMET/F");
     tree_->Branch("event_met_pfsumet"  ,&mpfSumET_ ,"mpfSumET/F");
     tree_->Branch("event_met_pfphi"    ,&mpfPhi_   ,"mpfPhi/F");
@@ -226,10 +227,19 @@ void tnp::BaseTreeFiller::init(const edm::Event &iEvent) const {
     if (saveMET_) {
       edm::Handle<pat::METCollection> mets;
       iEvent.getByToken(pfmetToken_, mets);
-      const pat::MET &met = mets->front();
-      mpfMET_ = met.pt();
-      mpfPhi_ = met.phi();
-      mpfSumET_ = met.sumEt();
+      if (mets.isValid()) {
+	const pat::MET &met = mets->front();
+	mpfMET_ = met.pt();
+	mpfPhi_ = met.phi();
+	mpfSumET_ = met.sumEt();
+      } else {
+	edm::Handle<reco::PFMETCollection> recoMets;
+	iEvent.getByToken(pfmetAODToken_, recoMets);
+	const reco::PFMET &met = recoMets->front();
+	mpfMET_ = met.pt();
+	mpfPhi_ = met.phi();
+	mpfSumET_ = met.sumEt();
+      }
     }
     
     if (saveRho_) {
