@@ -279,12 +279,13 @@ string TagProbeFitter::calculateEfficiency(string dirName,const std::vector<stri
     TIterator* vit = dataVars.createIterator();
     for(RooRealVar* v = (RooRealVar*)vit->Next(); v!=0; v = (RooRealVar*)vit->Next() ){
       inputTree->SetBranchStatus(v->GetName(), 1);
-      
-      if (strcmp(inputTree->GetLeaf(v->GetName())->GetTypeName(), "Float_t") == 0)
+    
+      TLeaf* myLeaf = (TLeaf*)inputTree->GetBranch(v->GetName())->GetListOfLeaves()->At(0);
+      if (strcmp(myLeaf->GetTypeName(), "Float_t") == 0)
 	inputTree->SetBranchAddress(v->GetName(), &(treeVarsF[v->GetName()]));
-      else if (strcmp(inputTree->GetLeaf(v->GetName())->GetTypeName(), "Double_t") == 0)
+      else if (strcmp(myLeaf->GetTypeName(), "Double_t") == 0)
 	inputTree->SetBranchAddress(v->GetName(), &(treeVarsD[v->GetName()]));
-      else if (strcmp(inputTree->GetLeaf(v->GetName())->GetTypeName(), "Int_t") == 0)
+      else if (strcmp(myLeaf->GetTypeName(), "Int_t") == 0)
 	inputTree->SetBranchAddress(v->GetName(), &(treeVarsI[v->GetName()]));
     }
 

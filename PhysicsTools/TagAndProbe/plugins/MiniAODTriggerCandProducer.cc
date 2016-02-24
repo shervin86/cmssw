@@ -14,7 +14,7 @@ bool MiniAODTriggerCandProducer<reco::GsfElectron, trigger::TriggerObject>::onli
 												      const trigger::Keys* keys, float dRmin) {
 
   for (const auto & key : *keys) {
-    float dR = deltaR2(ref->superCluster()->position().eta(), ref->superCluster()->position().eta(),
+    float dR = deltaR2(ref->superCluster()->position().eta(), ref->superCluster()->position().phi(),
 		       (*triggerObjects)[key].eta(), (*triggerObjects)[key].phi());
     //std::cout << "dr" << dR << std::endl;
     if (dR < dRmin*dRmin) {
@@ -70,7 +70,7 @@ void MiniAODTriggerCandProducer<reco::GsfElectron, trigger::TriggerObject>::prod
     bool saveObj = true;
     TRef ref = (*inputs)[i];
 
-
+    std::cout << "REF:" << ref->eta() << " " << ref->phi() << " " << ref->et() << std::endl;
     if (filterNames_.size() > 0) {
       unsigned int moduleFilterIndex = 9999;
       if (filterNames_[0] != "") {
@@ -83,7 +83,7 @@ void MiniAODTriggerCandProducer<reco::GsfElectron, trigger::TriggerObject>::prod
 	  }
 	}
 	//unsigned int moduleFilterIndex = trEv->filterIndex(filterNames_[0]);
-	//std::cout << "Filter: " << filterNames_[0] << " " << moduleFilterIndex << " " << trEv->sizeFilters() << std::endl;
+	//std::cout << "Filter: " << filterNames_[0] << std::endl;//" " << moduleFilterIndex << " " << trEv->sizeFilters() << std::endl;
 	
 	if (moduleFilterIndex+1 > trEv->sizeFilters()) 
 	  saveObj = false;
@@ -93,18 +93,18 @@ void MiniAODTriggerCandProducer<reco::GsfElectron, trigger::TriggerObject>::prod
 	}
       }
       for (size_t f=1; f<filterNames_.size(); f++) {
-	if (filterNames_[f] != "") {
-	  unsigned int moduleFilterIndex = trEv->filterIndex(filterNames_[f]);
-	  if (moduleFilterIndex+1 > trEv->sizeFilters()) 
-	    saveObj = false;
-	  else {
-	    const trigger::Keys &keys = trEv->filterKeys( moduleFilterIndex );
-	    if (isAND_)
-	      saveObj = (saveObj && onlineOfflineMatchingRECO(ref, &triggerObjects, &keys, dRMatch_));
-	    else		   
-	      saveObj = (saveObj || onlineOfflineMatchingRECO(ref, &triggerObjects, &keys, dRMatch_));
-	  } 
-	}
+      	if (filterNames_[f] != "") {
+      	  unsigned int moduleFilterIndex = trEv->filterIndex(filterNames_[f]);
+      	  if (moduleFilterIndex+1 > trEv->sizeFilters()) 
+      	    saveObj = false;
+      	  else {
+      	    const trigger::Keys &keys = trEv->filterKeys( moduleFilterIndex );
+      	    if (isAND_)
+      	      saveObj = (saveObj && onlineOfflineMatchingRECO(ref, &triggerObjects, &keys, dRMatch_));
+      	    else		   
+      	      saveObj = (saveObj || onlineOfflineMatchingRECO(ref, &triggerObjects, &keys, dRMatch_));
+      	  } 
+      	}
       }
     }
 
