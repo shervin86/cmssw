@@ -14,8 +14,8 @@
 #include "DataFormats/BeamSpot/interface/BeamSpot.h"
 
 #include "DataFormats/PatCandidates/interface/MET.h"
-
-//#include "DataFormats/Common/interface/MergeableDouble.h"
+//#include "DataFormats/METReco/interface/PFMET.h"
+#include "DataFormats/METReco/interface/PFMETCollection.h"
 
 #include "SimDataFormats/GeneratorProducts/interface/GenEventInfoProduct.h"
 
@@ -180,6 +180,7 @@ class BaseTreeFiller : boost::noncopyable {
         edm::EDGetTokenT<reco::VertexCollection> recVtxsToken_;
         edm::EDGetTokenT<reco::BeamSpot> beamSpotToken_;
         edm::EDGetTokenT<pat::METCollection> pfmetToken_;
+        edm::EDGetTokenT<reco::PFMETCollection> pfmetAODToken_;
 	edm::EDGetTokenT<double> rhoToken_;
         edm::EDGetTokenT<std::vector<PileupSummaryInfo> > pileupInfoToken_;
 	edm::EDGetTokenT<double> PUweightSrc_;
