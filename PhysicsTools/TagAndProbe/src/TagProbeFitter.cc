@@ -924,8 +924,8 @@ void TagProbeFitter::doSBSEfficiency(RooWorkspace* w, RooRealVar& efficiency){
 }
 
 void TagProbeFitter::doCntEfficiency(RooWorkspace* w, RooAbsData* data, RooRealVar& efficiency){
-  int pass = w->data("data")->sumEntries("_efficiencyCategory_==_efficiencyCategory_::Passed");
-  int fail = w->data("data")->sumEntries("_efficiencyCategory_==_efficiencyCategory_::Failed");
+  int pass = data->sumEntries("_efficiencyCategory_==_efficiencyCategory_::Passed");
+  int fail = data->sumEntries("_efficiencyCategory_==_efficiencyCategory_::Failed");
   double e = (pass+fail == 0) ? 0 : pass/double(pass+fail);
   // Use Clopper-Pearson
   double alpha = (1.0 - .68540158589942957)/2;
