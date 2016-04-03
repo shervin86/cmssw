@@ -19,28 +19,28 @@ varOptions.parseArguments()
 
 options['HLTProcessName']          = "HLT"
 options['ELECTRON_COLL']           = "gedGsfElectrons"
-options['ELECTRON_CUTS']           = "(abs(superCluster.eta)<2.5) && (ecalEnergy*sin(superClusterPosition.theta)>10.0)"
-options['ELECTRON_TAG_CUTS']       = "(abs(superCluster.eta)<=2.5) && !(1.4442<=abs(superCluster.eta)<=1.566) && pt >= 25.0"
+options['ELECTRON_CUTS']           = "(abs(eta)<2.5) && (ecalEnergy*sin(superClusterPosition.theta)>5.0)"
+options['ELECTRON_TAG_CUTS']       = "(abs(eta)<=2.5) && !(1.4442<=abs(eta)<=1.566) && pt >= 25.0"
 options['SUPERCLUSTER_COLL']       = "particleFlowSuperClusterECAL:particleFlowSuperClusterECALBarrel" # not used
-options['SUPERCLUSTER_CUTS']       = "abs(eta)<2.5 && !(1.4442< abs(eta) <1.566) && et>10.0"
+options['SUPERCLUSTER_CUTS']       = "abs(eta)<2.5 && !(1.4442< abs(eta) <1.566) && et>5.0"
 options['MAXEVENTS']               = cms.untracked.int32(-1) 
 options['useAOD']                  = cms.bool(False)
 options['DOTRIGGER']               = cms.bool(False)
 options['DORECO']                  = cms.bool(True)
-options['DOID']                    = cms.bool(True)
+options['DOID']                    = cms.bool(False)
 options['OUTPUTEDMFILENAME']       = 'edmFile.root'
 options['DEBUG']                   = cms.bool(False)
 
 from PhysicsTools.TagAndProbe.treeMakerOptionsRECO_cfi import *
 
 if (varOptions.isMC):
-    options['INPUT_FILE_NAME']     = "/store/relval/CMSSW_7_6_2/RelValZEE_13//GEN-SIM-RECO/PU25ns_76X_mcRun2_asymptotic_v12-v1/00000/0432AFB6-A39C-E511-9288-0025905A608A.root"
+    options['INPUT_FILE_NAME']     = "/store/relval/CMSSW_8_0_0/RelValZEE_13/MINIAODSIM/PU25ns_80X_mcRun2_asymptotic_v4-v1/10000/44A7587D-D1DA-E511-ADF4-0CC47A4C8ECA.root"
     options['OUTPUT_FILE_NAME']    = "TnPTree_mc.root"
-    options['TnPPATHS']            = cms.vstring("HLT_Ele23_WPLoose_Gsf_v*")
-    options['TnPHLTTagFilters']    = cms.vstring("hltEle23WPLooseGsfTrackIsoFilter")
+    options['TnPPATHS']            = cms.vstring()#"HLT_Ele23_WPLoose_Gsf_v*")
+    options['TnPHLTTagFilters']    = cms.vstring()#"hltEle23WPLooseGsfTrackIsoFilter")
     options['TnPHLTProbeFilters']  = cms.vstring()
     options['HLTFILTERTOMEASURE']  = cms.vstring("")
-    options['GLOBALTAG']           = '76X_mcRun2_asymptotic_v12'
+    options['GLOBALTAG']           = '80X_mcRun2_asymptotic_v4'
     options['EVENTSToPROCESS']     = cms.untracked.VEventRange()
 else:
     options['INPUT_FILE_NAME']     = "/store/data/Run2015D/SingleElectron/MINIAOD/16Dec2015-v1/20000/FC4F7BEE-FCA6-E511-A99F-0CC47A4D7686.root"

@@ -19,8 +19,8 @@ varOptions.parseArguments()
 
 options['HLTProcessName']          = "HLT"
 options['ELECTRON_COLL']           = "slimmedElectrons"
-options['ELECTRON_CUTS']           = "(abs(superCluster.eta)<2.5)"# && (ecalEnergy*sin(superCluster.position.theta)>10.0)"
-options['ELECTRON_TAG_CUTS']       = ""#(abs(superCluster.eta)<=2.5) && !(1.4442<=abs(superCluster.eta)<=1.566) && pt >= 25.0"
+options['ELECTRON_CUTS']           = "(abs(eta)<2.5)"# && (ecalEnergy*sin(superCluster.position.theta)>10.0)"
+options['ELECTRON_TAG_CUTS']       = "(abs(eta)<=2.5) && !(1.4442<=abs(eta)<=1.566) && pt >= 25.0"
 options['SUPERCLUSTER_COLL']       = "reducedEgamma:reducedSuperClusters"
 options['SUPERCLUSTER_CUTS']       = "abs(eta)<2.5 && !(1.4442< abs(eta) <1.566) && et>10.0"
 options['MAXEVENTS']               = cms.untracked.int32(-1) 
@@ -29,7 +29,7 @@ options['DOTRIGGER']               = cms.bool(False)
 options['DORECO']                  = cms.bool(False)
 options['DOID']                    = cms.bool(True)
 options['OUTPUTEDMFILENAME']       = 'edmFile.root'
-options['DEBUG']                   = cms.bool(True)
+options['DEBUG']                   = cms.bool(False)
 
 from PhysicsTools.TagAndProbe.treeMakerOptions_cfi import *
 
@@ -53,7 +53,7 @@ else:
     options['EVENTSToPROCESS']     = cms.untracked.VEventRange()
 
 ###################################################################
-process.Tracer = cms.Service("Tracer")
+
 setModules(process, options)
 from PhysicsTools.TagAndProbe.treeContent_cfi import *
 
