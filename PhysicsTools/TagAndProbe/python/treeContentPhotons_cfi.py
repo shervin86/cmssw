@@ -28,16 +28,16 @@ ProbeVariablesToStore = cms.PSet(
     probe_Pho_full5x5x_r9   = cms.string("full5x5_r9"),
     probe_Pho_r9            = cms.string("r9"),
     probe_Pho_sigmaIEtaIEta = cms.string("full5x5_sigmaIetaIeta"),
-    #probe_Pho_ESsigma       = cms.InputTag("photonIDValueMapProducer:phoESEffSigmaRR"),
-    #probe_Pho_sigmaIEtaIPhi = cms.InputTag("photonIDValueMapProducer:phoFull5x5SigmaIEtaIPhi"),
+    probe_Pho_ESsigma       = cms.InputTag("photonIDValueMapProducer:phoESEffSigmaRR"),
+    probe_Pho_sigmaIEtaIPhi = cms.InputTag("photonIDValueMapProducer:phoFull5x5SigmaIEtaIPhi"),
     probe_Pho_hoe           = cms.string("hadronicOverEm"),
-    #probe_Pho_mva           = cms.InputTag("photonFromDiPhotons:idmva"),
 
 #iso
-    #probe_Pho_chIso    = cms.InputTag("photonIDValueMapProducer:phoChargedIsolation"),
-    #probe_Pho_neuIso   = cms.InputTag("photonIDValueMapProducer:phoNeutralHadronIsolation"),
-    #probe_Pho_phoIso   = cms.InputTag("photonIDValueMapProducer:phoPhotonIsolation"),
-    #probe_Pho_chWorIso = cms.InputTag("photonIDValueMapProducer:phoWorstChargedIsolation"), 
+    probe_Pho_chIso    = cms.InputTag("photonIDValueMapProducer:phoChargedIsolation"),
+    probe_Pho_neuIso   = cms.InputTag("photonIDValueMapProducer:phoNeutralHadronIsolation"),
+    probe_Pho_phoIso   = cms.InputTag("photonIDValueMapProducer:phoPhotonIsolation"),
+    probe_Pho_chWorIso = cms.InputTag("photonIDValueMapProducer:phoWorstChargedIsolation"), 
+    probe_mva          = cms.InputTag("photonMVAValueMapProducer:PhotonMVAEstimatorRun2Spring15NonTrig50nsV2Values"),
 )
 
 TagVariablesToStore = cms.PSet(
@@ -52,9 +52,9 @@ TagVariablesToStore = cms.PSet(
     sc_et     = cms.string("superCluster.energy*sin(superCluster.position.theta)"),    
     sc_eta    = cms.string("superCluster.eta"),
     sc_abseta = cms.string("abs(superCluster.eta)"),
-    #Pho_mva   = cms.InputTag("photonFromDiPhotons:idmva"),
     Pho_full5x5x_r9   = cms.string("full5x5_r9"),
     Pho_r9            = cms.string("r9"),
+    Pho_mva           = cms.InputTag("photonMVAValueMapProducer:PhotonMVAEstimatorRun2Spring15NonTrig50nsV2Values"),
 )
 
 CommonStuffForPhotonProbe = cms.PSet(
@@ -65,7 +65,7 @@ CommonStuffForPhotonProbe = cms.PSet(
     addEventVariablesInfo   =  cms.bool(True),
     vertexCollection = cms.InputTag("offlineSlimmedPrimaryVertices"),
     beamSpot = cms.InputTag("offlineBeamSpot"),
-    #pfMet = cms.InputTag(""),
+    pfMet = cms.InputTag("slimmedMETs"),
     pairVariables =  cms.PSet(ZVariablesToStore),
     pairFlags     =  cms.PSet(
         mass60to120 = cms.string("60 < mass < 120")
@@ -77,7 +77,8 @@ CommonStuffForPhotonProbe = cms.PSet(
 mcTruthCommonStuff = cms.PSet(
     isMC        = cms.bool(True),
     #tagMatches  = cms.InputTag("McMatchTag"),
-    motherPdgId = cms.vint32(22,23),
+    motherPdgId = cms.vint32(),
+    #motherPdgId = cms.vint32(22,23), # g, Z
     #motherPdgId = cms.vint32(443), # JPsi
     #motherPdgId = cms.vint32(553), # Yupsilon
     #makeMCUnbiasTree       = cms.bool(False),

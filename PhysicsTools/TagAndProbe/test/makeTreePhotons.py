@@ -38,13 +38,13 @@ if (varOptions.isMC):
     options['GLOBALTAG']             = '76X_mcRun2_asymptotic_v12'
     options['EVENTSToPROCESS']       = cms.untracked.VEventRange()
 else:
-    options['INPUT_FILE_NAME']       = ("/store/relval/CMSSW_7_4_1/RelValZEE_13/MINIAODSIM/MCRUN2_74_V9_gensim_740pre7-v1/00000/1E35CCF8-32EC-E411-8F29-0025905A48D0.root")
+    options['INPUT_FILE_NAME']       = ("/store/data/Run2015D/SingleElectron/MINIAOD/16Dec2015-v1/20000/FC4F7BEE-FCA6-E511-A99F-0CC47A4D7686.root")
     options['OUTPUT_FILE_NAME']      = "TnPTree_data.root"
-    options['TnPPATHS']              = ["HLT_Ele23_WPLoose_Gsf_v1",]
-    options['TnPHLTTagFilters']      = ["hltEle23WPLooseGsfTrackIsoFilter"]
+    options['TnPPATHS']              = cms.vstring("HLT_Ele23_WPLoose_Gsf_v*")
+    options['TnPHLTTagFilters']      = cms.vstring("hltEle23WPLooseGsfTrackIsoFilter")
     options['TnPHLTProbeFilters']    = cms.vstring()
     options['HLTFILTERTOMEASURE']    = cms.vstring("")
-    options['GLOBALTAG']             = 'MCRUN2_74_V9'
+    options['GLOBALTAG']             = '76X_dataRun2_v15'
     options['EVENTSToPROCESS']       = cms.untracked.VEventRange()
 
 ###################################################################
@@ -90,6 +90,7 @@ process.pho_sequence = cms.Sequence(
     process.goodPhotonsPROBECutBasedLoose +
     process.goodPhotonsPROBECutBasedMedium +
     process.goodPhotonsPROBECutBasedTight +
+    process.goodPhotonsPROBEMVA +
     process.goodPhotonsTAGCutBasedLoose +
     process.goodPhotonsTAGCutBasedMedium +
     process.goodPhotonsTAGCutBasedTight +
@@ -124,6 +125,7 @@ process.PhotonToRECO = cms.EDAnalyzer("TagProbeFitTreeProducer",
                                       flags         = cms.PSet(passingLoose  = cms.InputTag("goodPhotonsPROBECutBasedLoose"),
                                                                passingMedium = cms.InputTag("goodPhotonsPROBECutBasedMedium"),
                                                                passingTight  = cms.InputTag("goodPhotonsPROBECutBasedTight"),
+                                                               passingMVA    = cms.InputTag("goodPhotonsPROBEMVA"),
                                                                ),                                               
                                       allProbes     = cms.InputTag("goodPhotonsProbeHLT"),
                                       )
