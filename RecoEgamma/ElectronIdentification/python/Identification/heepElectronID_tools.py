@@ -76,9 +76,9 @@ class HEEP_WorkingPoint_V1:
 def psetMinPtCut():
     return cms.PSet( 
         cutName = cms.string("MinPtCut"),
-        minPt = cms.double(35.0),
+        minPt = cms.double(.0),
         needsAdditionalProducts = cms.bool(False),
-        isIgnored = cms.bool(False) 
+        isIgnored = cms.bool(True) 
         )
 
 # Take all particles in the eta ranges 0-ebMax and eeMin-2.5
