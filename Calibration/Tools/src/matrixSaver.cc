@@ -83,7 +83,7 @@ matrixSaver::saveMatrixVector (std::string filename,
      typedef std::vector<CLHEP::HepGenMatrix*>::const_iterator const_iterator ;
      // open the output file
      std::fstream outputFile (filename.c_str (), std::ios::out) ;
-     assert(outputFile.fail() == false) ;
+     assert (outputFile != NULL) ;
 
      // save the number of elements of the vector
      outputFile << saveMe.size ()	
@@ -134,10 +134,11 @@ operator>> (std::istream& input, CLHEP::HepGenMatrix &matrix)
   return input ;
 }
 
-bool matrixSaver::touch (std::string inputFileName)
+
+int matrixSaver::touch (std::string inputFileName)
 {
    std::fstream inputFile (inputFileName.c_str (), std::ios::in) ;
-   return !inputFile.fail();
+   return (inputFile != NULL) ;
 }
 
 
@@ -147,8 +148,8 @@ matrixSaver::getMatrix (std::string inputFileName)
 {
      //PG open the output file
      std::fstream inputFile (inputFileName.c_str (), std::ios::in) ;
-     if (inputFile.fail()) std::cerr << "file: " << inputFileName << std::endl ;
-     assert(inputFile.fail() == false);
+     if (inputFile == NULL) std::cerr << "file: " << inputFileName << std::endl ;
+     assert (inputFile != NULL) ;
 
      //PG get the matrix dimensions
      int numRow = 0 ;
@@ -174,7 +175,7 @@ matrixSaver::getMatrixVector (std::string inputFileName)
 {
      // open the output file
      std::fstream inputFile (inputFileName.c_str (), std::ios::in) ;
-     assert(inputFile.fail() == false);
+     assert (inputFile != NULL) ;
 
      // get the vector length
      int numElem = 0 ;
@@ -218,7 +219,7 @@ matrixSaver::getConcreteMatrixVector (std::string inputFileName)
 {
      // open the output file
      std::fstream inputFile (inputFileName.c_str (), std::ios::in) ;
-     assert(inputFile.fail() == false);
+     assert (inputFile != NULL) ;
 
      // get the vector length
      int numElem = 0 ;
