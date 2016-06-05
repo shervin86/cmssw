@@ -345,22 +345,22 @@ class DSRandom : public DS
 };
 
 
-class DSIsUncalib : public DS
-{
-        public:
-                DSIsUncalib() : set_(false) { }
-                void setIC(const IC & ic) { ic_ = ic; set_ = true; }
-                bool operator()(DetId id)
-                {
-                        assert(set_);
-                        float v = ic_.ic()[id];
-                        float e = ic_.eic()[id];
-                        return !IC::isValid(v, e);
-                }
-        private:
-                IC ic_;
-                bool set_;
-};
+/* class DSIsUncalib : public DS */
+/* { */
+/*         public: */
+/*                 DSIsUncalib() : set_(false) { } */
+/*                 void setIC(const IC & ic) { ic_ = ic; set_ = true; } */
+/*                 bool operator()(DetId id) */
+/*                 { */
+/*                         assert(set_); */
+/*                         float v = ic_.ic()[id]; */
+/*                         float e = ic_.eic()[id]; */
+/*                         return !IC::isValid(v, e); */
+/*                 } */
+/*         private: */
+/*                 IC ic_; */
+/*                 bool set_; */
+/* }; */
 
 
 class DSIsOutlier : public DS

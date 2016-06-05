@@ -17,7 +17,7 @@ namespace {
                 DSIsBarrel isBarrel;
                 DSHasChannelStatusEB chStEB;
                 DSHasChannelStatusEE chStEE;
-                DSIsUncalib isUncalib;
+			//DSIsUncalib isUncalib;
                 DSIsOutlier isOutlier;
                 DRings rings;
         };

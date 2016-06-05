@@ -9,7 +9,8 @@ DRings IC::dr_;
 bool IC::idr_;
 
 
-IC::IC()
+IC::IC(bool isTime):
+	_isTime(isTime)
 {
 	_detId.resize(EBDetId::MAX_HASH + 1 + EEDetId::kSizeForDenseIndexing);
 	int idx = -1;
@@ -241,6 +242,40 @@ IC IC::operator *( const IC &b)
 	}
 	return res;
 }
+
+/** this method is meant for time calibrations: the new constants are the measured shifts + the reference time calibration constants.
+ * The shift is applied only if it is significant: shift> uncertainty on the shift
+ */
+IC IC::operator +( const IC &b)
+{
+	IC res;
+	for (size_t i = 0; i < ids().size(); ++i) {
+		DetId id(ids()[i]);
+		float va = ic()[id];
+		float ea = eic()[id];
+		float ea2= 0.5 * ea;
+		float vb = b.ic()[id];
+		float eb = b.eic()[id];
+		bool aValid = isValid(va, ea, _isTime);
+		bool bValid = isValid(vb, eb, _isTime);
+		if( aValid && bValid) {
+			if(fabs(va)>ea2){// update the value only if the shift is significant
+				res.ic().setValue(id, va + vb);
+				res.eic().setValue(id, sqrt(ea * ea + eb * eb));
+			}
+		} else {
+			if(aValid) {
+				res.ic().setValue(id, va);
+				res.eic().setValue(id, ea);
+			} else { // if are both invalid or only a is invalid
+				res.ic().setValue(id, vb);
+				res.eic().setValue(id, eb);
+			}
+		}
+	}
+	return res;
+}
+
 
 bool IC::operator==(const IC& b)
 {
@@ -510,7 +545,7 @@ void IC::dump(const IC & a, const char * fileName, DS & selector, bool invalid)
 		float va = a.ic()[id];
 		float ve = a.eic()[id];
 		if(invalid == false && isValid(va, ve) == false) {
-			va = 1;
+			va = (_isTime) ? 0. : 1.;
 			ve = 999;
 		}
 
@@ -951,13 +986,13 @@ void IC::applyEtaScale(IC & ic)
 //////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////
 
-bool IC::isValid(float v, float e)
-{
-	//if (v < 0 || v > 2) return false;
-	//if (v < 0) return false;
-	if (fabs(e) > 100 || v <= 0.1 || v > 10) return false;
-	//if (fabs(e) > 100 || v < 0.4 || v > 2.5) return false;
-	//if (v < 0.3 || v > 3) return false;
+bool IC::isValid(float v, float e, bool isTime)
+{	
+	if(isTime==false){
+		if (fabs(e) > 100 || v <= 0.1 || v > 10) return false;
+	}else{
+		if (fabs(e) > 100) return false;
+	}
 	return true;
 }
 
@@ -1224,6 +1259,9 @@ void IC::readTextFile(const char * fileName, IC & ic)
 	while ((read = getline(&line, &len, fd)) != EOF) {
 		if (line[0] == '#') continue;
 		sscanf(line, "%d %d %d %f %f", &ix, &iy, &iz, &c, &e);
+#ifdef DEBUG
+		std::cout << "[DEBUG] " << ix << "\t" << iy << "\t" << iz << "\t" << c << "\t" << e << std::endl;
+#endif
 		if (iz == 0) id = EBDetId(ix, iy);
 		else         id = EEDetId(ix, iy, iz);
 		ic.ic().setValue(id, c);
@@ -1253,11 +1291,11 @@ void IC::readTextFile(const char * fileName)
 		if (iz == 0) id = EBDetId(ix, iy);
 		else         id = EEDetId(ix, iy, iz);
 #ifdef DEBUG
-		std::cout << line << ix << "\t" << iy << "\t" << iz << "\t" << c << "\t" << e << std::endl;
+		std::cout << ix << "\t" << iy << "\t" << iz << "\t" << c << "\t" << e << std::endl;
 #endif
 
 		ic().setValue(id, c);
-		_eic.setValue(id, e);
+		eic().setValue(id, e);
 	}
 	fclose(fd);
 	if(ids().size() == 0) {
@@ -1458,3 +1496,33 @@ void IC::BonToBoff(const IC& Bcorr, const IC& alphas, DS& selector)
 	}
 
 }
+
+void IC::PrintNewCalibrated(const IC& ref) const{
+
+	for (size_t i = 0; i < ids().size(); ++i) {
+		DetId id(ids()[i]);
+		float va = ic()[id];
+		float ea = eic()[id];
+		float vb = ref.ic()[id];
+		float eb = ref.eic()[id];
+		bool aValid = isValid(va, ea, _isTime);
+		bool bValid = isValid(vb, eb, _isTime);
+		
+		if(aValid==true && bValid==false) {
+			int ix = 0, iy = 0, iz=0;
+			if (id.subdetId() == EcalBarrel) {
+				ix = EBDetId(id).iphi();
+				iy = EBDetId(id).ieta();
+			} else if (id.subdetId() == EcalEndcap) {
+				ix = EEDetId(id).ix();
+				iy = EEDetId(id).iy();
+				iz = EEDetId(id).zside();
+			}
+			
+		std::cout << "[NEW CALIBRATED]" << ix << "\t" << iy << "\t" << iz  << "\t" << va << "\t" << ea << "\t" << vb << "\t" << eb << "\n";
+		}
+	}
+	
+	std::cout << std::endl;
+
+}	
