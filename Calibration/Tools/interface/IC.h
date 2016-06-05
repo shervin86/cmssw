@@ -43,7 +43,7 @@ public:
 	static void coord(DetId id, Coord * c);
 
 
-	IC();
+	IC(bool isTime=false);
 	//IC(const DRings &dr){ dr_ = dr; idr_=true;} ///< constructor with rings, missing constructor function
 
 	void PrintInfos(void);
@@ -82,7 +82,7 @@ public:
 	static void profilePhi(const IC & a, TProfile * h, DS & d, bool errors = false);
 	static void profileSM(const IC & a, TProfile * h, DS & d, bool errors = false);
 
-	static bool isValid(float v, float e);
+	static bool isValid(float v, float e, bool isTime=false);
 
 	// IC manipulation
 	bool operator ==(const IC &b);
@@ -93,7 +93,8 @@ public:
 	IC operator /(const IC &b);
 	void operator /=(const IC &b);
 	void operator /=(float val);
-
+	IC operator +(const IC &b);
+	
 	static void add(const IC & a, const IC & b, IC & res);
 	static void combine(const IC & a, const IC & b, IC & res, bool arithmetic = false); // N.B. arithmetic average is for value and errrors
 	IC combine(const IC& a, const IC&b, bool arithmetic = false);
@@ -129,7 +130,7 @@ public:
 
 	bool isUnit(void);
 
-	static void dump(const IC & a, const char * fileName, DS & d, bool invalid = true);
+	void dump(const IC & a, const char * fileName, DS & d, bool invalid = true);
 	inline void dump(const char *fileName, DS &d, bool invalid = true) //invalid to indicate if you want to dump invalid values
 	{
 		dump(*this, fileName, d, invalid);
@@ -162,12 +163,15 @@ public:
 
 	float Normalize(DS& selector);
 	void BonToBoff(const IC& Bcorr, const IC& alphas, DS& selector);
+	void PrintNewCalibrated(const IC& ref) const;
+
 private:
 	EcalIntercalibConstants   _ic;
 	EcalIntercalibErrors     _eic;
 	static DRings dr_;
 	static bool idr_;
 	static std::vector<DetId>     _detId;
+	bool _isTime;
 };
 
 #endif

@@ -54,7 +54,7 @@ process.load("CondCore.DBCommon.CondDBCommon_cfi")
 
 tagName = options.tag
 
-process.CondDBCommon.connect = 'sqlite_file:'+tagName+'.db'
+process.CondDBCommon.connect = 'sqlite_file:'+options.output
 
 process.PoolDBOutputService = cms.Service("PoolDBOutputService",
   process.CondDBCommon, 
@@ -67,25 +67,27 @@ process.PoolDBOutputService = cms.Service("PoolDBOutputService",
   )
 )
 
-# process.Test1 = cms.EDAnalyzer("ExTestEcalIntercalibAnalyzer",
-#   record = cms.string(options.record),
-#   loggingOn= cms.untracked.bool(True),
-#   IsDestDbCheckedInQueryLog=cms.untracked.bool(True),
-#   SinceAppendMode=cms.bool(True),
-#   Source=cms.PSet(
-#     InputFile = cms.string(options.fileName),
-#     firstRun = cms.string(options.firstRun),
-#   )                            
-# )
+if(options.record=='EcalTimeCalibConstantsRcd'):
+    process.mytest = cms.EDAnalyzer("EcalTimeCalibConstantsAnalyzer",
+                                    record = cms.string('EcalTimeCalibConstantsRcd'),
+                                    loggingOn= cms.untracked.bool(True),
+                                    SinceAppendMode=cms.bool(True),
+                                    Source=cms.PSet(
+            xmlFile = cms.untracked.string(options.fileName),
+            since = cms.untracked.int64(int(options.firstRun)),
+            )                            
+                                    )
+else:
+    process.mytest = cms.EDAnalyzer("ExTestEcalIntercalibAnalyzer",
+                                    record = cms.string(options.record),
+                                    loggingOn= cms.untracked.bool(True),
+                                    IsDestDbCheckedInQueryLog=cms.untracked.bool(True),
+                                    SinceAppendMode=cms.bool(True),
+                                    Source=cms.PSet(
+            InputFile = cms.string(options.fileName),
+            firstRun = cms.string(options.firstRun),
+            )                            
+                                    )
 
-process.mytest = cms.EDAnalyzer("EcalTimeCalibConstantsAnalyzer",
-    record = cms.string('EcalTimeCalibConstantsRcd'),
-    loggingOn= cms.untracked.bool(True),
-    SinceAppendMode=cms.bool(True),
-    Source=cms.PSet(
-    xmlFile = cms.untracked.string(options.fileName),
-    since = cms.untracked.int64(100000),
-    )                            
-)
 
 process.p = cms.Path(process.mytest)
