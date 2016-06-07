@@ -255,7 +255,7 @@ string TagProbeFitter::calculateEfficiency(string dirName,const std::vector<stri
       
       sprintf(aChar, "%s_bin%d__%s_bin%d", binnedVariableNames[0].c_str(), i, binnedVariableNames[1].c_str(), j);
       catNames.push_back(aChar);
-
+      //      std::cout << aChar << std::endl;
       nCats++;
     }
   }
@@ -267,10 +267,9 @@ string TagProbeFitter::calculateEfficiency(string dirName,const std::vector<stri
   TObjArray *tx = rootInputFile.Tokenize("/");
   TString basename = ((TObjString *)(tx->Last()))->String().ReplaceAll(".root", "");
   std::string treeDirectory = std::string(basename.Data())+"_"+effCats[0]+"_"+catNames.back();
-  
-  struct stat sb;
-  if (stat(treeDirectory.c_str(), &sb) != 0) { // && S_ISDIR(sb.st_mode)) {   
- 
+  //  struct stat sb;
+    //  if (stat(treeDirectory.c_str(), &sb) != 0) { // && S_ISDIR(sb.st_mode)) {   
+  {
     std::map<std::string, float> treeVarsF;
     std::map<std::string, double> treeVarsD;
     std::map<std::string, int> treeVarsI;
@@ -279,7 +278,7 @@ string TagProbeFitter::calculateEfficiency(string dirName,const std::vector<stri
     TIterator* vit = dataVars.createIterator();
     for(RooRealVar* v = (RooRealVar*)vit->Next(); v!=0; v = (RooRealVar*)vit->Next() ){
       inputTree->SetBranchStatus(v->GetName(), 1);
-    
+      
       TLeaf* myLeaf = (TLeaf*)inputTree->GetBranch(v->GetName())->GetListOfLeaves()->At(0);
       if (strcmp(myLeaf->GetTypeName(), "Float_t") == 0)
 	inputTree->SetBranchAddress(v->GetName(), &(treeVarsF[v->GetName()]));
@@ -288,7 +287,7 @@ string TagProbeFitter::calculateEfficiency(string dirName,const std::vector<stri
       else if (strcmp(myLeaf->GetTypeName(), "Int_t") == 0)
 	inputTree->SetBranchAddress(v->GetName(), &(treeVarsI[v->GetName()]));
     }
-
+    
     mkdir(treeDirectory.c_str(), S_IRUSR | S_IWUSR | S_IXUSR);
     outputTemp = new TFile((treeDirectory+std::string("/temp.root")).c_str(), "recreate");
     for (int category=0; category<nCats; category++) {
@@ -296,11 +295,11 @@ string TagProbeFitter::calculateEfficiency(string dirName,const std::vector<stri
       sprintf(aChar, "formula%d", category);
       formulas.push_back(new TTreeFormula(aChar, categorySelection[category].c_str(), inputTree));
     }
-  
+    
     std::cout << "Splitting original tree according to chosen categorization..." << std::endl;
     for (int z=0; z<inputTree->GetEntries(); z++) {
-      //if (z % 100000 == 0)
-      //std::cout << z << std::endl;
+      if (z % 100000 == 0)
+	std::cout << z << std::endl;
       inputTree->GetEntry(z);
       int chosenCat = -1;
       for (int i=0; i<nCats; i++) {
@@ -323,7 +322,6 @@ string TagProbeFitter::calculateEfficiency(string dirName,const std::vector<stri
     }  
     outputTemp->Close();
   }
-  
   outputTemp = TFile::Open((treeDirectory+std::string("/temp.root")).c_str());
   outputTemp->cd();
   trees.resize(0);
@@ -346,7 +344,6 @@ string TagProbeFitter::calculateEfficiency(string dirName,const std::vector<stri
     
     //create the dataset
     RooDataSet* data = new RooDataSet("data", "data", trees[category], dataVars, categorySelection[category].c_str(), (weightVar.empty() ? 0 : weightVar.c_str()));
-    
     if(!floatShapeParameters) {
       //fitting whole dataset to get initial values for some parameters
       RooWorkspace* w = new RooWorkspace();
@@ -390,12 +387,10 @@ string TagProbeFitter::calculateEfficiency(string dirName,const std::vector<stri
       efficiencyCategory.map(multiState.c_str(), "Passed");
       data->addColumn( efficiencyCategory );
     }
-
     RooWorkspace* w = new RooWorkspace();
     //import the data
     w->import(*(data->get(0)));
     saveDistributionsPlot(w, data);
-
     if(data->numEntries() > 0) {
       //set the values of binnedVariables to the mean value in this data bin
       RooArgSet meanOfVariables;
@@ -927,6 +922,8 @@ void TagProbeFitter::doCntEfficiency(RooWorkspace* w, RooAbsData* data, RooRealV
   int pass = data->sumEntries("_efficiencyCategory_==_efficiencyCategory_::Passed");
   int fail = data->sumEntries("_efficiencyCategory_==_efficiencyCategory_::Failed");
   double e = (pass+fail == 0) ? 0 : pass/double(pass+fail);
+  std::cout << "passing: " << pass << " total: " << pass+fail << std::endl;
+  std::cout << "efficiency: " << e << std::endl;
   // Use Clopper-Pearson
   double alpha = (1.0 - .68540158589942957)/2;
   double lo = (pass == 0) ? 0.0 : ROOT::Math::beta_quantile(   alpha, pass,   fail+1 );
