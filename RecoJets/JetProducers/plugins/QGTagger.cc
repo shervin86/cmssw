@@ -35,7 +35,8 @@ QGTagger::QGTagger(const edm::ParameterSet& iConfig) :
   systLabel(							iConfig.getParameter<std::string>("systematicsLabel")),
   useQC(							iConfig.getParameter<bool>("useQualityCuts")),
   useJetCorr(							!iConfig.getParameter<edm::InputTag>("jec").label().empty()),
-  produceSyst(							systLabel != "")
+  produceSyst(							systLabel != ""),
+  vertexIndex(                                               iConfig.getParameter<unsigned int>("vertexIndex"))
 {
   produces<edm::ValueMap<float>>("qgLikelihood");
   produces<edm::ValueMap<float>>("axis2");
@@ -142,10 +143,19 @@ std::tuple<int, float, float> QGTagger::calcVariables(const reco::Jet *jet, edm:
       auto part = static_cast<const pat::PackedCandidate*>(daughter);
 
       if(part->charge()){
-        if(!(part->fromPV() > 1 && part->trackHighPurity())) continue;
+	if (vertexIndex>0) {
+	  if(!(part->fromPV(vertexIndex) > 1 && part->trackHighPurity())) continue;
+	} else {
+	  if(!(part->fromPV() > 1 && part->trackHighPurity())) continue;
+	}
         if(useQC){
-          if((part->dz()*part->dz())/(part->dzError()*part->dzError()) > 25.) continue;
-          if((part->dxy()*part->dxy())/(part->dxyError()*part->dxyError()) < 25.) ++mult;
+	  if (vertexIndex>0) {
+	    if((part->dz(vertexIndex)*part->dz(vertexIndex))/(part->dzError()*part->dzError()) > 25.) continue;
+	    if((part->dxy(vC->at(vertexIndex).position())*part->dxy(vC->at(vertexIndex).position()))/(part->dxyError()*part->dxyError()) < 25.) ++mult;
+	  } else {
+	    if((part->dz()*part->dz())/(part->dzError()*part->dzError()) > 25.) continue;
+            if((part->dxy()*part->dxy())/(part->dxyError()*part->dxyError()) < 25.) ++mult;
+	  }
         } else ++mult;
       } else {
         if(part->pt() < 1.0) continue;
@@ -156,7 +166,7 @@ std::tuple<int, float, float> QGTagger::calcVariables(const reco::Jet *jet, edm:
 
       reco::TrackRef itrk = part->trackRef();
       if(itrk.isNonnull()){												//Track exists --> charged particle
-        auto vtxLead  = vC->begin();
+        auto vtxLead  = vC->begin()+vertexIndex;
         auto vtxClose = vC->begin();											//Search for closest vertex to track
         for(auto vtx = vC->begin(); vtx != vC->end(); ++vtx){
           if(fabs(itrk->dz(vtx->position())) < fabs(itrk->dz(vtxClose->position()))) vtxClose = vtx;
@@ -220,6 +230,7 @@ void QGTagger::fillDescriptions(edm::ConfigurationDescriptions& descriptions){
   desc.add<bool>("useQualityCuts");
   desc.add<edm::InputTag>("jec", edm::InputTag())->setComment("Jet correction service: only applied when non-empty");
   desc.add<edm::InputTag>("srcVertexCollection")->setComment("Ignored for miniAOD, possible to keep empty");
+  desc.add<unsigned int>("vertexIndex")->setComment("Index of vertex to use, requires correct vertex collection for miniAOD if non-0");
   descriptions.add("QGTagger",  desc);
 }
 
