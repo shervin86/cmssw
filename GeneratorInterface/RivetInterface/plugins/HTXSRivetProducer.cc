@@ -93,13 +93,14 @@ void HTXSRivetProducer::produce( edm::Event & iEvent, const edm::EventSetup & ) 
         else if ( _prodMode == "VBF"   ) m_HiggsProdMode = HTXS::VBF;
         else if ( _prodMode == "WH"    ) m_HiggsProdMode = HTXS::WH;
         else if ( _prodMode == "ZH"    ) m_HiggsProdMode = HTXS::QQ2ZH;
+	else if ( _prodMode == "VH"    ) m_HiggsProdMode = HTXS::WH;  // But we will check every event and switch on the fly
         else if ( _prodMode == "QQ2ZH" ) m_HiggsProdMode = HTXS::QQ2ZH;
         else if ( _prodMode == "GG2ZH" ) m_HiggsProdMode = HTXS::GG2ZH;
         else if ( _prodMode == "TTH"   ) m_HiggsProdMode = HTXS::TTH;
         else if ( _prodMode == "BBH"   ) m_HiggsProdMode = HTXS::BBH;
         else if ( _prodMode == "TH"    ) m_HiggsProdMode = HTXS::TH;
         else {
-            throw cms::Exception("HTXSRivetProducer") << "ProductionMode must be one of: GGF,VBF,WH,ZH,QQ2ZH,GG2ZH,TTH,BBH,TH " ; 
+            throw cms::Exception("HTXSRivetProducer") << "ProductionMode must be one of: GGF,VBF,WH,ZH,VH,QQ2ZH,GG2ZH,TTH,BBH,TH " ; 
         }
         _HTXS->setHiggsProdMode(m_HiggsProdMode);
 
@@ -107,6 +108,27 @@ void HTXSRivetProducer::produce( edm::Event & iEvent, const edm::EventSetup & ) 
         _analysisHandler->init(*myGenEvent);
         _isFirstEvent = false;
 
+    }
+
+    if ( _prodMode == "VH" ) {
+      unsigned nWs = 0;
+      unsigned nZs = 0;
+      HepMC::GenVertex *HSvtx = myGenEvent->signal_process_vertex();
+      for (auto ptcl:particles(HSvtx,HepMC::children)) {
+	if (ptcl->pdg_id() == 24 || ptcl->pdg_id() == -24) ++nWs;
+	if (ptcl->pdg_id() == 23) ++nZs;
+      }
+      if (nZs == 0 && nWs == 0) {
+	throw cms::Exception("HTXSRivetProducer") << "ProductionMode set to ZH but no W or Z is found ";
+      } else if (nZs > 0 && nWs > 0) {
+	throw cms::Exception("HTXSRivetProducer") << "ProductionMode set to ZH and both Ws and Zs are found ";
+      } else if (nZs > 0) {
+	// std::cout << " DEBUG ProductionMode set to ZH and we found a Z and set HTXS::QQ2ZH" << std::endl;
+	m_HiggsProdMode = HTXS::QQ2ZH; // No GG2ZH until we look at NNLO samples
+      } else if (nWs > 0) {
+	// std::cout << " DEBUG ProductionMode set to WH and we found a W and set HTXS::WH" << std::endl;
+	m_HiggsProdMode = HTXS::WH; 
+      }
     }
 
     // classify the event
