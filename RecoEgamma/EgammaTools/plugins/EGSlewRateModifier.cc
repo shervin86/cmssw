@@ -148,6 +148,11 @@ void EGSlewRateModifier::setConsumes(edm::ConsumesCollector& sumes)
 
 }
 
+/** no correction if 
+ - non ecal driven electron
+ - E<100 GeV
+ - no seed rechit found in reduced rechit collection
+*/
 void EGSlewRateModifier::modifyObject(pat::Electron& ele) const
 {
 	// Assume that the multiplicative factor from the regression 
@@ -168,18 +173,20 @@ void EGSlewRateModifier::modifyObject(pat::Electron& ele) const
 	if(!ele.ecalDrivenSeed()) return;
 	if(ele.energy()<100) return;
 	const EcalRecHit * rechit = getSeedRecHit(ele.superCluster());
+	if(rechit == NULL) return;
 
 	float correctedEcalEnergy = ele.correctedEcalEnergy(); // E
 	float regression_factor = correctedEcalEnergy / ele.superCluster()->rawEnergy(); //F(E_raw,others)
 	float deltaESeed = getCorrectedRecHitEnergy(rechit) - rechit->energy(); //(E'_seed - E_seed)
-
+	if(rechit->energy()>300) std::cout << deltaESeed << std::endl;
 	float newEnergy = regression_factor * ( ele.superCluster()->rawEnergy() + deltaESeed ); // E'
-
+	//std::cout << ele.energy() << "\t" << newEnergy << "\t" << deltaESeed << "\t" << ele.eta() << std::endl;
 	auto p4 = ele.p4();
 	ele.setCorrectedEcalEnergy(newEnergy);
 	auto kind = reco::GsfElectron::P4_COMBINATION;
 	// setCorrectedEcalEnergy does not correctly modify p4 so we do it ourselves
 	ele.setP4(kind, p4*newEnergy/correctedEcalEnergy, ele.p4Error(kind), true);
+	ele.addUserFloat("slewRateDeltaESeed", deltaESeed);
 }
 
 
@@ -190,6 +197,7 @@ void EGSlewRateModifier::modifyObject(pat::Photon& pho) const
 
 	// see comments in void EGSlewRateModifier::modifyObject(pat::Electron& ele) const
 	const EcalRecHit * rechit = getSeedRecHit(pho.superCluster());
+	if(rechit == NULL) return;
 
 	float correctedEcalEnergy = pho.energy();
 	float regression_factor = correctedEcalEnergy / pho.superCluster()->rawEnergy();
@@ -201,6 +209,7 @@ void EGSlewRateModifier::modifyObject(pat::Photon& pho) const
 	pho.setCorrectedEnergy(kind, newEnergy, pho.getCorrectedEnergyError(kind), true);
 }
 
+// returns NULL if no recHit is found. This can happen because of the reducedRecHit collection.... it should be revisited
 const EcalRecHit * EGSlewRateModifier::getSeedRecHit(reco::SuperClusterRef supercluster) const
 {
 	auto detid = supercluster->seed()->seed();
@@ -208,12 +217,14 @@ const EcalRecHit * EGSlewRateModifier::getSeedRecHit(reco::SuperClusterRef super
 	const EcalRecHit * rh = NULL;
 	if (detid.subdetId() == EcalBarrel) {
 		auto rh_i =  _ebrechits->find(detid);
-		assert( rh_i != _ebrechits->end());
-		rh =  &(*rh_i);
+//		assert( rh_i != _ebrechits->end());
+		if( rh_i != _ebrechits->end()) rh =  &(*rh_i);
+		else rh = NULL;
 	} else {
 		auto rh_i =  _eerechits->find(detid);
-		assert( rh_i != _eerechits->end());
-		rh =  &(*rh_i);
+		//assert( rh_i != _eerechits->end());
+		if( rh_i != _eerechits->end()) rh =  &(*rh_i);
+		else rh = NULL;
 	}
 	return rh;
 }

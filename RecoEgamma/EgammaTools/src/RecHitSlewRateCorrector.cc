@@ -1,9 +1,10 @@
 #include "RecoEgamma/EgammaTools/interface/RecHitSlewRateCorrector.h"
 #include "DataFormats/EcalRecHit/interface/EcalUncalibratedRecHit.h"
+#include <iostream>
 
 RecHitSlewRateCorrector::RecHitSlewRateCorrector() {};
 RecHitSlewRateCorrector::~RecHitSlewRateCorrector() {};
-
+//#define DEBUG
 float RecHitSlewRateCorrector::RecHitCorrectedEnergy(const EcalRecHit *rh, float lc, float ic, float agc) const
 {
 
@@ -11,7 +12,13 @@ float RecHitSlewRateCorrector::RecHitCorrectedEnergy(const EcalRecHit *rh, float
 	uint32_t recoflag = 0;
 	if (rh->checkFlag(EcalRecHit::kHasSwitchToGain6)) recoflag |= 0x1 << EcalUncalibratedRecHit::kHasSwitchToGain6;
 	if (rh->checkFlag(EcalRecHit::kHasSwitchToGain1)) recoflag |= 0x1 << EcalUncalibratedRecHit::kHasSwitchToGain1;
-	return calib / MultiFitParametricCorrection(calib / lc / ic / agc, rh->chi2(), recoflag);
+	float newcalib = calib / MultiFitParametricCorrection(calib / lc / ic / agc, rh->chi2(), recoflag);
+#ifdef DEBUG
+	if(calib/lc/ic/agc > 2000 || newcalib-calib<0){
+		std::cout << "[RecHitSlewRateCorrector::DEBUG] " << calib << " - " << newcalib << "\t" << calib / lc / ic / agc << "\t" << lc << "\t" << ic << "\t" << agc << "\t" << rh->chi2() << "\t" << recoflag << std::endl;
+	}
+#endif
+	return newcalib;
 
 }
 
