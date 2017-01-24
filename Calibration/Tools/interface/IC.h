@@ -27,13 +27,34 @@
 
 #include "Calibration/Tools/interface/DRings.h"
 
+
 class DS;
+/**
+ * Error values:
+ * - 98: IC set to 1 by SetToUnit method
+ * - 99:  channel removed because outlier
+ * - 101: channel with only one valid value in product
+ * - 997: invalid, but with error <900, set to this value in dump
+ * - 999: not calibrated by the calibrator
+ * - 1000: value not present in the file provided by the calibrator
+ * - 1001: channel set as invalid from other IC set
+ * - 1010: channel with no error
+ * - 1015: channel with no kFactor from phisym
+ * - 1020: channel with no hits from timing
+ * - 1021: channel with error larger than time shift
+ */
 
 class IC
 {
 public:
 	enum EcalPart { kAll, kEB, kEE };
 
+	enum kERROR{
+		kOUTLIER=99,
+		kINVALIDPROD=100,
+		kNOERROR=1010
+	};
+		
 	typedef struct Coord {
 		int ix_;
 		int iy_;
@@ -43,11 +64,14 @@ public:
 	static void coord(DetId id, Coord * c);
 
 
-	IC(bool isTime=false);
+	IC(bool isTime = false);
 	//IC(const DRings &dr){ dr_ = dr; idr_=true;} ///< constructor with rings, missing constructor function
 
 	void PrintInfos(void);
-
+	inline void SetIsTime()
+	{
+		_isTime = true;
+	};
 	EcalIntercalibConstants & ic()
 	{
 		return _ic;
@@ -82,7 +106,7 @@ public:
 	static void profilePhi(const IC & a, TProfile * h, DS & d, bool errors = false);
 	static void profileSM(const IC & a, TProfile * h, DS & d, bool errors = false);
 
-	static bool isValid(float v, float e, bool isTime=false);
+	static bool isValid(float v, float e, bool isTime = false);
 
 	// IC manipulation
 	bool operator ==(const IC &b);
@@ -94,7 +118,8 @@ public:
 	void operator /=(const IC &b);
 	void operator /=(float val);
 	IC operator +(const IC &b);
-	
+	IC operator -(const IC &b);
+
 	static void add(const IC & a, const IC & b, IC & res);
 	static void combine(const IC & a, const IC & b, IC & res, bool arithmetic = false); // N.B. arithmetic average is for value and errrors
 	IC combine(const IC& a, const IC&b, bool arithmetic = false);
@@ -109,6 +134,7 @@ public:
 	static void smear(const IC & a, IC & res);
 
 	// tools
+	IC getPhiScale(DS& selector) const;
 	IC getEtaScale();
 	static void applyEtaScale(IC & ic);
 	static void scaleEta(IC & ic, const IC & ic_scale, bool reciprocalScale = false);
@@ -149,10 +175,8 @@ public:
 
 	// dumps for checking
 	static void dumpEtaScale(const IC & a, const char * fileName, bool allIC = false);
-	void dumpEtaScale(const char *fileName)
-	{
-		dumpEtaScale(*this, fileName);
-	}
+	void dumpEtaScale(const char *fileName, DS& selector);
+	void dumpPhiScale(const char *fileName, DS& selector);
 	static void dumpOutliers(const IC & a, float min = 0.4, float max = 2.5);
 
 	static float average(const IC & a, DS & d, bool errors = false);
@@ -161,9 +185,12 @@ public:
 		return average(*this, selector, errors);
 	}
 
-	float Normalize(DS& selector);
+	float Normalize(DS& selector); ///< calculate the mean over the region and renormalize to 1 that region and returns the mean value used for the normalization
 	void BonToBoff(const IC& Bcorr, const IC& alphas, DS& selector);
 	void PrintNewCalibrated(const IC& ref) const;
+
+	void SetInvalids(const IC&ref); ///<this method sets as invalid the IDs that are invalid in the ref IC set
+	void RemoveNonSignificant(void); ///< if shifts are smaller than error, don't change the channel
 
 private:
 	EcalIntercalibConstants   _ic;
@@ -172,6 +199,8 @@ private:
 	static bool idr_;
 	static std::vector<DetId>     _detId;
 	bool _isTime;
+	double _defaultValue, _noValue;
+	
 };
 
 #endif

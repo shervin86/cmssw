@@ -1,0 +1,95 @@
+set term unknown
+GNUTERM='unknown'
+ext='png'
+
+set cbrange [0.95:1.05]
+
+method="phisym"
+
+dir='data/RunII-IC/Cal_Oct2016/'.method.'/'
+dirImg=dir.'img/'
+
+#call 'spEB.gpl' dir.'originals/2016/pizero/IC_fromECALpro.txt'
+#@OUTPUT dirImg.'IC_pizero_2016_rel_original-EB.'.ext
+
+#call 'spEB.gpl' dir.'originals/2015/pizero/IC_fromECALpro.txt'
+#@OUTPUT dirImg.'IC_pizero_2015_rel_original-EB.'.ext
+
+call 'spEB.gpl' dir.'tags/dump/ic_rel_2016.dump'
+@OUTPUT dirImg.'IC_'.method.'_2016_rel-EB.'.ext
+
+call 'spEB.gpl' dir.'tags/dump/ic_rel_2015.dump'
+@OUTPUT dirImg.'IC_'.method.'_2015_rel-EB.'.ext
+
+call 'spEB.gpl' dir.'tags/dump/ic_rel_2016-nooutliers.dump'
+@OUTPUT dirImg.'IC_'.method.'_2016_rel_nooutliers-EB.'.ext
+
+call 'spEB.gpl' dir.'tags/dump/ic_rel_2015-nooutliers.dump'
+@OUTPUT dirImg.'IC_'.method.'_2015_rel_nooutliers-EB.'.ext
+
+set cbrange [0.9:1.1]
+call 'spEB.gpl' dir.'tags/dump/ic_transfactor.dump'
+@OUTPUT dirImg.'IC_'.method'._transfactor-EB.'.ext
+
+call 'spEB.gpl' dir.'tags/dump/ic_transfactor.dump'
+@OUTPUT dirImg.'IC_'.method.'_transfactor-EB.'.ext
+
+#call 'spEB.gpl' dir.'tags/dump/ic_mytrans.dump'
+#@OUTPUT dirImg.'IC_'.method.'_trans-EB.'.ext
+
+
+# set cbrange [0.8:1.2]
+# ########################
+
+# call 'spEEm.gpl' 'data/RunII-IC/Cal_Jun2016/pizero/originals/2016/IC_fromECALpro.txt'
+# @OUTPUT 'pizero/IC_pizero_2016B_rel_original-EEm.pdf'
+
+# call 'spEEm.gpl' 'data/RunII-IC/Cal_Jun2016/pizero/originals/2016/IC_fromECALpro.txt'
+# @OUTPUT 'pizero/IC_pizero_2015D_rel_original-EEm.pdf'
+
+# call 'spEEm.gpl' 'data/RunII-IC/Cal_Jun2016/pizero/tags/dump/ic_rel_2016B.dump'
+# @OUTPUT 'pizero/IC_pizero_2016B_rel-EEm.pdf'
+
+# call 'spEEm.gpl' 'data/RunII-IC/Cal_Jun2016/pizero/tags/dump/ic_rel_2015D.dump'
+# @OUTPUT 'pizero/IC_pizero_2015D_rel-EEm.pdf'
+
+# call 'spEEm.gpl' 'data/RunII-IC/Cal_Jun2016/pizero/tags/dump/ic_rel_2016B-nooutliers.dump'
+# @OUTPUT 'pizero/IC_pizero_2016B_rel_nooutliers-EEm.pdf'
+
+# call 'spEEm.gpl' 'data/RunII-IC/Cal_Jun2016/pizero/tags/dump/ic_rel_2015D-nooutliers.dump'
+# @OUTPUT 'pizero/IC_pizero_2015D_rel_nooutliers-EEm.pdf'
+
+
+# call 'spEEm.gpl' 'data/RunII-IC/Cal_Jun2016/pizero/tags/dump/ic_myabs_trans_withOut.dump'
+# @OUTPUT 'pizero/IC_pizero_trans_withOut-EEm.pdf'
+
+# call 'spEEm.gpl' 'data/RunII-IC/Cal_Jun2016/pizero/tags/dump/ic_myabs_trans.dump'
+# @OUTPUT 'pizero/IC_pizero_trans-EEm.pdf'
+
+
+# ##########
+
+# call 'spEEm.gpl' 'data/RunII-IC/Cal_Jun2016/pizero/originals/2016/IC_fromECALpro.txt'
+# @OUTPUT 'pizero/IC_pizero_2016B_rel_original-EEp.pdf'
+
+# call 'spEEp.gpl' 'data/RunII-IC/Cal_Jun2016/pizero/originals/2015/IC_fromECALpro.txt'
+# @OUTPUT 'pizero/IC_pizero_2015D_rel_original-EEp.pdf'
+
+# call 'spEEp.gpl' 'data/RunII-IC/Cal_Jun2016/pizero/tags/dump/ic_rel_2016B.dump'
+# @OUTPUT 'pizero/IC_pizero_2016B_rel-EEp.pdf'
+
+# call 'spEEp.gpl' 'data/RunII-IC/Cal_Jun2016/pizero/tags/dump/ic_rel_2015D.dump'
+# @OUTPUT 'pizero/IC_pizero_2015D_rel-EEp.pdf'
+
+# call 'spEEp.gpl' 'data/RunII-IC/Cal_Jun2016/pizero/tags/dump/ic_rel_2016B-nooutliers.dump'
+# @OUTPUT 'pizero/IC_pizero_2016B_rel_nooutliers-EEp.pdf'
+
+# call 'spEEp.gpl' 'data/RunII-IC/Cal_Jun2016/pizero/tags/dump/ic_rel_2015D-nooutliers.dump'
+# @OUTPUT 'pizero/IC_pizero_2015D_rel_nooutliers-EEp.pdf'
+
+
+# call 'spEEp.gpl' 'data/RunII-IC/Cal_Jun2016/pizero/tags/dump/ic_myabs_trans_withOut.dump'
+# @OUTPUT 'pizero/IC_pizero_trans_withOut-EEp.pdf'
+
+# call 'spEEp.gpl' 'data/RunII-IC/Cal_Jun2016/pizero/tags/dump/ic_myabs_trans.dump'
+# @OUTPUT 'pizero/IC_pizero_trans-EEp.pdf'

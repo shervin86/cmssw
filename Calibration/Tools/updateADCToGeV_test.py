@@ -27,7 +27,7 @@ process.PoolDBOutputService = cms.Service("PoolDBOutputService",
   toPut = cms.VPSet(
     cms.PSet(
       record = cms.string('EcalADCToGeVConstantRcd'),
-      tag = cms.string('EcalADCToGeVConstant_V1_hlt')
+      tag = cms.string('EcalADCToGeVConstant_2016_Bon_v2')
     )
   )
 )
@@ -38,8 +38,8 @@ process.Test1 = cms.EDAnalyzer("ExTestEcalADCToGeVAnalyzer",
   IsDestDbCheckedInQueryLog=cms.untracked.bool(True),
   SinceAppendMode=cms.bool(True),
   Source=cms.PSet(
-    InputFile = cms.string('ADCtoGeV_Bon.xml'),
-    firstRun = cms.string('98273'),
+    InputFile = cms.string('EcalADCToGeVConstant_2016_Bon_v2.xml'),
+    firstRun = cms.string('1'),
   )                            
 )
 

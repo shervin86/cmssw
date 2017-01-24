@@ -1,0 +1,20 @@
+file=sprintf("%s", ARG1)
+
+set view map
+set xlabel 'iPhi'
+set ylabel 'iEta' offset -2
+
+sp [1:360][-85:85] '< awk -v region="EB" -f awk/listToMap.awk '.file nonuniform matrix u 2:1:3 with image
+
+if(ARGC>1){
+		if(ARGC>2){
+				set cbrange [ARG3:ARG4]
+				rep
+		}
+		if(ARG2 ne "" ){
+				print "output: ".ARG2
+				@OUTPUT ARG2
+		}
+}
+
+

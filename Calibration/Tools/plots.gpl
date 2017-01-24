@@ -1,0 +1,86 @@
+set term unknown
+TERM='unknown'
+set cbrange [0.9:1.1]
+
+call 'spEB.gpl' 'data/RunII-IC/Cal_Jun2016/phiSym/originals/phisymIC_2016B_09062016/2016B_272760-72_272775-150_80X_dataRun2_Prompt_v8_REL_kCh_09062016.dat'
+@OUTPUT 'phisym/IC_phiSym_2016B_rel_original-EB.pdf'
+
+call 'spEB.gpl' 'data/RunII-IC/Cal_Jun2016/phiSym/originals/phisymIC_2016B_09062016/2015D_259862-434_259891-108_80X_dataRun2_Prompt_v8_REL_kCh_09062016.dat'
+@OUTPUT 'phisym/IC_phiSym_2015D_rel_original-EB.pdf'
+
+call 'spEB.gpl' 'data/RunII-IC/Cal_Jun2016/phiSym/tags/dump/ic_rel_2016B.dump'
+@OUTPUT 'phisym/IC_phiSym_2016B_rel-EB.pdf'
+
+call 'spEB.gpl' 'data/RunII-IC/Cal_Jun2016/phiSym/tags/dump/ic_rel_2015D.dump'
+@OUTPUT 'phisym/IC_phiSym_2015D_rel-EB.pdf'
+
+call 'spEB.gpl' 'data/RunII-IC/Cal_Jun2016/phiSym/tags/dump/ic_rel_2016B-nooutliers.dump'
+@OUTPUT 'phisym/IC_phiSym_2016B_rel_nooutliers-EB.pdf'
+
+call 'spEB.gpl' 'data/RunII-IC/Cal_Jun2016/phiSym/tags/dump/ic_rel_2015D-nooutliers.dump'
+@OUTPUT 'phisym/IC_phiSym_2015D_rel_nooutliers-EB.pdf'
+
+set cbrange [0.9:1.1]
+call 'spEB.gpl' 'data/RunII-IC/Cal_Jun2016/phiSym/tags/dump/ic_myabs_trans_withOut.dump'
+@OUTPUT 'phisym/IC_phiSym_trans_withOut-EB.pdf'
+
+call 'spEB.gpl' 'data/RunII-IC/Cal_Jun2016/phiSym/tags/dump/ic_myabs_trans.dump'
+@OUTPUT 'phisym/IC_phiSym_trans-EB.pdf'
+
+
+
+set cbrange [0.8:1.2]
+########################
+
+call 'spEEm.gpl' 'data/RunII-IC/Cal_Jun2016/phiSym/originals/phisymIC_2016B_09062016/2016B_272760-72_272775-150_80X_dataRun2_Prompt_v8_REL_kCh_09062016.dat'
+@OUTPUT 'phisym/IC_phiSym_2016B_rel_original-EEm.pdf'
+
+call 'spEEm.gpl' 'data/RunII-IC/Cal_Jun2016/phiSym/originals/phisymIC_2016B_09062016/2015D_259862-434_259891-108_80X_dataRun2_Prompt_v8_REL_kCh_09062016.dat'
+@OUTPUT 'phisym/IC_phiSym_2015D_rel_original-EEm.pdf'
+
+call 'spEEm.gpl' 'data/RunII-IC/Cal_Jun2016/phiSym/tags/dump/ic_rel_2016B.dump'
+@OUTPUT 'phisym/IC_phiSym_2016B_rel-EEm.pdf'
+
+call 'spEEm.gpl' 'data/RunII-IC/Cal_Jun2016/phiSym/tags/dump/ic_rel_2015D.dump'
+@OUTPUT 'phisym/IC_phiSym_2015D_rel-EEm.pdf'
+
+call 'spEEm.gpl' 'data/RunII-IC/Cal_Jun2016/phiSym/tags/dump/ic_rel_2016B-nooutliers.dump'
+@OUTPUT 'phisym/IC_phiSym_2016B_rel_nooutliers-EEm.pdf'
+
+call 'spEEm.gpl' 'data/RunII-IC/Cal_Jun2016/phiSym/tags/dump/ic_rel_2015D-nooutliers.dump'
+@OUTPUT 'phisym/IC_phiSym_2015D_rel_nooutliers-EEm.pdf'
+
+
+call 'spEEm.gpl' 'data/RunII-IC/Cal_Jun2016/phiSym/tags/dump/ic_myabs_trans_withOut.dump'
+@OUTPUT 'phisym/IC_phiSym_trans_withOut-EEm.pdf'
+
+call 'spEEm.gpl' 'data/RunII-IC/Cal_Jun2016/phiSym/tags/dump/ic_myabs_trans.dump'
+@OUTPUT 'phisym/IC_phiSym_trans-EEm.pdf'
+
+
+##########
+
+call 'spEEp.gpl' 'data/RunII-IC/Cal_Jun2016/phiSym/originals/phisymIC_2016B_09062016/2016B_272760-72_272775-150_80X_dataRun2_Prompt_v8_REL_kCh_09062016.dat'
+@OUTPUT 'phisym/IC_phiSym_2016B_rel_original-EEp.pdf'
+
+call 'spEEp.gpl' 'data/RunII-IC/Cal_Jun2016/phiSym/originals/phisymIC_2016B_09062016/2015D_259862-434_259891-108_80X_dataRun2_Prompt_v8_REL_kCh_09062016.dat'
+@OUTPUT 'phisym/IC_phiSym_2015D_rel_original-EEp.pdf'
+
+call 'spEEp.gpl' 'data/RunII-IC/Cal_Jun2016/phiSym/tags/dump/ic_rel_2016B.dump'
+@OUTPUT 'phisym/IC_phiSym_2016B_rel-EEp.pdf'
+
+call 'spEEp.gpl' 'data/RunII-IC/Cal_Jun2016/phiSym/tags/dump/ic_rel_2015D.dump'
+@OUTPUT 'phisym/IC_phiSym_2015D_rel-EEp.pdf'
+
+call 'spEEp.gpl' 'data/RunII-IC/Cal_Jun2016/phiSym/tags/dump/ic_rel_2016B-nooutliers.dump'
+@OUTPUT 'phisym/IC_phiSym_2016B_rel_nooutliers-EEp.pdf'
+
+call 'spEEp.gpl' 'data/RunII-IC/Cal_Jun2016/phiSym/tags/dump/ic_rel_2015D-nooutliers.dump'
+@OUTPUT 'phisym/IC_phiSym_2015D_rel_nooutliers-EEp.pdf'
+
+
+call 'spEEp.gpl' 'data/RunII-IC/Cal_Jun2016/phiSym/tags/dump/ic_myabs_trans_withOut.dump'
+@OUTPUT 'phisym/IC_phiSym_trans_withOut-EEp.pdf'
+
+call 'spEEp.gpl' 'data/RunII-IC/Cal_Jun2016/phiSym/tags/dump/ic_myabs_trans.dump'
+@OUTPUT 'phisym/IC_phiSym_trans-EEp.pdf'

@@ -1,0 +1,8 @@
+file=sprintf("%s", ARG1)
+
+set view map
+set xlabel 'ix'
+set ylabel 'iy'
+sp  [1:100][1:100]  '< awk -v region="EE-" -f awk/listToMap.awk '.file nonuniform matrix u 1:2:3 with image
+
+
