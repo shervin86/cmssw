@@ -1,0 +1,33 @@
+/**
+ - create a milestone on 
+\code 
+https://gitlab.cern.ch/shervin/ecal-calibration-ic
+\endcode
+ - clone the git repository under data/RunII-IC/
+ - create a new cycle: create a subdirectory with the name of the cycle (same name of the milestone)
+ - put the txt files in that
+ - add an info.txt file with all the useful informations for the cycle and the analysis performed
+   - dataset
+   - release
+   - git tag
+   - GT
+   - json 
+ - from data/RunII-IC/ clean the piZero files:
+   /verbatim
+for file in  Cal_Oct2016/pizero/originals/2016/*/IC_fromECALpro.txt; do ./scripts/cleaningTxt.sh -f $file ;done
+   /endverbatim
+ - create a check_prevalidate.py script with the commands to create the xml file and the automatic plots
+   - map of EB, EE+, EE- GT reference
+   - map of EB, EE+, EE- absolute
+   - map of EB, EE+, EE- relative
+   - etaScale
+   - 1D ICs of EB, EE+, EE-
+   - ICs profile vs eta 
+   - map of non calibrated channels
+ - make the .db files
+ - start ECALELF validation procedure with defined
+   - rereco name
+
+
+*/
+ 

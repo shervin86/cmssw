@@ -3,6 +3,7 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include "Calibration/Tools/interface/Stats.hh"
 //#define DEBUG
 std::vector<DetId> IC::_detId;
 DRings IC::dr_;
@@ -12,6 +13,8 @@ bool IC::idr_;
 IC::IC(bool isTime):
 	_isTime(isTime)
 {
+	_defaultValue = (_isTime) ? 0 : 1;
+	_noValue      = (_isTime) ? -100 : 0;
 	_detId.resize(EBDetId::MAX_HASH + 1 + EEDetId::kSizeForDenseIndexing);
 	int idx = -1;
 	for (int hi = EBDetId::MIN_HASH; hi <= EBDetId::MAX_HASH; ++hi ) {
@@ -31,7 +34,7 @@ IC::IC(bool isTime):
 	assert(_detId.size() == EBDetId::MAX_HASH + 1 + EEDetId::kSizeForDenseIndexing);
 	for (size_t i = 0; i < ids().size(); ++i) {
 		DetId id(ids()[i]);
-		ic().setValue(id, 1);
+		ic().setValue(id, _defaultValue);
 		eic().setValue(id, 1000);
 	}
 
@@ -216,6 +219,7 @@ void IC::multiply(const IC & a, const IC & b, IC & res)
 }
 
 
+//if one of the two operators has an invalid channel, then assign the good value and the error of the other
 IC IC::operator *( const IC &b)
 {
 	IC res;
@@ -225,18 +229,20 @@ IC IC::operator *( const IC &b)
 		float ea = eic()[id];
 		float vb = b.ic()[id];
 		float eb = b.eic()[id];
+
+
 		bool aValid = isValid(va, ea);
 		bool bValid = isValid(vb, eb);
 		if( aValid && bValid) {
 			res.ic().setValue(id, va * vb);
 			res.eic().setValue(id, sqrt(vb * vb * ea * ea + va * va * eb * eb));
-		} else {
-			if(aValid) {
+		} else {// if a is not valid, then use the valid value from b. This is usually used when making the product of a relative IC and an absolute IC. So the old absolute value should be kept
+			if(aValid == true) {
 				res.ic().setValue(id, va);
-				res.eic().setValue(id, ea);
-			} else { // if are both invalid or only a is invalid
-				res.ic().setValue(id, vb);
 				res.eic().setValue(id, eb);
+			} else {
+				res.ic().setValue(id, vb);
+				res.eic().setValue(id, ea);
 			}
 		}
 	}
@@ -253,24 +259,54 @@ IC IC::operator +( const IC &b)
 		DetId id(ids()[i]);
 		float va = ic()[id];
 		float ea = eic()[id];
-		float ea2= 0.5 * ea;
+		float ea2 = 0.5 * ea;
 		float vb = b.ic()[id];
 		float eb = b.eic()[id];
 		bool aValid = isValid(va, ea, _isTime);
 		bool bValid = isValid(vb, eb, _isTime);
-		if( aValid && bValid) {
-			if(fabs(va)>ea2){// update the value only if the shift is significant
+		if(bValid) {
+			if(aValid && fabs(va) > ea2) { // update the value only if the shift is significant
 				res.ic().setValue(id, va + vb);
 				res.eic().setValue(id, sqrt(ea * ea + eb * eb));
-			}
-		} else {
-			if(aValid) {
-				res.ic().setValue(id, va);
-				res.eic().setValue(id, ea);
 			} else { // if are both invalid or only a is invalid
 				res.ic().setValue(id, vb);
 				res.eic().setValue(id, eb);
 			}
+		} else {
+			res.ic().setValue(id, va);
+			res.eic().setValue(id, ea);
+		}
+	}
+	return res;
+}
+
+/** this method is meant for time calibrations: the new constants are the measured shifts + the reference time calibration constants.
+ * The shift is applied only if it is significant: shift> uncertainty on the shift
+ */
+IC IC::operator -( const IC &b)
+{
+	IC res;
+	for (size_t i = 0; i < ids().size(); ++i) {
+		DetId id(ids()[i]);
+		float va = ic()[id];
+		float ea = eic()[id];
+		float vb = b.ic()[id];
+		float eb = b.eic()[id];
+		bool aValid = isValid(va, ea, _isTime) && fabs(va) > 0.5 * ea;
+		bool bValid = isValid(vb, eb, _isTime) && fabs(vb) > 0.5 * vb;
+//			std::cout << aValid << " " << bValid << "\t" << va << " " << ea << "\t" << vb << " " << eb << std::endl;
+
+		if(bValid) {
+			if(aValid) { // update the value only if the shift is significant
+				res.ic().setValue(id, va - vb);
+				res.eic().setValue(id, sqrt(ea * ea + eb * eb));
+			} else { // if are both invalid or only a is invalid
+				res.ic().setValue(id, vb);
+				res.eic().setValue(id, eb);
+			}
+		} else {
+			res.ic().setValue(id, va);
+			res.eic().setValue(id, ea);
 		}
 	}
 	return res;
@@ -309,30 +345,28 @@ IC IC::operator /( const IC &b)
 		if( aValid && bValid) {
 			res.ic().setValue(id, ratio);
 			res.eic().setValue(id, ratio * sqrt(eb * eb / (vb * vb) + ea * ea / (va * va)));
-		} else if(aValid) {
-			res.ic().setValue(id, va);
-			res.eic().setValue(id, ea);
-		} else { //
-			res.ic().setValue(id, vb);
-			res.eic().setValue(id, eb);
+		} else { // if a is not valid, then don't change the value! We want to conserve the invalid status looking at the error. That's why the invalid value is propagated. This is usually used in transport factors
+			if(aValid == false) {
+				res.ic().setValue(id, va);
+				res.eic().setValue(id, ea);
+			} else {
+				res.ic().setValue(id, vb);
+				res.eic().setValue(id, eb);
+			}
 		}
-
 	}
 	return res;
 }
 
 void IC::operator /=( const IC &b)
 {
+	IC res = *this / b;
 	for (size_t i = 0; i < ids().size(); ++i) {
 		DetId id(ids()[i]);
-		float va = ic()[id];
-		float ea = eic()[id];
-		float vb = b.ic()[id];
-		float eb = b.eic()[id];
-		float ratio = va / vb;
-
-		ic().setValue(id, va / vb);
-		eic().setValue(id, ratio * sqrt(eb * eb / (vb * vb) + ea * ea / (va * va)));
+		float va = res.ic()[id];
+		float ea = res.eic()[id];
+		ic().setValue(id, va);
+		eic().setValue(id, ea);
 	}
 	return;
 }
@@ -534,19 +568,25 @@ void IC::smear(const IC & a, IC & res)
 void IC::dump(const IC & a, const char * fileName, DS & selector, bool invalid)
 {
 	FILE * fd = fopen(fileName, "w");
+
 	if (fd == NULL) {
 		fprintf(stderr, "[dump] cannot open file %s\n", fileName);
 		exit(-1);
 	}
+
+	// print one line for the 0 IETA in EB
+//	for(int iphi=1; iphi<=360; ++iphi) fprintf(fd, "%d %d %d %f %f\n", 0, iphi, 0, _noValue, 0.);
+
 	for (size_t i = 0; i < a.ids().size(); ++i) {
 		DetId id(a.ids()[i]);
 		if (!selector(id)) continue;
 
 		float va = a.ic()[id];
 		float ve = a.eic()[id];
-		if(invalid == false && isValid(va, ve) == false) {
-			va = (_isTime) ? 0. : 1.;
-			ve = 999;
+
+		if(invalid == false && isValid(va, ve, _isTime) == false) {
+			va = _defaultValue;
+			if(ve < 900) ve = 997;
 		}
 
 		if (id.subdetId() == EcalBarrel) {
@@ -617,6 +657,18 @@ void IC::dumpEtaScale(const IC & a, const char * fileName, bool allIC)
 	fclose(fd);
 }
 
+
+void IC::dumpEtaScale(const char * fileName, DS& selector)
+{
+	IC etaScale = getEtaScale();
+	etaScale.dump(fileName, selector, true);
+}
+
+void IC::dumpPhiScale(const char * fileName, DS& selector)
+{
+	IC phiScale = getPhiScale(selector);
+	phiScale.dump(fileName, selector, true);
+}
 
 
 void IC::dumpXML(const IC & a, const char * fileName, DS & selector, bool errors)
@@ -987,44 +1039,70 @@ void IC::applyEtaScale(IC & ic)
 //////////////////////////////////////////////////////////////////////////////////////////
 
 bool IC::isValid(float v, float e, bool isTime)
-{	
-	if(isTime==false){
+{
+	if(isTime == false) {
 		if (fabs(e) > 100 || v <= 0.1 || v > 10) return false;
-	}else{
+	} else {
 		if (fabs(e) > 100) return false;
 	}
 	return true;
 }
 
 
+IC IC::getPhiScale(DS& selector) const
+{
+	IC phiScale(*this);
+	stats ringValue[360];
+
+	for (size_t i = 0; i < ids().size(); ++i) {
+		DetId id(ids()[i]);
+		int x = 0;
+		if (id.subdetId() == EcalBarrel) {
+			x = EBDetId(id).iphi()-1;
+		} else if (id.subdetId() == EcalEndcap) {
+			//x = atan((EEDetId(id).iy() - 50) / (EEDetId(id).ix() - 50));
+		}
+		float v = ic()[id];
+		float e = eic()[id];
+		if (!isValid(v, e)) continue;
+		if (!selector(id)) continue;
+		ringValue[x].add(v);
+	}
+	for (size_t i = 0; i < ids().size(); ++i) {
+		DetId id(phiScale.ids()[i]);
+		int x =0;
+		if (id.subdetId() == EcalBarrel) {
+			x = EBDetId(id).iphi()-1;
+		} else if (id.subdetId() == EcalEndcap) {
+			//x = atan((EEDetId(id).iy() - 50) / (EEDetId(id).ix() - 50));
+		}
+		
+		phiScale.ic().setValue( id, ringValue[x].mean()  );
+		phiScale.eic().setValue(id, ringValue[x].meanErr());
+	}
+	return phiScale;
+}
+
 IC IC::getEtaScale()
 {
 	IC etaScale(*this);
-	float etasum[DRings::nHalfIEta * 2 + 1]; // ieta = 0 does not exist
-	int n[DRings::nHalfIEta * 2 + 1]; // ieta = 0 does not exist
-	for (int i = 0; i < DRings::nHalfIEta * 2 + 1; ++i) {
-		etasum[i] = 0;
-		n[i] = 0;
-	}
+	stats ringValue[DRings::nHalfIEta * 2 + 1]; // ieta = 0 does not exist
 	for (size_t i = 0; i < ids().size(); ++i) {
 		DetId id(ids()[i]);
 		float v = ic()[id];
 		float e = eic()[id];
 		if (!isValid(v, e)) continue;
 		int idx = dr_.ieta(id) + DRings::nHalfIEta;
-		etasum[idx] += v;
-		n[idx]++;
+		ringValue[idx].add(v);
 	}
 	for (size_t i = 0; i < ids().size(); ++i) {
 		DetId id(etaScale.ids()[i]);
-		float e = etaScale.eic()[id];
 //                if (!isValid(v, e)) continue;
 //				std::cout << "\t" << v << "\t" <<  e <<std::endl;
 		int idx = dr_.ieta(id) + DRings::nHalfIEta;
-		float s = etasum[idx] / n[idx];
-
-		etaScale.ic().setValue(id, s);
-		etaScale.eic().setValue(id, e);
+		
+		etaScale.ic().setValue( id, ringValue[idx].mean()  );
+		etaScale.eic().setValue(id, ringValue[idx].meanErr());
 	}
 	return etaScale;
 }
@@ -1070,11 +1148,13 @@ void IC::removeOutliers(const IC & a, IC & res, float low_thr, float high_thr)
 
 		if (va > high_thr) {
 			res.ic().setValue(id, high_thr);
+			res.eic().setValue(id, 99);
 			fprintf(stderr, "[IC::RemoveOutlier] !!! set to 2.5 IC for crystal %d was %f now %f\n", id.rawId(), va, res.ic()[id]);
 		}
 
 		if (va < low_thr ) {
 			res.ic().setValue(id, low_thr);
+			res.eic().setValue(id, 99);
 			fprintf(stderr, "[IC::RemoveOutlier] !!! set to 0.4 IC for crystal %d was %f now %f\n", id.rawId(), va, res.ic()[id]);
 
 		}
@@ -1087,17 +1167,18 @@ void IC::removeOutliers(float low_thr, float high_thr)
 	for (size_t i = 0; i < ids().size(); ++i) {
 		DetId id(ids()[i]);
 		float va = ic()[id];
-
+		float ea = eic()[id];
+		if(isValid(va, ea, _isTime) == false) continue;
 		if (va > high_thr) {
 			ic().setValue(id, high_thr);
-			eic().setValue(id, 999);
-			fprintf(stderr, "[IC::RemoveOutlier] !!! set to 2.5 IC for crystal %d was %f now %f\n", id.rawId(), va, ic()[id]);
+			eic().setValue(id, 99);
+			fprintf(stderr, "[IC::RemoveOutlier] !!! set to INVALID IC for crystal %d was %f now %f\n", id.rawId(), va, ic()[id]);
 		}
 
 		if (va < low_thr ) {
 			ic().setValue(id, low_thr);
-			eic().setValue(id, 999);
-			fprintf(stderr, "[IC::RemoveOutlier] !!! set to 0.4 IC for crystal %d was %f now %f\n", id.rawId(), va, ic()[id]);
+			eic().setValue(id, 99);
+			fprintf(stderr, "[IC::RemoveOutlier] !!! set to INVALID IC for crystal %d was %f now %f\n", id.rawId(), va, ic()[id]);
 
 		}
 	}
@@ -1110,11 +1191,12 @@ void IC::dumpOutliers(const IC & a, float min, float max)
 	for (size_t i = 0; i < a.ids().size(); ++i) {
 		DetId id(a.ids()[i]);
 		float va = a.ic()[id];
+		float ea = a.eic()[id];
 
 		IC::Coord c;
 		coord(id, &c);
 
-		if (va > max || va < min) {
+		if (isValid(va, ea, false) && (va > max || va < min)) {
 			fprintf(stdout, "%d %d %d %d %f %f\n", id.rawId(), c.ix_, c.iy_, c.iz_, va, a.eic()[id]);
 		}
 	}
@@ -1127,7 +1209,7 @@ void IC::setToUnit(IC & ic, DS & selector)
 		DetId id(ic.ids()[i]);
 		if (!selector(id)) continue;
 		ic.ic().setValue(id, 1.);
-		ic.eic().setValue(id, 998);
+		ic.eic().setValue(id, 98);
 	}
 }
 
@@ -1168,6 +1250,7 @@ void IC::fillHoles(const IC & a, const IC & b, IC & res)
 			res.eic().setValue(id, eb);
 		} else {
 			fprintf(stderr, "[IC::fillHoles] WARNING: no IC for crystal %d\n", id.rawId());
+			//res.ic().setValue(id, _defaultValue);
 			res.ic().setValue(id, 1);
 			res.eic().setValue(id, 999);
 		}
@@ -1190,6 +1273,7 @@ void IC::fillHoles(const IC & b, bool preserveErrors)
 		} else {
 			fprintf(stderr, "[IC::fillHoles] WARNING: no IC for crystal %d\n", id.rawId());
 			ic().setValue(id, 1);
+//			ic().setValue(id, _defaultValue);
 			eic().setValue(id, 999);
 		}
 	}
@@ -1417,6 +1501,7 @@ void IC::readXMLFile(const char * fileName)
 			DetId id = ids()[i];
 			ic().setValue(id, std::stod(val));
 			eic().setValue(id, 0);
+//			assert(isValid(ic()[id], eic()[id], _isTime));
 			i++;
 		}
 	}
@@ -1462,7 +1547,7 @@ bool IC::isUnit(void)
 float IC::Normalize(DS& selector)
 {
 
-	float sum = 0.;
+	double sum = 0.;
 	unsigned int n = 0;
 	for (size_t i = 0; i < ids().size(); ++i) {
 		DetId id(ids()[i]);
@@ -1497,7 +1582,8 @@ void IC::BonToBoff(const IC& Bcorr, const IC& alphas, DS& selector)
 
 }
 
-void IC::PrintNewCalibrated(const IC& ref) const{
+void IC::PrintNewCalibrated(const IC& ref) const
+{
 
 	for (size_t i = 0; i < ids().size(); ++i) {
 		DetId id(ids()[i]);
@@ -1507,22 +1593,58 @@ void IC::PrintNewCalibrated(const IC& ref) const{
 		float eb = ref.eic()[id];
 		bool aValid = isValid(va, ea, _isTime);
 		bool bValid = isValid(vb, eb, _isTime);
-		
-		if(aValid==true && bValid==false) {
-			int ix = 0, iy = 0, iz=0;
-			if (id.subdetId() == EcalBarrel) {
-				ix = EBDetId(id).iphi();
-				iy = EBDetId(id).ieta();
-			} else if (id.subdetId() == EcalEndcap) {
-				ix = EEDetId(id).ix();
-				iy = EEDetId(id).iy();
-				iz = EEDetId(id).zside();
-			}
-			
-		std::cout << "[NEW CALIBRATED]" << ix << "\t" << iy << "\t" << iz  << "\t" << va << "\t" << ea << "\t" << vb << "\t" << eb << "\n";
+
+		int ix = 0, iy = 0, iz = 0;
+		if (id.subdetId() == EcalBarrel) {
+			ix = EBDetId(id).iphi();
+			iy = EBDetId(id).ieta();
+		} else if (id.subdetId() == EcalEndcap) {
+			ix = EEDetId(id).ix();
+			iy = EEDetId(id).iy();
+			iz = EEDetId(id).zside();
+		}
+
+		if(aValid == true && bValid == false) {
+			std::cout << "[NEW CALIBRATED] " << ix << "\t" << iy << "\t" << iz  << "\t" << va << "\t" << ea << "\t" << vb << "\t" << eb << "\n";
+		} else if(aValid == false && bValid == true) {
+			std::cout << "[OLD CALIBRATED] " << ix << "\t" << iy << "\t" << iz  << "\t" << va << "\t" << ea << "\t" << vb << "\t" << eb << "\n";
+//		}else if(aValid==false && bValid==false) {
+//			std::cout << "[BOTH UNCALIBRATED] " << ix << "\t" << iy << "\t" << iz  << "\t" << va << "\t" << ea << "\t" << vb << "\t" << eb << "\n";
 		}
 	}
-	
 	std::cout << std::endl;
 
-}	
+}
+
+
+void IC::SetInvalids(const IC&ref)
+{
+	for (size_t i = 0; i < ids().size(); ++i) {
+		DetId id(ids()[i]);
+		float va = ic()[id];
+		float ea = eic()[id];
+		float vb = ref.ic()[id];
+		float eb = ref.eic()[id];
+		bool aValid = isValid(va, ea, _isTime);
+		bool bValid = isValid(vb, eb, _isTime);
+
+		if(aValid == true && bValid == false) {
+			eic().setValue(id, 1001);
+		}
+	}
+}
+
+void IC::RemoveNonSignificant(void)
+{
+	for (size_t i = 0; i < ids().size(); ++i) {
+		DetId id(ids()[i]);
+		float va = ic()[id];
+		float ea = eic()[id];
+		if(_isTime) {
+			if(fabs(va - _defaultValue) < ea) ic().setValue(id, _defaultValue);
+		} else {
+			if(fabs(va / _defaultValue) < ea) ic().setValue(id, _defaultValue);
+		}
+		if (va != ic()[id]) 			fprintf(stderr, "[IC::RemoveNonSignificant] !!! set to DEFAULT IC for crystal %d was %f now %f\n", id.rawId(), va, ic()[id]);
+	}
+}
