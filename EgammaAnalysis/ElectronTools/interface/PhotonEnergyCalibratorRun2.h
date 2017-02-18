@@ -2,8 +2,9 @@
 #define PhotonEnergyCalibratorRun2_h
 
 #include <TRandom.h>
-#include "EgammaAnalysis/ElectronTools/interface/EnergyScaleCorrection_class.hh"
-#include "EgammaAnalysis/ElectronTools/interface/SimplePhoton.h"
+#include "DataFormats/EgammaCandidates/interface/Photon.h"
+#include "EgammaAnalysis/ElectronTools/interface/EnergyScaleCorrection_class.h"
+
 #include "FWCore/Utilities/interface/StreamID.h"
 
 #include <vector>

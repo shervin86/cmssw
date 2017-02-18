@@ -1,5 +1,3 @@
-#include "EgammaAnalysis/ElectronTools/interface/SimpleElectron.h"
-#include "EgammaAnalysis/ElectronTools/interface/EpCombinationTool.h"
 #include "EgammaAnalysis/ElectronTools/interface/EpCombinationToolSemi.h"
 #include "EgammaAnalysis/ElectronTools/interface/ElectronEnergyCalibratorRun2.h"
 #include "EgammaAnalysis/ElectronTools/interface/PhotonEnergyCalibratorRun2.h"
