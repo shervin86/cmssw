@@ -73,23 +73,29 @@ process = regressionWeights(process)
 
 process.load('EgammaAnalysis.ElectronTools.regressionApplication_cff')
 process.RandomNumberGeneratorService = cms.Service("RandomNumberGeneratorService",
-                  calibratedPatElectrons  = cms.PSet( initialSeed = cms.untracked.uint32(81),
+                  calibratedPatElectrons  = cms.PSet( initialSeed = cms.untracked.uint32(8675389),
                                                       engineName = cms.untracked.string('TRandom3'),
                                                       ),
-                  calibratedPatPhotons    = cms.PSet( initialSeed = cms.untracked.uint32(81),
+                  calibratedPatPhotons    = cms.PSet( initialSeed = cms.untracked.uint32(8675389),
                                                       engineName = cms.untracked.string('TRandom3'),
+                                                      ),
+                  mix                     = cms.PSet(
+                                                      initialSeed = cms.untracked.uint32(8675389),
+                                                      engineName = cms.untracked.string('TRandom3')
                                                       ),
                                                    )
-process.load('EgammaAnalysis.ElectronTools.calibratedElectronsRun2_cfi')
-process.load('EgammaAnalysis.ElectronTools.calibratedPhotonsRun2_cfi')
+process.load('EgammaAnalysis.ElectronTools.calibratedPatElectronsRun2_cfi')
+process.load('EgammaAnalysis.ElectronTools.calibratedPatPhotonsRun2_cfi')
 
 # Path and EndPath definitions
 process.EGMRegression = cms.Path(process.regressionApplication)
-process.EGMSmearerElectrons = cms.Path(process.process.calibratedPatElectrons)
-process.EGMSmearerPhotons   = cms.Path(process.process.calibratedPatPhotons)
+process.EGMSmearerElectrons = cms.Path(process.calibratedPatElectrons)
+process.EGMSmearerPhotons   = cms.Path(process.calibratedPatPhotons)
 
 # You don't need to really remak all of miniAOD, only the regressions
 process.endjob_step = cms.EndPath(process.endOfProcess)
+
+process.MINIAODSIMoutput.outputCommands.extend(['keep *_calibratedPatElectrons_*_*', 'keep *_calibratedPatPhotons_*_*'])
 process.MINIAODSIMoutput_step = cms.EndPath(process.MINIAODSIMoutput)
 
 # Schedule definition
