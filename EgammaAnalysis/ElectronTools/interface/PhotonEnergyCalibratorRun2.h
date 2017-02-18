@@ -24,10 +24,6 @@ class PhotonEnergyCalibratorRun2 {
   
   /// Correct this electron. 
   /// StreamID is needed when used with CMSSW Random Number Generator
-  void calibrate(SimplePhoton &photon, edm::StreamID const & id = edm::StreamID::invalidStreamID()) const ;
-  
-  /// Correct this electron. 
-  /// StreamID is needed when used with CMSSW Random Number Generator
   void calibrate(reco::Photon &photon, unsigned int runNumber, edm::StreamID const & id = edm::StreamID::invalidStreamID()) const ;
   
  protected:    

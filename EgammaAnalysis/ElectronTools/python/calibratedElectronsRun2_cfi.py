@@ -12,7 +12,10 @@ calibratedElectrons = cms.EDProducer("CalibratedElectronProducerRun2",
 
                                      # input collections
                                      electrons = cms.InputTag('gedGsfElectrons'),
-                                     gbrForestName = cms.string("gedelectron_p4combination_25ns"),
+                                     gbrForestName = cms.vstring('electron_eb_ECALTRK_lowpt', 'electron_eb_ECALTRK',
+                                                                 'electron_ee_ECALTRK_lowpt', 'electron_ee_ECALTRK',
+                                                                 'electron_eb_ECALTRK_lowpt_var', 'electron_eb_ECALTRK_var',
+                                                                 'electron_ee_ECALTRK_lowpt_var', 'electron_ee_ECALTRK_var'),
 
                                      # data or MC corrections
                                      # if isMC is false, data corrections are applied
@@ -29,7 +32,10 @@ calibratedPatElectrons = cms.EDProducer("CalibratedPatElectronProducerRun2",
                                         
                                         # input collections
                                         electrons = cms.InputTag('slimmedElectrons'),
-                                        gbrForestName = cms.string("gedelectron_p4combination_25ns"),
+                                        gbrForestName = cms.vstring('electron_eb_ECALTRK_lowpt', 'electron_eb_ECALTRK',
+                                                                    'electron_ee_ECALTRK_lowpt', 'electron_ee_ECALTRK',
+                                                                    'electron_eb_ECALTRK_lowpt_var', 'electron_eb_ECALTRK_var',
+                                                                    'electron_ee_ECALTRK_lowpt_var', 'electron_ee_ECALTRK_var'),
                                         
                                         # data or MC corrections
                                         # if isMC is false, data corrections are applied

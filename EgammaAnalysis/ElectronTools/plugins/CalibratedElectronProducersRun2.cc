@@ -11,9 +11,9 @@
 #include "DataFormats/EgammaCandidates/interface/GsfElectron.h"
 #include "DataFormats/PatCandidates/interface/Electron.h"
 
-#include "CondFormats/DataRecord/interface/GBRWrapperRcd.h"
-#include "CondFormats/EgammaObjects/interface/GBRForest.h"
-#include "EgammaAnalysis/ElectronTools/interface/EpCombinationTool.h"
+#include "CondFormats/DataRecord/interface/GBRDWrapperRcd.h"
+#include "CondFormats/EgammaObjects/interface/GBRForestD.h"
+#include "EgammaAnalysis/ElectronTools/interface/EpCombinationToolSemi.h"
 #include "EgammaAnalysis/ElectronTools/interface/ElectronEnergyCalibratorRun2.h"
 
 #include <vector>
@@ -27,18 +27,18 @@ class CalibratedElectronProducerRun2T: public edm::stream::EDProducer<>
         virtual void produce( edm::Event &, const edm::EventSetup & ) override ;
 
     private:
-        edm::EDGetTokenT<edm::View<T> > theElectronToken;
-        std::string theGBRForestName;
-        edm::ESHandle<GBRForest> theGBRForestHandle;
+        edm::EDGetTokenT<edm::View<T> >         theElectronToken;
+        std::vector<std::string>                theGBRForestName;
+        std::vector<const GBRForestD* > theGBRForestHandle;
 
-        EpCombinationTool theEpCombinationTool;
+        EpCombinationToolSemi        theEpCombinationTool;
         ElectronEnergyCalibratorRun2 theEnCorrectorRun2;
 };
 
 template<typename T>
 CalibratedElectronProducerRun2T<T>::CalibratedElectronProducerRun2T( const edm::ParameterSet & conf ) :
   theElectronToken(consumes<edm::View<T> >(conf.getParameter<edm::InputTag>("electrons"))),
-  theGBRForestName(conf.getParameter<std::string>("gbrForestName")),
+  theGBRForestName(conf.getParameter< std::vector<std::string> >("gbrForestName")),
   theEpCombinationTool(),
   theEnCorrectorRun2(theEpCombinationTool, conf.getParameter<bool>("isMC"), conf.getParameter<bool>("isSynchronization"), conf.getParameter<std::string>("correctionFile"))
 {
@@ -54,8 +54,14 @@ template<typename T>
 void
 CalibratedElectronProducerRun2T<T>::produce( edm::Event & iEvent, const edm::EventSetup & iSetup ) 
 {
-    iSetup.get<GBRWrapperRcd>().get(theGBRForestName, theGBRForestHandle);
-    theEpCombinationTool.init(theGBRForestHandle.product());
+
+    for (auto&& forestName : theGBRForestName) {
+      edm::ESHandle<GBRForestD> forestHandle;
+      iSetup.get<GBRDWrapperRcd>().get(forestName, forestHandle);
+      theGBRForestHandle.emplace_back(forestHandle.product());      
+    }
+
+    theEpCombinationTool.init(theGBRForestHandle);
 
     edm::Handle<edm::View<T> > in;
     iEvent.getByToken(theElectronToken, in);

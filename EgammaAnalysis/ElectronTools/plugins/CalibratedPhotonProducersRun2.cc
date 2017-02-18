@@ -48,8 +48,8 @@ CalibratedPhotonProducerRun2T<T>::produce( edm::Event & iEvent, const edm::Event
   std::auto_ptr<std::vector<T> > out(new std::vector<T>());
   out->reserve(in->size());   
   
-  for (const T &ele : *in) {
-    out->push_back(ele);
+  for (const T &pho : *in) {
+    out->push_back(pho);
     theEnCorrectorRun2.calibrate(out->back(), iEvent.id().run(), iEvent.streamID());
   }
     
