@@ -6,6 +6,7 @@ files = {"Prompt2015":"EgammaAnalysis/ElectronTools/data/ScalesSmearings/74X_Pro
          "80Xapproval" : "EgammaAnalysis/ElectronTools/data/ScalesSmearings/80X_ichepV2_2016_pho",
          "Moriond2017_JEC" : "EgammaAnalysis/ElectronTools/data/ScalesSmearings/Winter_2016_reReco_v1_ele", #only to derive JEC correctionsb
          "Moriond17_23Jan" : "EgammaAnalysis/ElectronTools/data/ScalesSmearings/Moriond17_23Jan_ele",
+         "Moriond17_74Xregression_v1" : "EgammaAnalysis/EgammaAnalysis/data/ScalesSmearings/Moriond17_74x_pho",
          }
 
 
