@@ -1,6 +1,6 @@
 import FWCore.ParameterSet.Config as cms
 
-correctionType = "Moriond17_23Jan"
+correctionType = "Moriond17_74Xregression_v1"
 files = {"Prompt2015":"EgammaAnalysis/ElectronTools/data/ScalesSmearings/74X_Prompt_2015",
          "76XReReco" :"EgammaAnalysis/ElectronTools/data/ScalesSmearings/76X_16DecRereco_2015_Etunc",
          "80Xapproval" : "EgammaAnalysis/ElectronTools/data/ScalesSmearings/80X_ichepV2_2016_pho",
