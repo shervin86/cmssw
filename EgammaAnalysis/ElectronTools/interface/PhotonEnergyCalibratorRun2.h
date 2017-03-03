@@ -2,8 +2,9 @@
 #define PhotonEnergyCalibratorRun2_h
 
 #include <TRandom.h>
+#include "DataFormats/EgammaCandidates/interface/Photon.h"
 #include "EgammaAnalysis/ElectronTools/interface/EnergyScaleCorrection_class.h"
-#include "EgammaAnalysis/ElectronTools/interface/SimplePhoton.h"
+
 #include "FWCore/Utilities/interface/StreamID.h"
 
 #include <vector>
@@ -21,10 +22,6 @@ class PhotonEnergyCalibratorRun2 {
   /// Initialize with a random number generator (if not done, it will use the CMSSW service)
   /// Caller code owns the TRandom.
   void initPrivateRng(TRandom *rnd) ;
-  
-  /// Correct this electron. 
-  /// StreamID is needed when used with CMSSW Random Number Generator
-  void calibrate(SimplePhoton &photon, edm::StreamID const & id = edm::StreamID::invalidStreamID()) const ;
   
   /// Correct this electron. 
   /// StreamID is needed when used with CMSSW Random Number Generator

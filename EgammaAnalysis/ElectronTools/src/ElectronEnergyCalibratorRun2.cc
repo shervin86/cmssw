@@ -4,7 +4,7 @@
 #include "FWCore/Utilities/interface/RandomNumberGenerator.h"
 #include "FWCore/Utilities/interface/Exception.h"
 
-ElectronEnergyCalibratorRun2::ElectronEnergyCalibratorRun2(EpCombinationTool &combinator, 
+ElectronEnergyCalibratorRun2::ElectronEnergyCalibratorRun2(EpCombinationToolSemi &combinator, 
 							   bool isMC, 
 							   bool synchronization, 
 							   std::string correctionFile
@@ -33,32 +33,32 @@ void ElectronEnergyCalibratorRun2::initPrivateRng(TRandom *rnd)
 
 void ElectronEnergyCalibratorRun2::calibrate(reco::GsfElectron &electron, unsigned int runNumber, edm::StreamID const &id) const
 {
-  SimpleElectron simple(electron, runNumber, isMC_);
-  calibrate(simple, id);
-  simple.writeTo(electron);
-}
-void ElectronEnergyCalibratorRun2::calibrate(SimpleElectron &electron, edm::StreamID const & id) const 
-{
-  assert(isMC_ == electron.isMC());
   float smear = 0.0, scale = 1.0;
-  float aeta = std::abs(electron.getEta()); //, r9 = electron.getR9();
-  float et = electron.getNewEnergy()/cosh(aeta);
+  float aeta = std::abs(electron.superCluster()->eta()); 
+  float et = electron.correctedEcalEnergy()/cosh(aeta);
   
-  scale = _correctionRetriever.ScaleCorrection(electron.getRunNumber(), electron.isEB(), electron.getR9(), aeta, et);
-  smear = _correctionRetriever.getSmearingSigma(electron.getRunNumber(), electron.isEB(), electron.getR9(), aeta, et, 0., 0.); 
+  scale = _correctionRetriever.ScaleCorrection(runNumber, electron.isEB(), electron.full5x5_r9(), aeta, et);
+  smear = _correctionRetriever.getSmearingSigma(runNumber, electron.isEB(), electron.full5x5_r9(), aeta, et, 0., 0.); 
   
   double newEcalEnergy, newEcalEnergyError;
   if (isMC_) {
     double corr = 1.0 + smear * gauss(id);
-    newEcalEnergy      = electron.getNewEnergy() * corr;
-    newEcalEnergyError = std::hypot(electron.getNewEnergyError() * corr, smear * newEcalEnergy);
+    newEcalEnergy      = electron.correctedEcalEnergy() * corr;
+    newEcalEnergyError = std::hypot(electron.correctedEcalEnergyError() * corr, smear * newEcalEnergy);
   } else {
-    newEcalEnergy      = electron.getNewEnergy() * scale;
-    newEcalEnergyError = std::hypot(electron.getNewEnergyError() * scale, smear * newEcalEnergy);
+    newEcalEnergy      = electron.correctedEcalEnergy() * scale;
+    newEcalEnergyError = std::hypot(electron.correctedEcalEnergyError() * scale, smear * newEcalEnergy);
   }
-  electron.setNewEnergy(newEcalEnergy); 
-  electron.setNewEnergyError(newEcalEnergyError);
-  epCombinationTool_->combine(electron);
+  electron.setCorrectedEcalEnergy(newEcalEnergy);
+  electron.setCorrectedEcalEnergyError(newEcalEnergyError);
+  std::pair<float, float> combinedMomentum = epCombinationTool_->combine(electron);
+
+  math::XYZTLorentzVector oldFourMomentum = electron.p4();
+  math::XYZTLorentzVector newFourMomentum = math::XYZTLorentzVector(oldFourMomentum.x()*combinedMomentum.first/oldFourMomentum.t(),
+								    oldFourMomentum.y()*combinedMomentum.first/oldFourMomentum.t(),
+								    oldFourMomentum.z()*combinedMomentum.first/oldFourMomentum.t(),
+								    combinedMomentum.first); 
+  electron.correctMomentum(newFourMomentum, electron.trackMomentumError(), combinedMomentum.second);
 }
 
 double ElectronEnergyCalibratorRun2::gauss(edm::StreamID const& id) const 
