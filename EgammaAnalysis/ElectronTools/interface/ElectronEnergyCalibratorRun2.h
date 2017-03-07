@@ -6,6 +6,7 @@
 #include "EgammaAnalysis/ElectronTools/interface/EpCombinationToolSemi.h"
 #include "FWCore/Utilities/interface/StreamID.h"
 
+#include "DataFormats/EcalRecHit/interface/EcalRecHitCollections.h"
 
 #include <vector>
 
@@ -15,7 +16,7 @@ class ElectronEnergyCalibratorRun2 {
   ElectronEnergyCalibratorRun2() {}
   
   // further configuration will be added when we will learn how it will work
-  ElectronEnergyCalibratorRun2(EpCombinationToolSemi &combinator, bool isMC, bool synchronization, std::string); 
+  ElectronEnergyCalibratorRun2(EpCombinationToolSemi &combinator, bool isMC, bool synchronization, std::string, const EcalRecHitCollection* recHits_ = NULL); 
   ~ElectronEnergyCalibratorRun2() ;
   
   /// Initialize with a random number generator (if not done, it will use the CMSSW service)
@@ -37,6 +38,7 @@ class ElectronEnergyCalibratorRun2 {
   /// If synchronization is set to true, it returns a fixed number (1.0)
   double gauss(edm::StreamID const& id) const ;
   EnergyScaleCorrection_class _correctionRetriever;
+  const EcalRecHitCollection* _recHits;
 };
 
 #endif

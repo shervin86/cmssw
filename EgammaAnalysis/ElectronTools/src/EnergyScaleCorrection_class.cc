@@ -50,10 +50,10 @@ EnergyScaleCorrection_class::~EnergyScaleCorrection_class(void)
 
 
 float EnergyScaleCorrection_class::ScaleCorrection(unsigned int runNumber, bool isEBEle,
-						   double R9Ele, double etaSCEle, double EtEle) const
+												   double R9Ele, double etaSCEle, double EtEle, unsigned int gainSeed) const
 {
   float correction = 1;
-  if(doScale) correction *= getScaleOffset(runNumber, isEBEle, R9Ele, etaSCEle, EtEle);
+  if(doScale) correction *= getScaleOffset(runNumber, isEBEle, R9Ele, etaSCEle, EtEle, gainSeed);
   
   return correction; 
 }
@@ -61,33 +61,33 @@ float EnergyScaleCorrection_class::ScaleCorrection(unsigned int runNumber, bool 
 
 
 float EnergyScaleCorrection_class::ScaleCorrectionUncertainty(unsigned int runNumber, bool isEBEle,
-							      double R9Ele, double etaSCEle, double EtEle) const
+															  double R9Ele, double etaSCEle, double EtEle, unsigned int gainSeed) const
 {
-  float statUncert = getScaleStatUncertainty(runNumber, isEBEle, R9Ele, etaSCEle, EtEle);
-  float systUncert = getScaleSystUncertainty(runNumber, isEBEle, R9Ele, etaSCEle, EtEle);
+  float statUncert = getScaleStatUncertainty(runNumber, isEBEle, R9Ele, etaSCEle, EtEle, gainSeed);
+  float systUncert = getScaleSystUncertainty(runNumber, isEBEle, R9Ele, etaSCEle, EtEle, gainSeed);
   
   return sqrt(statUncert * statUncert + systUncert * systUncert);
 }
 
 
 float EnergyScaleCorrection_class::getScaleStatUncertainty(unsigned int runNumber, bool isEBEle,
-							   double R9Ele, double etaSCEle, double EtEle) const
+															double R9Ele, double etaSCEle, double EtEle, unsigned int gainSeed) const
 {
-  return getScaleCorrection(runNumber, isEBEle, R9Ele, etaSCEle, EtEle).scale_err;
+	return getScaleCorrection(runNumber, isEBEle, R9Ele, etaSCEle, EtEle,gainSeed).scale_err;
 }	
 
 float EnergyScaleCorrection_class::getScaleSystUncertainty(unsigned int runNumber, bool isEBEle,
-							   double R9Ele, double etaSCEle, double EtEle) const
+														   double R9Ele, double etaSCEle, double EtEle, unsigned int gainSeed) const
 {
-  return getScaleCorrection(runNumber, isEBEle, R9Ele, etaSCEle, EtEle).scale_err_syst;
+	return getScaleCorrection(runNumber, isEBEle, R9Ele, etaSCEle, EtEle, gainSeed).scale_err_syst;
 }	
 
 
-correctionValue_class EnergyScaleCorrection_class::getScaleCorrection(unsigned int runNumber, bool isEBEle, double R9Ele, double etaSCEle, double EtEle) const
+correctionValue_class EnergyScaleCorrection_class::getScaleCorrection(unsigned int runNumber, bool isEBEle, double R9Ele, double etaSCEle, double EtEle, unsigned int gainSeed) const
 {
-  // buld the category based on the values of the object
-  correctionCategory_class category(runNumber, etaSCEle, R9Ele, EtEle);
-  correction_map_t::const_iterator corr_itr = scales.find(category); // find the correction value in the map that associates the category to the correction
+	// buld the category based on the values of the object
+	correctionCategory_class category(runNumber, etaSCEle, R9Ele, EtEle, gainSeed);
+	correction_map_t::const_iterator corr_itr = scales.find(category); // find the correction value in the map that associates the category to the correction
   
   if(corr_itr == scales.end()) { // if not in the standard classes, add it in the list of not defined classes
     
@@ -116,10 +116,10 @@ correctionValue_class EnergyScaleCorrection_class::getScaleCorrection(unsigned i
   return corr_itr->second;
 }
 
-float EnergyScaleCorrection_class::getScaleOffset(unsigned int runNumber, bool isEBEle, double R9Ele, double etaSCEle, double EtEle) const
+float EnergyScaleCorrection_class::getScaleOffset(unsigned int runNumber, bool isEBEle, double R9Ele, double etaSCEle, double EtEle, unsigned int gainSeed) const
 {
   // buld the category based on the values of the object
-  correctionCategory_class category(runNumber, etaSCEle, R9Ele, EtEle);
+	correctionCategory_class category(runNumber, etaSCEle, R9Ele, EtEle, gainSeed);
   correction_map_t::const_iterator corr_itr = scales.find(category); // find the correction value in the map that associates the category to the correction
   
   if(corr_itr == scales.end()) { // if not in the standard classes, add it in the list of not defined classes
@@ -287,6 +287,7 @@ void EnergyScaleCorrection_class::ReadSmearingFromFile(TString filename)
   //double smearing, err_smearing;
   double rho, phi, Emean, err_rho, err_phi, err_Emean;
   double etaMin, etaMax, r9Min, r9Max;
+//  unsigned int gainSeed;
   std::string phi_string, err_phi_string;
   
   
@@ -351,17 +352,17 @@ void EnergyScaleCorrection_class::ReadSmearingFromFile(TString filename)
 
 
 
-float EnergyScaleCorrection_class::getSmearingSigma(int runNumber, bool isEBEle, float R9Ele, float etaSCEle, float EtEle, paramSmear_t par, float nSigma) const
+float EnergyScaleCorrection_class::getSmearingSigma(int runNumber, bool isEBEle, float R9Ele, float etaSCEle, float EtEle, unsigned int gainSeed, paramSmear_t par, float nSigma) const
 {
-  if (par == kRho) return getSmearingSigma(runNumber, isEBEle, R9Ele, etaSCEle, EtEle, nSigma, 0.);
-  if (par == kPhi) return getSmearingSigma(runNumber, isEBEle, R9Ele, etaSCEle, EtEle, 0., nSigma);
-  return getSmearingSigma(runNumber, isEBEle, R9Ele, etaSCEle, EtEle, 0., 0.);
+	if (par == kRho) return getSmearingSigma(runNumber, isEBEle, R9Ele, etaSCEle, EtEle, gainSeed, nSigma, 0.);
+	if (par == kPhi) return getSmearingSigma(runNumber, isEBEle, R9Ele, etaSCEle, EtEle, gainSeed, 0., nSigma);
+	return getSmearingSigma(runNumber, isEBEle, R9Ele, etaSCEle, EtEle, gainSeed, 0., 0.);
 }
 
-float EnergyScaleCorrection_class::getSmearingSigma(int runNumber, bool isEBEle, float R9Ele, float etaSCEle, float EtEle, float nSigma_rho, float nSigma_phi) const
+float EnergyScaleCorrection_class::getSmearingSigma(int runNumber, bool isEBEle, float R9Ele, float etaSCEle, float EtEle, unsigned int gainSeed, float nSigma_rho, float nSigma_phi) const
 {
   
-  correctionCategory_class category(runNumber, etaSCEle, R9Ele, EtEle);
+	correctionCategory_class category(runNumber, etaSCEle, R9Ele, EtEle, gainSeed);
   correction_map_t::const_iterator corr_itr = smearings.find(category);
   if(corr_itr == smearings.end()) { // if not in the standard classes, add it in the list of not defined classes
     // the following commented part makes the method non const
@@ -392,10 +393,10 @@ float EnergyScaleCorrection_class::getSmearingSigma(int runNumber, bool isEBEle,
   
 }
 
-float EnergyScaleCorrection_class::getSmearingRho(int runNumber, bool isEBEle, float R9Ele, float etaSCEle, float EtEle) const
+float EnergyScaleCorrection_class::getSmearingRho(int runNumber, bool isEBEle, float R9Ele, float etaSCEle, float EtEle, unsigned int gainSeed) const
 {
   
-  correctionCategory_class category(runNumber, etaSCEle, R9Ele, EtEle);
+	correctionCategory_class category(runNumber, etaSCEle, R9Ele, EtEle, gainSeed);
   correction_map_t::const_iterator corr_itr = smearings.find(category);
   if(corr_itr == smearings.end()) { // if not in the standard classes, add it in the list of not defined classes
     // if(smearings_not_defined.count(category) == 0) {
@@ -440,7 +441,7 @@ correctionCategory_class::correctionCategory_class(TString category_)
   r9max = 0.94;
   etmin = -1;
   etmax = 99999.;
-  
+  gain  = 0;
   size_t p1, p2; // boundary
   // eta region
   p1 = category.find("absEta_");
@@ -514,4 +515,12 @@ correctionCategory_class::correctionCategory_class(TString category_)
     r9min = -1;
     r9max = 0.94;
   };	
+ 
+  //------------------------------
+  p1 = category.find("gainEle_"); //position of first character
+  if(p1 != std::string::npos) {
+	  p1+=8;//position of character after _
+	  p2 = category.find("-", p1); // position of - or end of string
+	  gain = std::stoul(category.substr(p1, p2-p1), NULL);
+  }
 }

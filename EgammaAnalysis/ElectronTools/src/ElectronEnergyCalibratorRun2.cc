@@ -5,14 +5,16 @@
 #include "FWCore/Utilities/interface/Exception.h"
 
 ElectronEnergyCalibratorRun2::ElectronEnergyCalibratorRun2(EpCombinationToolSemi &combinator, 
-							   bool isMC, 
-							   bool synchronization, 
-							   std::string correctionFile
-							   ) :
+														   bool isMC, 
+														   bool synchronization, 
+														   std::string correctionFile,
+														   const EcalRecHitCollection* recHits_
+	) :
   epCombinationTool_(&combinator),
   isMC_(isMC), synchronization_(synchronization),
   rng_(0),
-  _correctionRetriever(correctionFile) // here is opening the files and reading the corrections
+  _correctionRetriever(correctionFile), // here is opening the files and reading the corrections
+  _recHits(recHits_)
 {
   if(isMC_) {
     _correctionRetriever.doScale = false; 
@@ -36,9 +38,14 @@ void ElectronEnergyCalibratorRun2::calibrate(reco::GsfElectron &electron, unsign
   float smear = 0.0, scale = 1.0;
   float aeta = std::abs(electron.superCluster()->eta()); 
   float et = electron.correctedEcalEnergy()/cosh(aeta);
-  
-  scale = _correctionRetriever.ScaleCorrection(runNumber, electron.isEB(), electron.full5x5_r9(), aeta, et);
-  smear = _correctionRetriever.getSmearingSigma(runNumber, electron.isEB(), electron.full5x5_r9(), aeta, et, 0., 0.); 
+  DetId seedDetId = electron.superCluster()->seed()->seed();
+  EcalRecHitCollection::const_iterator seedRecHit = _recHits->find(seedDetId);
+  unsigned int gainSeedSC=0;
+  if(seedRecHit->checkFlag(EcalRecHit::kHasSwitchToGain6)) gainSeedSC |= 0x01;
+  if(seedRecHit->checkFlag(EcalRecHit::kHasSwitchToGain1)) gainSeedSC |= 0x02;
+
+  scale = _correctionRetriever.ScaleCorrection(runNumber, electron.isEB(), electron.full5x5_r9(), aeta, et, gainSeedSC);
+  smear = _correctionRetriever.getSmearingSigma(runNumber, electron.isEB(), electron.full5x5_r9(), aeta, et, gainSeedSC, 0., 0.); 
   
   double newEcalEnergy, newEcalEnergyError;
   if (isMC_) {
