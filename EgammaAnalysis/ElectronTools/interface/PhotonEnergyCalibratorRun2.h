@@ -5,6 +5,8 @@
 #include "DataFormats/EgammaCandidates/interface/Photon.h"
 #include "EgammaAnalysis/ElectronTools/interface/EnergyScaleCorrection_class.h"
 
+#include "DataFormats/EcalRecHit/interface/EcalRecHitCollections.h"
+
 #include "FWCore/Utilities/interface/StreamID.h"
 
 #include <vector>
@@ -15,7 +17,7 @@ class PhotonEnergyCalibratorRun2 {
   PhotonEnergyCalibratorRun2() {}
   
   // further configuration will be added when we will learn how it will work
-  PhotonEnergyCalibratorRun2(bool isMC, bool synchronization, std::string correctionFile);
+  PhotonEnergyCalibratorRun2(bool isMC, bool synchronization, std::string correctionFile, const EcalRecHitCollection* recHits_ = NULL);
 
   ~PhotonEnergyCalibratorRun2() ;
   
@@ -39,6 +41,7 @@ class PhotonEnergyCalibratorRun2 {
   /// If synchronization is set to true, it returns a fixed number (1.0)
   double gauss(edm::StreamID const& id) const ;
   EnergyScaleCorrection_class _correctionRetriever;
+  const EcalRecHitCollection* _recHits;
 
 };
 
