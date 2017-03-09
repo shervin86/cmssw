@@ -50,10 +50,12 @@ EnergyScaleCorrection_class::~EnergyScaleCorrection_class(void)
 
 
 float EnergyScaleCorrection_class::ScaleCorrection(unsigned int runNumber, bool isEBEle,
-												   double R9Ele, double etaSCEle, double EtEle, unsigned int gainSeed) const
+												   double R9Ele, double etaSCEle, double EtEle, unsigned int gainSeed, std::bitset<scAll> uncBitMask) const
 {
-  float correction = 1;
-  if(doScale) correction *= getScaleOffset(runNumber, isEBEle, R9Ele, etaSCEle, EtEle, gainSeed);
+  double correction = 1;
+  if(doScale==false) return correction;
+//  double uncertainty = getScaleStatUncertainty(runNumber, isEBEle, R9Ele, etaSCEle, EtEle, gainSeed, uncBitMask);
+  correction *= getScaleOffset(runNumber, isEBEle, R9Ele, etaSCEle, EtEle, gainSeed); // + uncertainty;
   
   return correction; 
 }
@@ -61,26 +63,43 @@ float EnergyScaleCorrection_class::ScaleCorrection(unsigned int runNumber, bool 
 
 
 float EnergyScaleCorrection_class::ScaleCorrectionUncertainty(unsigned int runNumber, bool isEBEle,
-															  double R9Ele, double etaSCEle, double EtEle, unsigned int gainSeed) const
+															  double R9Ele, double etaSCEle, double EtEle, unsigned int gainSeed, std::bitset<scAll> uncBitMask) const
 {
-  float statUncert = getScaleStatUncertainty(runNumber, isEBEle, R9Ele, etaSCEle, EtEle, gainSeed);
-  float systUncert = getScaleSystUncertainty(runNumber, isEBEle, R9Ele, etaSCEle, EtEle, gainSeed);
-  
-  return sqrt(statUncert * statUncert + systUncert * systUncert);
+
+	const correctionValue_class& c = getScaleCorrection(runNumber, isEBEle, R9Ele, etaSCEle, EtEle,gainSeed);
+
+	double totUncertainty(0);
+//	for(std::size_t i=0; i < MAXUNCTYPE; ++i){
+	if(uncBitMask.test(0)){
+		double t = c.scale_err;
+		totUncertainty+= t*t;
+	}
+	if(uncBitMask.test(1)){
+		double t = c.scale_err_syst;
+		totUncertainty+= t*t;
+	}
+
+	if(uncBitMask.test(2)){
+		double t = c.scale_err_gain;
+		totUncertainty+= t*t;
+	}
+
+	
+	return sqrt(totUncertainty);
 }
 
 
-float EnergyScaleCorrection_class::getScaleStatUncertainty(unsigned int runNumber, bool isEBEle,
-															double R9Ele, double etaSCEle, double EtEle, unsigned int gainSeed) const
-{
-	return getScaleCorrection(runNumber, isEBEle, R9Ele, etaSCEle, EtEle,gainSeed).scale_err;
-}	
+// float EnergyScaleCorrection_class::getScaleStatUncertainty(unsigned int runNumber, bool isEBEle,
+// 															double R9Ele, double etaSCEle, double EtEle, unsigned int gainSeed) const
+// {
+// 	return getScaleCorrection(runNumber, isEBEle, R9Ele, etaSCEle, EtEle,gainSeed).scale_err;
+// }	
 
-float EnergyScaleCorrection_class::getScaleSystUncertainty(unsigned int runNumber, bool isEBEle,
-														   double R9Ele, double etaSCEle, double EtEle, unsigned int gainSeed) const
-{
-	return getScaleCorrection(runNumber, isEBEle, R9Ele, etaSCEle, EtEle, gainSeed).scale_err_syst;
-}	
+// float EnergyScaleCorrection_class::getScaleSystUncertainty(unsigned int runNumber, bool isEBEle,
+// 														   double R9Ele, double etaSCEle, double EtEle, unsigned int gainSeed) const
+// {
+// 	return getScaleCorrection(runNumber, isEBEle, R9Ele, etaSCEle, EtEle, gainSeed).scale_err_syst;
+// }	
 
 
 correctionValue_class EnergyScaleCorrection_class::getScaleCorrection(unsigned int runNumber, bool isEBEle, double R9Ele, double etaSCEle, double EtEle, unsigned int gainSeed) const
@@ -173,15 +192,15 @@ void EnergyScaleCorrection_class::ReadFromFile(TString filename)
   
   int runMin, runMax;
   TString category, region2;
-  double deltaP, err_deltaP, err_deltaP_stat, err_deltaP_syst;
+  double deltaP, err_deltaP, err_deltaP_stat, err_deltaP_syst, err_deltaP_gain;
   
   
   for(f_in >> category; f_in.good(); f_in >> category) {
     f_in >> region2
 	 >> runMin >> runMax
-	 >> deltaP >> err_deltaP >> err_deltaP_stat >> err_deltaP_syst;
+		 >> deltaP >> err_deltaP >> err_deltaP_stat >> err_deltaP_syst >> err_deltaP_gain;
     
-    AddScale(category, runMin, runMax, deltaP, err_deltaP_stat, err_deltaP_syst);
+    AddScale(category, runMin, runMax, deltaP, err_deltaP_stat, err_deltaP_syst, err_deltaP_gain);
   }
   
   f_in.close();
@@ -190,7 +209,7 @@ void EnergyScaleCorrection_class::ReadFromFile(TString filename)
 }
 
 // this method adds the correction values read from the txt file to the map
-void EnergyScaleCorrection_class::AddScale(TString category_, int runMin_, int runMax_, double deltaP_, double err_deltaP_, double err_syst_deltaP)
+void EnergyScaleCorrection_class::AddScale(TString category_, int runMin_, int runMax_, double deltaP_, double err_deltaP_, double err_syst_deltaP, double err_deltaP_gain)
 {
   
   correctionCategory_class cat(category_); // build the category from the string
@@ -209,6 +228,7 @@ void EnergyScaleCorrection_class::AddScale(TString category_, int runMin_, int r
   corr.scale = deltaP_;
   corr.scale_err = err_deltaP_;
   corr.scale_err_syst = err_syst_deltaP;
+  corr.scale_err_gain = err_deltaP_gain;
   scales[cat] = corr;
   
 #ifdef PEDANTIC_OUTPUT

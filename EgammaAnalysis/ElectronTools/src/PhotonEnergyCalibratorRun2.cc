@@ -5,13 +5,11 @@
 #include "FWCore/Utilities/interface/Exception.h"
 
 PhotonEnergyCalibratorRun2::PhotonEnergyCalibratorRun2(bool isMC, bool synchronization, 
-													   std::string correctionFile,
-													   const EcalRecHitCollection* recHits_
+													   std::string correctionFile
 						       ) :
   isMC_(isMC), synchronization_(synchronization),
   rng_(0),
-  _correctionRetriever(correctionFile), // here is opening the files and reading thecorrections
-  _recHits(recHits_)
+  _correctionRetriever(correctionFile) // here is opening the files and reading thecorrections
 {
   if(isMC_) {
     _correctionRetriever.doScale = false; 
@@ -29,12 +27,12 @@ void PhotonEnergyCalibratorRun2::initPrivateRng(TRandom *rnd) {
      rng_ = rnd;   
 }
 
-void PhotonEnergyCalibratorRun2::calibrate(reco::Photon &photon, unsigned int runNumber, edm::StreamID const & id) const {
+void PhotonEnergyCalibratorRun2::calibrate(reco::Photon &photon, unsigned int runNumber, const EcalRecHitCollection *recHits, edm::StreamID const & id) const {
     float smear = 0.0, scale = 1.0;
     float aeta = std::abs(photon.superCluster()->eta()); //, r9 = photon.getR9();
     float et = photon.getCorrectedEnergy(reco::Photon::P4type::regression2)/cosh(aeta);
 	DetId seedDetId = photon.superCluster()->seed()->seed();
-	EcalRecHitCollection::const_iterator seedRecHit = _recHits->find(seedDetId);
+	EcalRecHitCollection::const_iterator seedRecHit = recHits->find(seedDetId);
 	unsigned int gainSeedSC=0;
 	if(seedRecHit->checkFlag(EcalRecHit::kHasSwitchToGain6)) gainSeedSC |= 0x01;
 	if(seedRecHit->checkFlag(EcalRecHit::kHasSwitchToGain1)) gainSeedSC |= 0x02;

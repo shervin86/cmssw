@@ -25,13 +25,14 @@
 #include <TChain.h>
 #include <TRandom3.h>
 #include <string>
+#include <bitset> 
 
 //============================== First auxiliary class
 class correctionValue_class
 {
 public:
   // values
-  float scale, scale_err, scale_err_syst;
+	float scale, scale_err, scale_err_syst, scale_err_gain;
   float rho, rho_err;
   float phi, phi_err;
   float Emean, Emean_err;
@@ -41,6 +42,7 @@ public:
     scale = 1;
     scale_err = 0;
     scale_err_syst=0;
+	scale_err_gain=0;
     rho = 0;
     rho_err = 0;
     phi = 0;
@@ -52,7 +54,7 @@ public:
   friend std::ostream& operator << (std::ostream& os, const correctionValue_class a)
   {
     os <<  "( "
-       << a.scale << " +/- " << a.scale_err << " +/- " << a.scale_err_syst << ")" 
+       << a.scale << " +/- " << a.scale_err << " +/- " << a.scale_err_syst << " +/- " << a.scale_err_gain <<")" 
        <<  "\t"
        << a.rho << " +/- " << a.rho_err 
        <<  "\t"
@@ -149,7 +151,17 @@ public:
         kPhi,
         kNParamSmear
   };
-  
+
+  enum scaleNuisances_t{
+	  scNone = 0,
+	  scStat,
+	  scSyst,
+	  scStatSyst,
+	  scGain,
+	  scStatGain,
+	  scAll
+  };
+
   bool doScale, doSmearings;
   
 public:
@@ -160,10 +172,16 @@ public:
 
 //------------------------------ scales
 	float ScaleCorrection(unsigned int runNumber, bool isEBEle, double R9Ele, double etaSCEle,
-	                      double EtEle, unsigned int gainSeed=12 ) const; ///< method to get energy scale corrections
+	                      double EtEle, unsigned int gainSeed=12, std::bitset<scAll> uncBitMask=scNone ) const; ///< method to get energy scale corrections
 
 	float ScaleCorrectionUncertainty(unsigned int runNumber, bool isEBEle,
-									 double R9Ele, double etaSCEle, double EtEle, unsigned int gainSeed=12) const; ///< method to get scale correction uncertainties: it's stat+syst in eta x R9 categories
+									 double R9Ele, double etaSCEle, double EtEle, unsigned int gainSeed, 
+									 std::bitset<scAll> uncBitMask=scAll) const;///< method to get scale correction uncertainties: it is:
+	/** 
+	 * bit 0 = stat
+	 * bit 1 = syst
+	 * but 2 = gain
+	 */
 
 private:
 	correctionValue_class getScaleCorrection(unsigned int runNumber, bool isEBEle, double R9Ele, double etaSCEle, double EtEle, unsigned int gainSeed) const; ///< returns the correction value class
@@ -175,7 +193,7 @@ private:
 	void ReadFromFile(TString filename); ///<   category  "runNumber"   runMin  runMax   deltaP  err_deltaP_per_bin err_deltaP_stat err_deltaP_syst
 
 	// this method adds the correction values read from the txt file to the map
-	void AddScale(TString category_, int runMin_, int runMax_, double deltaP_, double err_deltaP_, double err_syst_deltaP);
+	void AddScale(TString category_, int runMin_, int runMax_, double deltaP_, double err_deltaP_, double err_syst_deltaP, double err_deltaP_gain);
 
 	//============================== smearings
 public:
