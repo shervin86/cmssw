@@ -1,4 +1,4 @@
-#include "../interface/EnergyScaleCorrection_class.h"
+#include "../interface/EnergyScaleCorrection_class.hh"
 #include "FWCore/ParameterSet/interface/FileInPath.h"
 #include <RooDataSet.h>
 #include <RooArgSet.h>
