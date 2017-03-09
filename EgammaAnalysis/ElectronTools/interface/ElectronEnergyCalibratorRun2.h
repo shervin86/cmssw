@@ -16,7 +16,7 @@ class ElectronEnergyCalibratorRun2 {
   ElectronEnergyCalibratorRun2() {}
   
   // further configuration will be added when we will learn how it will work
-  ElectronEnergyCalibratorRun2(EpCombinationToolSemi &combinator, bool isMC, bool synchronization, std::string, const EcalRecHitCollection* recHits_ = NULL); 
+  ElectronEnergyCalibratorRun2(EpCombinationToolSemi &combinator, bool isMC, bool synchronization, std::string); 
   ~ElectronEnergyCalibratorRun2() ;
   
   /// Initialize with a random number generator (if not done, it will use the CMSSW service)
@@ -25,7 +25,7 @@ class ElectronEnergyCalibratorRun2 {
     
   /// Correct this electron. 
   /// StreamID is needed when used with CMSSW Random Number Generator
-  void calibrate(reco::GsfElectron &electron, unsigned int runNumber, edm::StreamID const & id = edm::StreamID::invalidStreamID()) const ;
+  void calibrate(reco::GsfElectron &electron, unsigned int runNumber, const EcalRecHitCollection* recHits, edm::StreamID const & id = edm::StreamID::invalidStreamID()) const ;
   
  protected:    
   // whatever data will be needed

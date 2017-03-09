@@ -7,6 +7,7 @@
 #include "FWCore/Framework/interface/EventSetup.h"
 #include "FWCore/Framework/interface/ESHandle.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
+#include "FWCore/Utilities/interface/EDGetToken.h"
 
 #include "DataFormats/EgammaCandidates/interface/GsfElectron.h"
 #include "DataFormats/PatCandidates/interface/Electron.h"
@@ -33,6 +34,9 @@ class CalibratedElectronProducerRun2T: public edm::stream::EDProducer<>
 
         EpCombinationToolSemi        theEpCombinationTool;
         ElectronEnergyCalibratorRun2 theEnCorrectorRun2;
+	    edm::EDGetTokenT<EcalRecHitCollection> recHitCollectionEBToken_;
+	    edm::EDGetTokenT<EcalRecHitCollection> recHitCollectionEEToken_;
+
 };
 
 template<typename T>
@@ -40,7 +44,9 @@ CalibratedElectronProducerRun2T<T>::CalibratedElectronProducerRun2T( const edm::
   theElectronToken(consumes<edm::View<T> >(conf.getParameter<edm::InputTag>("electrons"))),
   theGBRForestName(conf.getParameter< std::vector<std::string> >("gbrForestName")),
   theEpCombinationTool(),
-  theEnCorrectorRun2(theEpCombinationTool, conf.getParameter<bool>("isMC"), conf.getParameter<bool>("isSynchronization"), conf.getParameter<std::string>("correctionFile"))
+  theEnCorrectorRun2(theEpCombinationTool, conf.getParameter<bool>("isMC"), conf.getParameter<bool>("isSynchronization"), conf.getParameter<std::string>("correctionFile")),
+  recHitCollectionEBToken_(consumes<EcalRecHitCollection>(conf.getParameter<edm::InputTag>( "recHitCollectionEB" ))),
+  recHitCollectionEEToken_(consumes<EcalRecHitCollection>(conf.getParameter<edm::InputTag>( "recHitCollectionEE" )))
 {
   produces<std::vector<T> >();
 }
@@ -66,12 +72,19 @@ CalibratedElectronProducerRun2T<T>::produce( edm::Event & iEvent, const edm::Eve
     edm::Handle<edm::View<T> > in;
     iEvent.getByToken(theElectronToken, in);
 
+	edm::Handle<EcalRecHitCollection> recHitCollectionEBHandle;
+	edm::Handle<EcalRecHitCollection> recHitCollectionEEHandle;
+
+	iEvent.getByToken(recHitCollectionEBToken_, recHitCollectionEBHandle);
+	iEvent.getByToken(recHitCollectionEEToken_, recHitCollectionEEHandle);
+
     std::auto_ptr<std::vector<T> > out(new std::vector<T>());
     out->reserve(in->size());   
 
     for (const T &ele : *in) {
         out->push_back(ele);
-        theEnCorrectorRun2.calibrate(out->back(), iEvent.id().run(), iEvent.streamID());
+		const EcalRecHitCollection* recHits = (ele.isEB()) ? recHitCollectionEBHandle.product() : recHitCollectionEEHandle.product();
+        theEnCorrectorRun2.calibrate(out->back(), iEvent.id().run(), recHits, iEvent.streamID());
     }
     
     iEvent.put(out);

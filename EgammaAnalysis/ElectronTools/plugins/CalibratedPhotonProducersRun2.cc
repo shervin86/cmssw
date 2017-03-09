@@ -24,12 +24,18 @@ public:
 private:
   edm::EDGetTokenT<edm::View<T> > thePhotonToken;
   PhotonEnergyCalibratorRun2 theEnCorrectorRun2;
+	edm::EDGetTokenT<EcalRecHitCollection> recHitCollectionEBToken_;
+	edm::EDGetTokenT<EcalRecHitCollection> recHitCollectionEEToken_;
+
 };
 
 template<typename T>
 CalibratedPhotonProducerRun2T<T>::CalibratedPhotonProducerRun2T( const edm::ParameterSet & conf ) :
   thePhotonToken(consumes<edm::View<T> >(conf.getParameter<edm::InputTag>("photons"))),
-  theEnCorrectorRun2(conf.getParameter<bool>("isMC"), conf.getParameter<bool>("isSynchronization"), conf.getParameter<std::string >("correctionFile")) {
+  theEnCorrectorRun2(conf.getParameter<bool>("isMC"), conf.getParameter<bool>("isSynchronization"), conf.getParameter<std::string >("correctionFile")),
+  recHitCollectionEBToken_(consumes<EcalRecHitCollection>(conf.getParameter<edm::InputTag>( "recHitCollectionEB" ))),
+  recHitCollectionEEToken_(consumes<EcalRecHitCollection>(conf.getParameter<edm::InputTag>( "recHitCollectionEE" )))
+ {
 
   produces<std::vector<T> >();
 }
@@ -45,12 +51,20 @@ CalibratedPhotonProducerRun2T<T>::produce( edm::Event & iEvent, const edm::Event
   edm::Handle<edm::View<T> > in;
   iEvent.getByToken(thePhotonToken, in);
 
+	edm::Handle<EcalRecHitCollection> recHitCollectionEBHandle;
+	edm::Handle<EcalRecHitCollection> recHitCollectionEEHandle;
+
+	iEvent.getByToken(recHitCollectionEBToken_, recHitCollectionEBHandle);
+	iEvent.getByToken(recHitCollectionEEToken_, recHitCollectionEEHandle);
+
   std::auto_ptr<std::vector<T> > out(new std::vector<T>());
   out->reserve(in->size());   
   
   for (const T &pho : *in) {
     out->push_back(pho);
-    theEnCorrectorRun2.calibrate(out->back(), iEvent.id().run(), iEvent.streamID());
+	const EcalRecHitCollection* recHits = (pho.isEB()) ? recHitCollectionEBHandle.product() : recHitCollectionEEHandle.product();
+
+    theEnCorrectorRun2.calibrate(out->back(), iEvent.id().run(), recHits, iEvent.streamID());
   }
     
   iEvent.put(out);

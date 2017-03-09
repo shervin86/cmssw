@@ -7,14 +7,12 @@
 ElectronEnergyCalibratorRun2::ElectronEnergyCalibratorRun2(EpCombinationToolSemi &combinator, 
 														   bool isMC, 
 														   bool synchronization, 
-														   std::string correctionFile,
-														   const EcalRecHitCollection* recHits_
+														   std::string correctionFile
 	) :
   epCombinationTool_(&combinator),
   isMC_(isMC), synchronization_(synchronization),
   rng_(0),
-  _correctionRetriever(correctionFile), // here is opening the files and reading the corrections
-  _recHits(recHits_)
+  _correctionRetriever(correctionFile) // here is opening the files and reading the corrections
 {
   if(isMC_) {
     _correctionRetriever.doScale = false; 
@@ -33,13 +31,13 @@ void ElectronEnergyCalibratorRun2::initPrivateRng(TRandom *rnd)
   rng_ = rnd;   
 }
 
-void ElectronEnergyCalibratorRun2::calibrate(reco::GsfElectron &electron, unsigned int runNumber, edm::StreamID const &id) const
+void ElectronEnergyCalibratorRun2::calibrate(reco::GsfElectron &electron, unsigned int runNumber, const EcalRecHitCollection *recHits, edm::StreamID const &id) const
 {
   float smear = 0.0, scale = 1.0;
   float aeta = std::abs(electron.superCluster()->eta()); 
   float et = electron.correctedEcalEnergy()/cosh(aeta);
   DetId seedDetId = electron.superCluster()->seed()->seed();
-  EcalRecHitCollection::const_iterator seedRecHit = _recHits->find(seedDetId);
+  EcalRecHitCollection::const_iterator seedRecHit = recHits->find(seedDetId);
   unsigned int gainSeedSC=0;
   if(seedRecHit->checkFlag(EcalRecHit::kHasSwitchToGain6)) gainSeedSC |= 0x01;
   if(seedRecHit->checkFlag(EcalRecHit::kHasSwitchToGain1)) gainSeedSC |= 0x02;
