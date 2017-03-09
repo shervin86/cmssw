@@ -5,7 +5,7 @@
 #include "FWCore/Utilities/interface/Exception.h"
 
 PhotonEnergyCalibratorRun2::PhotonEnergyCalibratorRun2(bool isMC, bool synchronization, 
-						       std::string correctionFile
+													   std::string correctionFile
 						       ) :
   isMC_(isMC), synchronization_(synchronization),
   rng_(0),
@@ -27,32 +27,29 @@ void PhotonEnergyCalibratorRun2::initPrivateRng(TRandom *rnd) {
      rng_ = rnd;   
 }
 
-void PhotonEnergyCalibratorRun2::calibrate(reco::Photon &photon, unsigned int runNumber, edm::StreamID const &id) const {
-  SimplePhoton simple(photon, runNumber, isMC_);
-  calibrate(simple, id);
-  simple.writeTo(photon);
-}
-
-void PhotonEnergyCalibratorRun2::calibrate(SimplePhoton &photon, edm::StreamID const & id) const {
-    assert(isMC_ == photon.isMC());
+void PhotonEnergyCalibratorRun2::calibrate(reco::Photon &photon, unsigned int runNumber, const EcalRecHitCollection *recHits, edm::StreamID const & id) const {
     float smear = 0.0, scale = 1.0;
-    float aeta = std::abs(photon.getEta()); //, r9 = photon.getR9();
-    float et = photon.getNewEnergy()/cosh(aeta);
+    float aeta = std::abs(photon.superCluster()->eta()); //, r9 = photon.getR9();
+    float et = photon.getCorrectedEnergy(reco::Photon::P4type::regression2)/cosh(aeta);
+	DetId seedDetId = photon.superCluster()->seed()->seed();
+	EcalRecHitCollection::const_iterator seedRecHit = recHits->find(seedDetId);
+	unsigned int gainSeedSC=0;
+	if(seedRecHit->checkFlag(EcalRecHit::kHasSwitchToGain6)) gainSeedSC |= 0x01;
+	if(seedRecHit->checkFlag(EcalRecHit::kHasSwitchToGain1)) gainSeedSC |= 0x02;
 
-    scale = _correctionRetriever.ScaleCorrection(photon.getRunNumber(), photon.isEB(), photon.getR9(), aeta, et);
-    smear = _correctionRetriever.getSmearingSigma(photon.getRunNumber(), photon.isEB(), photon.getR9(), aeta, et, 0., 0.); 
+  scale = _correctionRetriever.ScaleCorrection(runNumber, photon.isEB(), photon.full5x5_r9(), aeta, et, gainSeedSC);
+  smear = _correctionRetriever.getSmearingSigma(runNumber, photon.isEB(), photon.full5x5_r9(), aeta, et, gainSeedSC, 0., 0.); 
     
     double newEcalEnergy, newEcalEnergyError;
     if (isMC_) {
-        double corr = 1.0 + smear * gauss(id);
-        newEcalEnergy      = photon.getNewEnergy() * corr;
-        newEcalEnergyError = std::hypot(photon.getNewEnergyError() * corr, smear * newEcalEnergy);
+      double corr = 1.0 + smear * gauss(id);
+      newEcalEnergy      = photon.getCorrectedEnergy(reco::Photon::P4type::regression2) * corr;
+      newEcalEnergyError = std::hypot(photon.getCorrectedEnergyError(reco::Photon::P4type::regression2) * corr, smear * newEcalEnergy);
     } else {
-        newEcalEnergy      = photon.getNewEnergy() * scale;
-        newEcalEnergyError = std::hypot(photon.getNewEnergyError() * scale, smear * newEcalEnergy);
+      newEcalEnergy      = photon.getCorrectedEnergy(reco::Photon::P4type::regression2) * scale;
+      newEcalEnergyError = std::hypot(photon.getCorrectedEnergyError(reco::Photon::P4type::regression2) * scale, smear * newEcalEnergy);
     }
-    photon.setNewEnergy(newEcalEnergy); 
-    photon.setNewEnergyError(newEcalEnergyError); 
+    photon.setCorrectedEnergy(reco::Photon::P4type::regression2, newEcalEnergy, newEcalEnergyError, true);
 
 }
 
