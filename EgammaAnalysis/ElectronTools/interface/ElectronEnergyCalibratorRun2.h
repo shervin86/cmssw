@@ -2,14 +2,8 @@
 #define ElectronEnergyCalibratorRun2_h
 
 #include <TRandom.h>
-<<< <<< < HEAD
-#include "EgammaAnalysis/ElectronTools/interface/EnergyScaleCorrection_class.hh"
-#include "EgammaAnalysis/ElectronTools/interface/SimpleElectron.h"
-#include "EgammaAnalysis/ElectronTools/interface/EpCombinationTool.h"
-== == == =
 #include "EgammaAnalysis/ElectronTools/interface/EnergyScaleCorrection_class.h"
 #include "EgammaAnalysis/ElectronTools/interface/EpCombinationToolSemi.h"
-    >>> >>> > cms - egamma / EGM_gain_v1
 #include "FWCore/Utilities/interface/StreamID.h"
 
 #include "DataFormats/EcalRecHit/interface/EcalRecHitCollections.h"
