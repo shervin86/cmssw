@@ -29,6 +29,7 @@ class QGTagger : public edm::EDProducer{
       edm::EDGetTokenT<double> 			rhoToken;
       std::string 				jetsLabel, systLabel;
       const bool 				useQC, useJetCorr, produceSyst;
+      unsigned int                              vertexIndex;
       bool					weStillNeedToCheckJetCandidates, weAreUsingPackedCandidates;
       QGLikelihoodCalculator *			qgLikelihood;
 };

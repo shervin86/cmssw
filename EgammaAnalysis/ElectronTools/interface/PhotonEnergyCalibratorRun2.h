@@ -2,8 +2,11 @@
 #define PhotonEnergyCalibratorRun2_h
 
 #include <TRandom.h>
-#include "EgammaAnalysis/ElectronTools/interface/EnergyScaleCorrection_class.hh"
-#include "EgammaAnalysis/ElectronTools/interface/SimplePhoton.h"
+#include "DataFormats/EgammaCandidates/interface/Photon.h"
+#include "EgammaAnalysis/ElectronTools/interface/EnergyScaleCorrection_class.h"
+
+#include "DataFormats/EcalRecHit/interface/EcalRecHitCollections.h"
+
 #include "FWCore/Utilities/interface/StreamID.h"
 
 #include <vector>
@@ -24,11 +27,7 @@ class PhotonEnergyCalibratorRun2 {
   
   /// Correct this electron. 
   /// StreamID is needed when used with CMSSW Random Number Generator
-  void calibrate(SimplePhoton &photon, edm::StreamID const & id = edm::StreamID::invalidStreamID()) const ;
-  
-  /// Correct this electron. 
-  /// StreamID is needed when used with CMSSW Random Number Generator
-  void calibrate(reco::Photon &photon, unsigned int runNumber, edm::StreamID const & id = edm::StreamID::invalidStreamID()) const ;
+  void calibrate(reco::Photon &photon, unsigned int runNumber, const EcalRecHitCollection* recHits, edm::StreamID const & id = edm::StreamID::invalidStreamID()) const ;
   
  protected:    
   // whatever data will be needed
