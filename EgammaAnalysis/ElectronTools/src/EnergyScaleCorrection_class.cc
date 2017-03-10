@@ -14,7 +14,7 @@
 #include <sstream>
 
 //#define DEBUG
-//#define PEDANTIC_OUTPUT
+#define PEDANTIC_OUTPUT
 
 EnergyScaleCorrection_class::EnergyScaleCorrection_class(std::string correctionFileName, unsigned int genSeed):
   doScale(false), doSmearings(false),
@@ -120,7 +120,9 @@ correctionValue_class EnergyScaleCorrection_class::getScaleCorrection(unsigned i
     std::cout << "[ERROR] Scale category not found: " << std::endl;
     std::cout << category << std::endl;
     std::cout << "Returning uncorrected value." << std::endl;
-    //     exit(1);
+#ifdef PEDANTIC_OUTPUT
+	exit(1);
+#endif
     correctionValue_class nocorr;
     std::cout << nocorr << std::endl;
     return nocorr;
@@ -382,7 +384,7 @@ float EnergyScaleCorrection_class::getSmearingSigma(int runNumber, bool isEBEle,
 float EnergyScaleCorrection_class::getSmearingSigma(int runNumber, bool isEBEle, float R9Ele, float etaSCEle, float EtEle, unsigned int gainSeed, float nSigma_rho, float nSigma_phi) const
 {
   
-	correctionCategory_class category(runNumber, etaSCEle, R9Ele, EtEle, gainSeed);
+	correctionCategory_class category(runNumber, etaSCEle, R9Ele, EtEle, 0);
   correction_map_t::const_iterator corr_itr = smearings.find(category);
   if(corr_itr == smearings.end()) { // if not in the standard classes, add it in the list of not defined classes
     // the following commented part makes the method non const
@@ -416,7 +418,7 @@ float EnergyScaleCorrection_class::getSmearingSigma(int runNumber, bool isEBEle,
 float EnergyScaleCorrection_class::getSmearingRho(int runNumber, bool isEBEle, float R9Ele, float etaSCEle, float EtEle, unsigned int gainSeed) const
 {
   
-	correctionCategory_class category(runNumber, etaSCEle, R9Ele, EtEle, gainSeed);
+	correctionCategory_class category(runNumber, etaSCEle, R9Ele, EtEle, 0);
   correction_map_t::const_iterator corr_itr = smearings.find(category);
   if(corr_itr == smearings.end()) { // if not in the standard classes, add it in the list of not defined classes
     // if(smearings_not_defined.count(category) == 0) {
@@ -442,6 +444,10 @@ bool correctionCategory_class::operator<(const correctionCategory_class& b) cons
   
   if(etmin  < b.etmin && etmax < b.etmax) return true;
   if(etmax  > b.etmax && etmin > b.etmin) return  false;
+
+  if(gain==0 || b.gain==0) return false; // if corrections are not categorized in gain then default gain value should always return false in order to have a match with the category
+  if(gain   < b.gain) return true;
+  else return false;
   return false;
   
 }
@@ -461,7 +467,7 @@ correctionCategory_class::correctionCategory_class(TString category_)
   r9max = 0.94;
   etmin = -1;
   etmax = 99999.;
-  gain  = 0;
+  gain  = 0; // not categorization
   size_t p1, p2; // boundary
   // eta region
   p1 = category.find("absEta_");
