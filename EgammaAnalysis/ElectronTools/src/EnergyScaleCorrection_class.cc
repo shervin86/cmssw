@@ -14,7 +14,7 @@
 #include <sstream>
 
 //#define DEBUG
-#define PEDANTIC_OUTPUT
+//#define PEDANTIC_OUTPUT
 
 EnergyScaleCorrection_class::EnergyScaleCorrection_class(std::string correctionFileName, unsigned int genSeed):
   doScale(false), doSmearings(false),
