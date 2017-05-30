@@ -62,7 +62,7 @@
 #include "CalibFormats/HcalObjects/interface/HcalDbService.h"
 #include "CalibFormats/HcalObjects/interface/HcalDbRecord.h"
 
-
+#define DEBUG
 using namespace std;
 
 /// Producer constructor
@@ -263,6 +263,9 @@ void SelectedElectronFEDListProducer<TEle,TCand>::beginJob(){
 template< typename TEle, typename TCand>
 void SelectedElectronFEDListProducer<TEle,TCand>::produce(edm::Event & iEvent, const edm::EventSetup & iSetup){
 
+#ifdef DEBUG
+	std::cout << "[DEBUG] Start of produce" << std::endl;
+#endif
   // get the hcal electronics map
   edm::ESHandle<HcalDbService> pSetup;
   iSetup.get<HcalDbRecord>().get(pSetup);
@@ -370,6 +373,11 @@ void SelectedElectronFEDListProducer<TEle,TCand>::produce(edm::Event & iEvent, c
   std::vector<int>::const_iterator itElectronCollFlag  = isGsfElectronCollection_.begin();                    
   std::vector<edm::EDGetTokenT<trigger::TriggerFilterObjectWithRefs> >::const_iterator itRecoEcalCandColl = recoEcalCandidateToken_.begin();
 
+
+#ifdef DEBUG
+	std::cout << "[DEBUG] Before dump" << std::endl;
+#endif
+
   // if you want to dump just FED related to the triggering electron/s
   if( !dumpAllTrackerFed_  || !dumpAllEcalFed_ ){
 
@@ -415,7 +423,7 @@ void SelectedElectronFEDListProducer<TEle,TCand>::produce(edm::Event & iEvent, c
 		if( hitFED < FEDNumbering::MINECALFEDID || hitFED > FEDNumbering::MAXECALFEDID ) continue;
 		
 		LogDebug("SelectedElectronFEDListProducer")<<" electron hit detID Barrel "<<(*itSChits).first.rawId()<<" eta "<<double(point.eta())<<" phi "<< double(point.phi())*radTodeg <<" FED "<<hitFED<<std::endl;
-		
+
 		if(dumpSelectedEcalFed_){
 		  if(!fedList_.empty()){ 
 		    if(std::find(fedList_.begin(),fedList_.end(),hitFED) == fedList_.end()) 
@@ -425,11 +433,13 @@ void SelectedElectronFEDListProducer<TEle,TCand>::produce(edm::Event & iEvent, c
 		}
 	      }
 	      else if((*itSChits).first.subdetId()== EcalEndcap){ // endcap one
+		return;		
 		EEDetId idEERaw ((*itSChits).first);
 		GlobalPoint point = GeometryCalo_->getPosition(idEERaw);
+		return;		
 		int hitFED = FEDNumbering::MINECALFEDID + EcalMapping_->GetFED(double(point.eta()),double(point.phi())*radTodeg);
 		if( hitFED < FEDNumbering::MINECALFEDID || hitFED > FEDNumbering::MAXECALFEDID ) continue;
-		
+  return;		
 		LogDebug("SelectedElectronFEDListProducer")<<" electron hit detID Endcap "<<(*itSChits).first.rawId()<<" eta "<<double(point.eta())<<" phi "<<double(point.phi())*radTodeg <<" FED "<<hitFED<<std::endl;
 		if(dumpSelectedEcalFed_){
 		  if(!fedList_.empty()){ 
