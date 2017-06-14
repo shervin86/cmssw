@@ -172,23 +172,23 @@ void
 WeightsCountProducer::endLuminosityBlockProduce(LuminosityBlock & theLuminosityBlock, const EventSetup & theSetup) {
   LogTrace("WeightsCounting") << "endLumi: adding " << weightProcessedInLumi_ << " events" << endl;
 
-  auto_ptr<edm::MergeableDouble> numWeightssPtr(new edm::MergeableDouble);
+  unique_ptr<edm::MergeableDouble> numWeightssPtr(new edm::MergeableDouble);
   numWeightssPtr->value = weightProcessedInLumi_;
-  theLuminosityBlock.put(numWeightssPtr,"totalWeight");
+  theLuminosityBlock.put(std::move(numWeightssPtr),"totalWeight");
   
   if( doTruePileup_ ) {
-    auto_ptr<hysto_type> truePileup(new hysto_type);
+    unique_ptr<hysto_type> truePileup(new hysto_type);
     truePileup->min = minTruePileup_;
     truePileup->max = maxTruePileup_;
     truePileup->values = truePileup_;
-    theLuminosityBlock.put(truePileup,"truePileup");
+    theLuminosityBlock.put(std::move(truePileup),"truePileup");
   }
   if( doObsPileup_ ) {
-    auto_ptr<hysto_type> obsPileup(new hysto_type);
+    unique_ptr<hysto_type> obsPileup(new hysto_type);
     obsPileup->min = minObsPileup_;
     obsPileup->max = maxObsPileup_;
     obsPileup->values = obsPileup_;
-    theLuminosityBlock.put(obsPileup,"obsPileup");
+    theLuminosityBlock.put(std::move(obsPileup),"obsPileup");
   }
   
   return;
