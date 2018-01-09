@@ -71,7 +71,7 @@ using namespace std;
 WeightsCountProducer::WeightsCountProducer(const edm::ParameterSet& iConfig) :
   genInfoToken_(consumes<GenEventInfoProduct>(iConfig.getParameter<InputTag> ("generator")))
 {
-  produces<edm::MergeableDouble, edm::InLumi>("totalWeight");
+  produces<edm::MergeableDouble, edm::Transition::EndLuminosityBlock>("totalWeight");
   
   doTruePileup_  = iConfig.getUntrackedParameter<bool>("doTruePileup",false);
   doObsPileup_   = iConfig.getUntrackedParameter<bool>("doObsPileup",false);
@@ -85,7 +85,7 @@ WeightsCountProducer::WeightsCountProducer(const edm::ParameterSet& iConfig) :
     maxTruePileup_ =  iConfig.getParameter<double>("maxTruePileup");
     widthTruePileup_ = (maxTruePileup_-minTruePileup_)/(double)nbinsTruePileup_;
     zeroTruePileup_.resize(nbinsTruePileup_+2,0.);  // add bins for overflow and underdflow
-    produces<hysto_type, edm::InLumi>("truePileup");
+    produces<hysto_type, edm::Transition::EndLuminosityBlock>("truePileup");
   }
 
   if( doObsPileup_ ) {
@@ -94,7 +94,7 @@ WeightsCountProducer::WeightsCountProducer(const edm::ParameterSet& iConfig) :
     maxObsPileup_ =  iConfig.getParameter<double>("maxObsPileup");
     widthObsPileup_ = (maxObsPileup_-minObsPileup_)/(double)nbinsObsPileup_;
     zeroObsPileup_.resize(nbinsObsPileup_+2,0.); // add bins for overflow and underdflow
-    produces<hysto_type, edm::InLumi>("obsPileup");
+    produces<hysto_type, edm::Transition::EndLuminosityBlock>("obsPileup");
   }
 
 }
