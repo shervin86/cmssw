@@ -17,8 +17,8 @@ PUDumper::PUDumper(const edm::ParameterSet& iConfig)
 
   PUTree_ -> Branch("nBX",      &nBX,              "nBX/I");
   PUTree_ -> Branch("BX",       BX_,              "BX[nBX]/I");
-  PUTree_ -> Branch("nPUtrue",  &nPUtrue_,    "nPUtrue/I");
   PUTree_ -> Branch("nPUobs",   nPUobs_,      "nPUobs[nBX]/I");
+	PUTree_ -> Branch("nPUtrue",  &nPUtrue_,    "nPUtrue/F");
 }
 
 // ----------------------------------------------------------------

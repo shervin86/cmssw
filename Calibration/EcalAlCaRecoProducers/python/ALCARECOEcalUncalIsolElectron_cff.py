@@ -26,13 +26,13 @@ from RecoLocalCalo.Configuration.ecalLocalRecoSequence_cff import *
 from RecoLocalCalo.EcalRecProducers.ecalGlobalUncalibRecHit_cfi import *
 ecalUncalibRecHitSequence53X = cms.Sequence(ecalGlobalUncalibRecHit * ecalDetIdToBeRecovered)
 
-ecalAndPreshowerDigisForUncalibRecHitSeqTask = cms.Task(ecalDigis, ecalPreshowerDigis)
-uncalibRecHitSeq = cms.Sequence(ecalUncalibRecHitSequence, ecalAndPreshowerDigisForUncalibRecHitSeqTask)
+uncalibRecHitSeq = cms.Sequence( (ecalDigis + ecalPreshowerDigis) ) # * ecalUncalibRecHitSequence)
 
-ALCARECOEcalUncalElectronECALSeq = cms.Sequence( ecalAndPreshowerDigisForUncalibRecHitSeqTask )
+ALCARECOEcalUncalElectronECALSeq = cms.Sequence( uncalibRecHitSeq )
 
 ############################################### FINAL SEQUENCES
 # sequences used in AlCaRecoStreams_cff.py
 seqALCARECOEcalUncalZElectron   = cms.Sequence(ALCARECOEcalUncalZElectronHLT * ZeeSkimFilterSeq  * ALCARECOEcalUncalElectronECALSeq * ALCARECOEcalCalElectronNonECALSeq)
 seqALCARECOEcalUncalZSCElectron = cms.Sequence(ALCARECOEcalUncalZSCElectronHLT * ZSCSkimFilterSeq  * ALCARECOEcalUncalElectronECALSeq * ALCARECOEcalCalElectronNonECALSeq)
 seqALCARECOEcalUncalWElectron   = cms.Sequence(ALCARECOEcalUncalWElectronHLT * WenuSkimFilterSeq * ALCARECOEcalUncalElectronECALSeq* ALCARECOEcalCalElectronNonECALSeq)
+seqALCARECOEcalUncalElectron   = cms.Sequence( ALCARECOEcalCalElectronNonECALSeq * ALCARECOEcalUncalElectronECALSeq)
