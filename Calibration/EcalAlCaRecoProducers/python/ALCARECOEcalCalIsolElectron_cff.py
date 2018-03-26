@@ -45,6 +45,7 @@ from Calibration.EcalAlCaRecoProducers.WZElectronSkims_cff import *
 from RecoJets.Configuration.RecoPFJets_cff import kt6PFJets
 kt6PFJetsForRhoCorrection = kt6PFJets.clone(doRhoFastjet = True)
 kt6PFJetsForRhoCorrection.Rho_EtaMax = cms.double(2.5)
+from PhysicsTools.PatAlgos.slimming.genParticles_cff import *
 
 #list of SCs to be used for the recHit reduction
 #GsfMatchedPhotonCands = cms.EDProducer("ElectronMatchedCandidateProducer",
@@ -60,8 +61,9 @@ alcarecoElectronTracksReducerSeq = cms.Sequence(alcaElectronTracksReducer)
 ALCARECOEcalCalElectronECALSeq = cms.Sequence( alCaIsolatedElectrons)
 
 # sequence that reduces the RECO format (not ECAL part) into ALCARECO
-ALCARECOEcalCalElectronNonECALSeq = cms.Sequence( kt6PFJetsForRhoCorrection +
+ALCARECOEcalCalElectronNonECALSeq = cms.Sequence(
                                               alcaElectronTracksReducer 
+                                              + (prunedGenParticlesWithStatusOne * prunedGenParticles * packedGenParticles )
 #                                             + pfisoALCARECO 
                                               )
 

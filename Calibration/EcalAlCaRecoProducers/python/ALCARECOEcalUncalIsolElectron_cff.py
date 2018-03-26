@@ -29,7 +29,7 @@ ecalUncalibRecHitSequence53X = cms.Sequence(ecalGlobalUncalibRecHit * ecalDetIdT
 ecalAndPreshowerDigisForUncalibRecHitSeqTask = cms.Task(ecalDigis, ecalPreshowerDigis)
 uncalibRecHitSeq = cms.Sequence(ecalUncalibRecHitSequence, ecalAndPreshowerDigisForUncalibRecHitSeqTask)
 
-ALCARECOEcalUncalElectronECALSeq = cms.Sequence( uncalibRecHitSeq )
+ALCARECOEcalUncalElectronECALSeq = cms.Sequence( ecalAndPreshowerDigisForUncalibRecHitSeqTask )
 
 ############################################### FINAL SEQUENCES
 # sequences used in AlCaRecoStreams_cff.py
