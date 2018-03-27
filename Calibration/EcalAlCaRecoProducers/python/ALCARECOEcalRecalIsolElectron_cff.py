@@ -10,8 +10,11 @@ ALCARECOEcalRecalElectronHLT = HLTrigger.HLTfilters.hltHighLevel_cfi.hltHighLeve
 from Configuration.StandardSequences.Reconstruction_Data_cff import ecalLocalRecoSequence, pfClusteringPS, pfClusteringECAL, ecalClusters
 from Calibration.EcalAlCaRecoProducers.ALCARECOEcalCalIsolElectron_cff import *
 
+from RecoLocalCalo.EcalRecProducers.ecalGlobalUncalibRecHit_cfi import *
+
 #ecal rechits
-from RecoLocalCalo.Configuration.RecoLocalCalo_cff import ecalLocalRecoSequence
+#from RecoLocalCalo.Configuration.RecoLocalCalo_cff import ecalLocalRecoSequence
+from RecoLocalCalo.Configuration.RecoLocalCalo_cff import *
 recoECALSeq = cms.Sequence( ecalLocalRecoSequence)
 
 from RecoParticleFlow.PFClusterProducer.particleFlowCluster_cff import *
@@ -29,6 +32,6 @@ rerecoECALSeq = cms.Sequence(recoECALSeq * rerecoPFClusteringSeq * ecalClusterin
 ############################################### FINAL SEQUENCES
 # sequences used in AlCaRecoStreams_cff.py
 #redo the preselection of electrons with selectorProducerSeq for recHit reducers: they use the selected objects as input
-seqALCARECOEcalRecalElectron = cms.Sequence(ALCARECOEcalRecalElectronHLT * rerecoECALSeq * selectorProducerSeq * ALCARECOEcalCalElectronECALSeq)
+seqALCARECOEcalRecalElectron = cms.Sequence(ALCARECOEcalRecalElectronHLT * bunchSpacingProducer* rerecoECALSeq * selectorProducerSeq * ALCARECOEcalCalElectronECALSeq)
 
 

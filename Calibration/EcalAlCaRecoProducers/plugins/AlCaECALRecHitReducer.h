@@ -18,7 +18,7 @@
 // Original Author:  Lorenzo AGOSTINO
 //         Created:  Mon Jul 17 18:07:01 CEST 2006
 // $Id: AlCaECALRecHitReducer.h,v 1.13 2010/02/11 00:10:34 wmtan Exp $
-//
+// Revisited completed by Shervin NOURBAKHSH
 //
 
 
@@ -63,6 +63,8 @@ class AlCaECALRecHitReducer : public edm::EDProducer {
   edm::EDGetTokenT<EcalRecHitCollection> ebRecHitsToken_;
   edm::EDGetTokenT<EcalRecHitCollection> eeRecHitsToken_;
   edm::EDGetTokenT<EcalRecHitCollection> esRecHitsToken_;
+  edm::EDGetTokenT<EcalUncalibratedRecHitCollection> ebUncalibRecHitsToken_;
+  edm::EDGetTokenT<EcalUncalibratedRecHitCollection> eeUncalibRecHitsToken_;
   edm::EDGetTokenT<reco::GsfElectronCollection> electronToken_;
   std::vector< edm::EDGetTokenT<edm::View < reco::RecoCandidate> > > eleViewTokens_;
 
@@ -70,6 +72,8 @@ class AlCaECALRecHitReducer : public edm::EDProducer {
   edm::EDGetTokenT<reco::SuperClusterCollection> EESuperClusterToken_;
   std::string alcaBarrelHitsCollection_;
   std::string alcaEndcapHitsCollection_;
+  std::string alcaBarrelUncalibHitsCollection_;
+  std::string alcaEndcapUncalibHitsCollection_;
   std::string alcaPreshowerHitsCollection_;
   int etaSize_;
   int phiSize_;
@@ -85,7 +89,8 @@ class AlCaECALRecHitReducer : public edm::EDProducer {
 
   void AddMiniRecHitCollection(const reco::SuperCluster& sc,
 			       std::set<DetId>& reducedRecHitMap,
-			       const CaloTopology *caloTopology
+							   const CaloTopology *caloTopology,
+							   std::set<DetId>& reducedESRecHitMap
 			       );
 
 
