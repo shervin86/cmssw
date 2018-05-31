@@ -67,7 +67,7 @@ float EnergyScaleCorrection::smearingSigma(int runnr, double et, double eta, dou
 {
   const SmearCorrection* smearCorr = getSmearCorr(runnr,et,eta,r9,gainSeed);
 						  
-  if(smearCorr!=nullptr) return smearCorr->sigma(nrSigmaRho,nrSigmaPhi);
+  if(smearCorr!=nullptr) return smearCorr->sigma(et, nrSigmaRho,nrSigmaPhi);
   else return kDefaultSmearVal_;
 }
 
@@ -76,7 +76,7 @@ const EnergyScaleCorrection::ScaleCorrection*
 EnergyScaleCorrection::getScaleCorr(unsigned int runnr, double et, double eta, double r9,
 				    unsigned int gainSeed) const
 {
-
+	eta=fabs(eta);
   // buld the category based on the values of the object
   CorrectionCategory category(runnr, et, eta, r9, gainSeed);
   auto result = std::equal_range(scales_.begin(),scales_.end(),category,Sorter<CorrectionCategory,ScaleCorrection>()); 
@@ -102,7 +102,7 @@ const EnergyScaleCorrection::SmearCorrection*
 EnergyScaleCorrection::getSmearCorr(unsigned int runnr, double et, double eta, double r9,
 				    unsigned int gainSeed) const
 {
-
+	eta=fabs(eta);
   // buld the category based on the values of the object
   CorrectionCategory category(runnr, et, eta, r9, gainSeed);
   auto result = std::equal_range(smearings_.begin(),smearings_.end(),category,Sorter<CorrectionCategory,SmearCorrection>()); 
